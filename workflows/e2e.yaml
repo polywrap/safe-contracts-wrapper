@@ -1,0 +1,14 @@
+name: safe-proxy-factory
+jobs:
+  cases:
+    steps:
+    - uri: fs/build-wrapper
+      method: createProxy
+      args:
+        address: "0xe2d3a739effcd3a99387d015e260eefac72ebea1"
+        safeMasterCopyAddress: "0xe2d3a739effcd3a99387d015e260eefac72ebea1"
+        initializer: "0x"
+        saltNonce: 42
+        connection:
+          networkNameOrChainId: "testnet"
+

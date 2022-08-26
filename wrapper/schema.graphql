@@ -1,0 +1,17 @@
+#import { Module, Connection } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
+
+type Module {
+    """
+    Module to deploy and interect with the simple-storage smart-contract
+    """
+    createProxy(
+        """
+        TODO
+        """
+        address: String!
+        safeMasterCopyAddress: String!
+        initializer: String!
+        saltNonce: UInt32!
+        connection: Ethereum_Connection
+    ): Boolean!
+}

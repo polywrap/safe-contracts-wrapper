@@ -1,0 +1,2 @@
+#import * into SimpleStorage from "ens/simple-storage.eth"
+#import * into Ethereum from "ens/ethereum.polywrap.eth"
