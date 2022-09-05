@@ -1,8 +1,11 @@
 import { ClientConfig, PolywrapClientConfig } from "@polywrap/client-js";
+import { Client, PluginModule } from "@polywrap/core-js";
 import { ensResolverPlugin } from "@polywrap/ens-resolver-plugin-js";
 import { ethereumPlugin } from "@polywrap/ethereum-plugin-js";
 import { ipfsPlugin } from "@polywrap/ipfs-plugin-js";
 import { providers, ensAddresses } from "@polywrap/test-env-js";
+import { abi, bytecode } from "../wrapper/__tests__/e2e/GnosisSafeProxyFactory";
+import { WrapManifest } from "@polywrap/wrap-manifest-types-js";
 
 interface TestEnvironment {
   ipfs: string;
@@ -26,6 +29,20 @@ function getPlugins(
   ipfs: string,
   ensAddress: string
 ): Partial<ClientConfig> {
+  class AbiPlugin extends PluginModule<{}> {
+    abi(_args: { }, _client: Client): string {
+      return abi
+    }
+    bytecode(_args: { }, _client: Client): string {
+      return bytecode
+    }
+  }
+  let abiPlugin = {
+    factory: () => {
+      return new AbiPlugin({})
+    },
+    manifest: {  } as WrapManifest,
+  }
   return {
     plugins: [
       {
@@ -47,6 +64,10 @@ function getPlugins(
           defaultNetwork: "testnet",
         }),
       },
+      {
+        uri: "wrap://ens/abi.stub.eth",
+        plugin: abiPlugin,
+      }
     ]
   };
 }

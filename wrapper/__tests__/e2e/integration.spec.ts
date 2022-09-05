@@ -40,16 +40,16 @@ describe("ProxyFactory", () => {
 
   it("createProxy", async () => {
 
-     const deployContractResponse = await App.Ethereum_Module.deployContract(
-       {
-       abi,
-       bytecode,
-       args: null,
-       connection: CONNECTION
-     },
+    const deployContractResponse = await App.Ethereum_Module.deployContract(
+      {
+        abi,
+        bytecode,
+        args: null,
+        connection: CONNECTION
+      },
       client,
       ethereumUri
-     );
+    );
 
     const contractAddress = deployContractResponse.data as string;
 
@@ -79,16 +79,16 @@ describe("ProxyFactory", () => {
 
   it("proxyCreationCode", async () => {
 
-     const deployContractResponse = await App.Ethereum_Module.deployContract(
-       {
-       abi,
-       bytecode,
-       args: null,
-       connection: CONNECTION
-     },
+    const deployContractResponse = await App.Ethereum_Module.deployContract(
+      {
+        abi,
+        bytecode,
+        args: null,
+        connection: CONNECTION
+      },
       client,
       ethereumUri
-     );
+    );
 
     const contractAddress = deployContractResponse.data as string;
 
@@ -113,16 +113,16 @@ describe("ProxyFactory", () => {
 
   it("estimateGas", async () => {
 
-     const deployContractResponse = await App.Ethereum_Module.deployContract(
-       {
-       abi,
-       bytecode,
-       args: null,
-       connection: CONNECTION
-     },
+    const deployContractResponse = await App.Ethereum_Module.deployContract(
+      {
+        abi,
+        bytecode,
+        args: null,
+        connection: CONNECTION
+      },
       client,
       ethereumUri
-     );
+    );
 
     const contractAddress = deployContractResponse.data as string;
 
@@ -135,8 +135,8 @@ describe("ProxyFactory", () => {
     const response = await App.ProxyFactory_Module.estimateGas(
       {
         address: contractAddress,
-	method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)",
-	args: [contractAddress, initCode, saltNonce.toString()],
+        method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)",
+        args: [contractAddress, initCode, saltNonce.toString()],
         connection: CONNECTION,
       },
       client,
@@ -156,8 +156,8 @@ describe("ProxyFactory", () => {
     const saltNonce = 42;
     const response = await App.ProxyFactory_Module.encode(
       {
-	method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)",
-	args: [contractAddress, initCode, saltNonce.toString()],
+        method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)",
+        args: [contractAddress, initCode, saltNonce.toString()],
       },
       client,
       wrapperUri
@@ -166,6 +166,6 @@ describe("ProxyFactory", () => {
     expect(response).toBeTruthy();
     expect(response.error).toBeFalsy();
     expect(response.data).not.toBeNull();
-    expect(response.data).toEqual("0x1688f0b90000000000000000000000009b1f7f645351af3631a656421ed2e40f2802e6c00000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000002a0000000000000000000000000000000000000000000000000000000000000000");
+    expect(response.data).toEqual("0x1688f0b9000000000000000000000000f308c38449adef77ae59b3a02b4ea1fa5d1c46e10000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000002a0000000000000000000000000000000000000000000000000000000000000000");
   });
 });

@@ -10,7 +10,7 @@ type Module {
         initializer: String!
         saltNonce: UInt32!
         connection: Ethereum_Connection
-    ): String!
+    ): String
 
     proxyCreationCode(
         address: String!
@@ -22,10 +22,10 @@ type Module {
         method: String!
         args: [String!]!
         connection: Ethereum_Connection
-    ): BigInt
+    ): BigInt!
 
     encode(
         method: String!
         args: [String!]!
-    ): String
+    ): String!
 }
