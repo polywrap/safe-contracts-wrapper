@@ -1,6 +1,6 @@
 format: 0.2.0
 project:
-  name: simple-storage-as
+  name: proxy-factory-as
   type: wasm/assemblyscript
 source:
   module: ./wrapper/index.ts
