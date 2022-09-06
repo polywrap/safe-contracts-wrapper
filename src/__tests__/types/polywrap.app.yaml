@@ -6,4 +6,4 @@ source:
   schema: ./schema.graphql
   import_abis:
     - uri: "wrap://ens/proxy-factory.eth"
-      abi: "../../../build-wrapper/wrap.info"
+      abi: "../../../build/wrap.info"
