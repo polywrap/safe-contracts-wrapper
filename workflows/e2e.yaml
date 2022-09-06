@@ -18,7 +18,7 @@ jobs:
     jobs:
       createProxy:
         steps:
-        - uri: fs/build-wrapper
+        - uri: fs/build
           method: createProxy
           args:
             address: $cases.2.data
@@ -29,7 +29,7 @@ jobs:
               networkNameOrChainId: "testnet"
       proxyCreationCode:
         steps:
-        - uri: fs/build-wrapper
+        - uri: fs/build
           method: proxyCreationCode
           args:
             address: $cases.2.data
@@ -37,7 +37,7 @@ jobs:
               networkNameOrChainId: "testnet"
       estimateGas:
         steps:
-        - uri: fs/build-wrapper
+        - uri: fs/build
           method: estimateGas
           args:
             address: $cases.2.data
@@ -47,7 +47,7 @@ jobs:
               networkNameOrChainId: "testnet"
       encode:
         steps:
-        - uri: fs/build-wrapper
+        - uri: fs/build
           method: encode
           args:
             method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)"
