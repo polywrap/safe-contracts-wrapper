@@ -1,4 +1,4 @@
-#import { Module, Connection } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
+#import { Module, Connection, TxOverrides } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
 
 type Module {
     """
@@ -10,6 +10,7 @@ type Module {
         initializer: String!
         saltNonce: UInt32!
         connection: Ethereum_Connection
+        txOverrides: Ethereum_TxOverrides
     ): String
 
     proxyCreationCode(

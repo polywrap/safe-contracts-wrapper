@@ -40,14 +40,15 @@ export function createProxy(args: Args_createProxy): string | null {
     method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)",
     args: [args.safeMasterCopyAddress, args.initializer, args.saltNonce.toString()],
     connection: args.connection,
-    txOverrides: null,
+    txOverrides: args.txOverrides,
   }).unwrap();
 
   const tx = Ethereum_Module.awaitTransaction({
     txHash: res.hash,
     confirmations: 1,
     timeout: 60000,
-  }).unwrap();
+    connection:args.connection
+  }).unwrap(); 
 
   const proxyCreation = "0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235";
   const index = tx.logs.findIndex( (log: Ethereum_Log) => log.topics[0] == proxyCreation);
