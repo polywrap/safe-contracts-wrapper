@@ -46,7 +46,7 @@ export function createProxy(args: Args_createProxy): string | null {
   const tx = Ethereum_Module.awaitTransaction({
     txHash: res.hash,
     confirmations: 1,
-    timeout: 60000,
+    timeout: 600000,
     connection:args.connection
   }).unwrap(); 
 
