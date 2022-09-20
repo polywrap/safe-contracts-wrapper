@@ -3,10 +3,16 @@ jobs:
   cases: 
     steps:
     - uri: ens/abi.stub.eth
-      method: abi
+      method: abi_1_2_0
       args: {}
     - uri: ens/abi.stub.eth
-      method: bytecode
+      method: bytecode_1_2_0
+      args: {}
+    - uri: ens/abi.stub.eth
+      method: abi_1_3_0
+      args: {}
+    - uri: ens/abi.stub.eth
+      method: bytecode_1_3_0
       args: {}
     - uri: ens/ethereum.polywrap.eth
       method: deployContract
@@ -15,40 +21,54 @@ jobs:
         bytecode: $cases.1.data
         connection: 
           networkNameOrChainId: "testnet"
+    - uri: ens/ethereum.polywrap.eth
+      method: deployContract
+      args:
+        abi: $cases.2.data
+        bytecode: $cases.3.data
+        connection:
+          networkNameOrChainId: "testnet"
+    - uri: fs/build
+      method: createProxy
+      args:
+        address: $cases.4.data
+        safeMasterCopyAddress: $cases.4.data
+        initializer: "0x"
+        saltNonce: 42
+        connection:
+          networkNameOrChainId: "testnet"
+    - uri: fs/build
+      method: createProxy
+      args:
+        address: $cases.5.data
+        safeMasterCopyAddress: $cases.5.data
+        initializer: "0x"
+        saltNonce: 42
+        connection:
+          networkNameOrChainId: "testnet"
     jobs:
-      createProxy:
-        steps:
-        - uri: fs/build-wrapper
-          method: createProxy
-          args:
-            address: $cases.2.data
-            safeMasterCopyAddress: $cases.2.data
-            initializer: "0x"
-            saltNonce: 42
-            connection:
-              networkNameOrChainId: "testnet"
       proxyCreationCode:
         steps:
-        - uri: fs/build-wrapper
+        - uri: fs/build
           method: proxyCreationCode
           args:
-            address: $cases.2.data
+            address: $cases.5.data
             connection:
               networkNameOrChainId: "testnet"
       estimateGas:
         steps:
-        - uri: fs/build-wrapper
+        - uri: fs/build
           method: estimateGas
           args:
-            address: $cases.2.data
+            address: $cases.5.data
             method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)"
-            args: [ $cases.2.data, "0x", "42" ]
+            args: [ $cases.5.data, "0x", "42" ]
             connection:
               networkNameOrChainId: "testnet"
       encode:
         steps:
-        - uri: fs/build-wrapper
+        - uri: fs/build
           method: encode
           args:
             method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)"
-            args: [ $cases.2.data, "0x", "42" ]
+            args: [ $cases.5.data, "0x", "42" ]

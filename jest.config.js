@@ -8,7 +8,7 @@ module.exports = {
   ],
   globals: {
     "ts-jest": {
-      tsconfig: "tsconfig.wrapper.json",
+      tsconfig: "tsconfig.json",
       diagnostics: false,
     },
   },
