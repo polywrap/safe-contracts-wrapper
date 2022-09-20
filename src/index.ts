@@ -35,22 +35,19 @@ export function proxyCreationCode(args: Args_proxyCreationCode): string {
 }
 
 export function createProxy(args: Args_createProxy): string | null {
-  const res = Ethereum_Module.callContractMethod({
+  const tx = Ethereum_Module.callContractMethodAndWait({
     address: args.address,
-    method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)",
+    method: "function createProxyWithNonce(address,bytes memory,uint256)",
     args: [args.safeMasterCopyAddress, args.initializer, args.saltNonce.toString()],
     connection: args.connection,
     txOverrides: null,
   }).unwrap();
 
-  const tx = Ethereum_Module.awaitTransaction({
-    txHash: res.hash,
-    confirmations: 1,
-    timeout: 60000,
-  }).unwrap();
-
-  const proxyCreation = "0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235";
-  const index = tx.logs.findIndex( (log: Ethereum_Log) => log.topics[0] == proxyCreation);
+  // ProxyCreation(address)
+  const proxyCreation_1_2_0 = "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80";
+  // ProxyCreation(address,address)
+  const proxyCreation_1_3_0 = "0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235";
+  const index = tx.logs.findIndex( (log: Ethereum_Log) => log.topics[0] == proxyCreation_1_2_0 || log.topics[0] == proxyCreation_1_3_0);
   if (index == -1) {
     return null
   }

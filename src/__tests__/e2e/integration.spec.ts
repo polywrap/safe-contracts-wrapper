@@ -10,9 +10,8 @@ import path from "path";
 
 import { getPlugins } from "../utils";
 
-//import { abi, bytecode } from "./GnosisSafeProxyFactory";
-
-import { abi, bytecode } from "@gnosis.pm/safe-contracts/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
+import { abi as abi_1_2_0, bytecode as bytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafeProxyFactory.json";
+import { abi as abi_1_3_0, bytecode as bytecode_1_3_0 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
 
 jest.setTimeout(500000);
 
@@ -30,23 +29,62 @@ describe("ProxyFactory", () => {
   const wrapperUri = `fs/${wrapperPath}/build`;
   const ethereumUri = "ens/ethereum.polywrap.eth";
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     await initTestEnvironment();
 
     const config = getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress);
     client = new PolywrapClient(config);
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await stopTestEnvironment();
   });
 
-  it("createProxy", async () => {
+  it("createProxy 1.2.0", async () => {
 
     const deployContractResponse = await App.Ethereum_Module.deployContract(
       {
-        abi: JSON.stringify(abi),
-        bytecode,
+        abi: JSON.stringify(abi_1_2_0),
+        bytecode: bytecode_1_2_0,
+        args: null,
+        connection: CONNECTION
+      },
+      client,
+      ethereumUri
+    );
+
+    const contractAddress = deployContractResponse.data as string;
+
+    expect(deployContractResponse).toBeTruthy();
+    expect(deployContractResponse.error).toBeFalsy();
+    expect(deployContractResponse.data).toBeTruthy();
+
+    const initCode = "0x";
+    const saltNonce = 42;
+    const response = await App.ProxyFactory_Module.createProxy(
+      {
+        address: contractAddress,
+        safeMasterCopyAddress: contractAddress,
+        initializer: initCode,
+        saltNonce,
+        connection: CONNECTION,
+      },
+      client,
+      wrapperUri
+    );
+
+    expect(response).toBeTruthy();
+    expect(response.error).toBeFalsy();
+    expect(response.data).not.toBeNull();
+    expect(response.data).toEqual("0x0ddb56f661e5bd05fb252f5bc619f74039cd6d63");
+  });
+
+  it("createProxy 1.3.0", async () => {
+
+    const deployContractResponse = await App.Ethereum_Module.deployContract(
+      {
+        abi: JSON.stringify(abi_1_3_0),
+        bytecode: bytecode_1_3_0,
         args: null,
         connection: CONNECTION
       },
@@ -84,8 +122,8 @@ describe("ProxyFactory", () => {
 
     const deployContractResponse = await App.Ethereum_Module.deployContract(
       {
-        abi: JSON.stringify(abi),
-        bytecode,
+        abi: JSON.stringify(abi_1_3_0),
+        bytecode: bytecode_1_3_0,
         args: null,
         connection: CONNECTION
       },
@@ -118,8 +156,8 @@ describe("ProxyFactory", () => {
 
     const deployContractResponse = await App.Ethereum_Module.deployContract(
       {
-        abi: JSON.stringify(abi),
-        bytecode,
+        abi: JSON.stringify(abi_1_3_0),
+        bytecode: bytecode_1_3_0,
         args: null,
         connection: CONNECTION
       },
