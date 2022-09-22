@@ -1,4 +1,6 @@
-name: safe-proxy-factory
+name: template-wasm-rs
+format: 0.1
+validation: "./workflows/validator.cue"
 jobs:
   cases: 
     steps:
