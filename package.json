@@ -1,37 +1,26 @@
 {
-  "name": "@consideritdone/safe-proxy-factory-wrapper",
-  "version": "1.0.0",
-  "description": "Gnosis safe proxy factory wrapper",
-  "files": [
-    "contracts",
-    "dist",
-    "src",
-    "test",
-    "build"
-  ],
+  "name": "safe-wrapper",
+  "description": "",
+  "license": "MIT",
+  "version": "2.0.0",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "./packages/safe-contracts-wrapper",
+      "./packages/safe-factory-wrapper"
+    ],
+    "nohoist": [ "**/polywrap-datetime-plugin" ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ConsiderItDone/safe-contracts-wrapper"
+  },
   "scripts": {
-    "build": "npx polywrap codegen && npx polywrap build",
-    "deploy": "npx polywrap deploy",
-    "test": "yarn test:e2e && yarn test:workflow",
-    "test:e2e": "yarn test:e2e:codegen && jest --passWithNoTests --runInBand --verbose",
-    "test:e2e:codegen": "npx polywrap app codegen -m ./src/__tests__/types/polywrap.app.yaml -g ./src/__tests__/types/wrap",
-    "test:env:up": "npx polywrap infra up --modules=eth-ens-ipfs",
-    "test:env:down": "npx polywrap infra down --modules=eth-ens-ipfs",
-    "test:workflow": "yarn test:env:up && sleep 120 && npx polywrap run ./workflows/e2e.yaml -c ./workflows/config.ts -v ./workflows/validator.cue; yarn test:env:down"
+     "build": "lerna run build --concurrency 1",
+     "test:proxy": "lerna run test --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
+     "test:safe": "lerna run test --concurrency 1 --scope @consideritdone/safe-factory-wrapper"
   },
   "devDependencies": {
-    "@gnosis.pm/safe-contracts_1.3.0": "npm:@gnosis.pm/safe-contracts@1.3.0",
-    "@gnosis.pm/safe-contracts_1.2.0": "npm:@gnosis.pm/safe-contracts@1.2.0",
-    "@polywrap/wasm-as": "0.4.1",
-    "@types/jest": "27.0.3",
-    "@types/node": "^14.14.21",
-    "argv": "^0.0.2",
-    "assemblyscript": "0.19.1",
-    "dotenv": "^8.0.0",
-    "jest": "26.6.3",
-    "polywrap": "0.4.1",
-    "ts-jest": "26.5.4",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.2.4"
+    "lerna": "5.5.2"
   }
 }

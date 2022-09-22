@@ -1,0 +1,2 @@
+#import * into Factory from "ens/factory.eth"
+#import * into Ethereum from "ens/ethereum.polywrap.eth"
