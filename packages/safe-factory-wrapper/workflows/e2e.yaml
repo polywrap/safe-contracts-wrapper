@@ -1,0 +1,54 @@
+name: safe-proxy-factory
+jobs:
+  cases: 
+    steps:
+    - uri: ens/abi.stub.eth
+      method: abi
+      args: {}
+    - uri: ens/abi.stub.eth
+      method: bytecode
+      args: {}
+    - uri: ens/ethereum.polywrap.eth
+      method: deployContract
+      args:
+        abi: $cases.0.data
+        bytecode: $cases.1.data
+        connection: 
+          networkNameOrChainId: "testnet"
+    jobs:
+      createProxy:
+        steps:
+        - uri: fs/build
+          method: createProxy
+          args:
+            address: $cases.2.data
+            safeMasterCopyAddress: $cases.2.data
+            initializer: "0x"
+            saltNonce: 42
+            connection:
+              networkNameOrChainId: "testnet"
+      proxyCreationCode:
+        steps:
+        - uri: fs/build
+          method: proxyCreationCode
+          args:
+            address: $cases.2.data
+            connection:
+              networkNameOrChainId: "testnet"
+      estimateGas:
+        steps:
+        - uri: fs/build
+          method: estimateGas
+          args:
+            address: $cases.2.data
+            method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)"
+            args: [ $cases.2.data, "0x", "42" ]
+            connection:
+              networkNameOrChainId: "testnet"
+      encode:
+        steps:
+        - uri: fs/build
+          method: encode
+          args:
+            method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)"
+            args: [ $cases.2.data, "0x", "42" ]
