@@ -1,0 +1,118 @@
+#import { Module } into SafeContracts from "wrap://ipfs/QmWTcA4vDAE1pXGeDCV4ct4qSEPuRNjxsmjVmUx5UNpKrh" # "wrap://ens/safe-proxy-factory-wrapper.polywrap.eth"
+#import { Module, Connection, TxOverrides, StaticTxResult, TxRequest, EventNotification, Network, TxReceipt, TxResponse, Log, Access } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
+#import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
+#import * into Datetime from "wrap://ens/datetime.polywrap.eth"
+
+type Module {
+    getChainId(
+        connection: Ethereum_Connection
+    ):String
+
+    deploySafe(
+        safeAccountConfig: SafeAccountConfig!,
+        safeDeploymentConfig: SafeDeploymentConfig,
+        #options: TransactionOptions,
+        connection: Ethereum_Connection,
+        txOverrides: Ethereum_TxOverrides
+    ): SafePayload
+
+    predictSafeAddress(
+        safeAccountConfig: SafeAccountConfig!,
+        safeDeploymentConfig: SafeDeploymentConfig,
+        connection: Ethereum_Connection,
+    ):String
+}
+
+enum OperationType {
+    Call,
+    DelegateCall
+}
+
+type SafePayload {
+    safeAddress: String!
+    contractNetworks: ContractNetworksConfig
+    isL1SafeMasterCopy: Boolean!
+}
+
+type ContractNetworksConfig {
+      multiSendAddress: String
+      multiSendCallOnlyAddress: String
+      safeMasterCopyAddress: String
+      safeProxyFactoryAddress: String
+}
+
+type SafeAccountConfig {
+    owners: [String!]!
+    threshold: UInt!
+    to: String
+    data: String
+    fallbackHandler: String
+    paymentToken: String
+    payment: BigInt
+    paymentReceiver: String
+}
+
+type SafeDeploymentConfig {
+    saltNonce: String!
+    isL1Safe: Boolean
+    version: String
+}
+
+type MetaTransactionData {
+    to: String!
+    value: String!
+    data: String!
+    operation: OperationType
+}
+
+type SafeTransactionData implements MetaTransactionData {
+    safeTxGas: BigInt!
+    baseGas: BigInt!
+    gasPrice: BigInt!
+    gasToken: String!
+    refundReceiver: String!
+    nonce: BigInt!
+}
+
+type SafeTransactionDataPartial implements MetaTransactionData {
+    safeTxGas: BigInt
+    baseGas: BigInt
+    gasPrice: BigInt
+    gasToken: String
+    refundReceiver: String
+    nonce: BigInt
+}
+
+type SafeSignature {
+    signer: String!
+    data: String!
+}
+
+type SafeTransaction {
+    data: SafeTransactionData!
+    signatures: [SafeSignature!]!
+}
+
+type BaseTransactionResult {
+    hash: String!
+}
+
+type TransactionResult implements BaseTransactionResult {
+    receipt: Ethereum_TxReceipt
+    transactionResponse: Ethereum_TxResponse
+    #options: TransactionOptions
+}
+
+type TransactionOptions {
+    from: String
+    gas: BigInt
+    gasLimit: BigInt
+    gasPrice: BigInt
+    maxFeePerGas: BigInt
+    maxPriorityFeePerGas: BigInt
+}
+
+type Eip3770Address {
+    prefix: String!
+    address: String!
+}
