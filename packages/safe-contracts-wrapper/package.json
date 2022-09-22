@@ -10,18 +10,28 @@
     "build"
   ],
   "scripts": {
-    "build": "npx polywrap codegen && npx polywrap build",
+    "build": "yarn polywrap codegen && yarn polywrap build",
     "test": "yarn test:e2e && yarn test:workflow",
     "test:e2e": "yarn test:e2e:codegen && jest --passWithNoTests --runInBand --verbose",
-    "test:e2e:codegen": "npx polywrap app codegen -m ./src/__tests__/types/polywrap.app.yaml -g ./src/__tests__/types/wrap",
-    "test:env:up": "npx polywrap infra up --modules=eth-ens-ipfs",
-    "test:env:down": "npx polywrap infra down --modules=eth-ens-ipfs",
-    "test:workflow": "yarn test:env:up && sleep 120 && npx polywrap run ./workflows/e2e.yaml -c ./workflows/config.ts -v ./workflows/validator.cue; yarn test:env:down"
+    "test:e2e:codegen": "yarn polywrap codegen -m ./src/__tests__/types/polywrap.app.yaml -g ./src/__tests__/types/wrap",
+    "test:env:up": "yarn polywrap infra up --modules=eth-ens-ipfs",
+    "test:env:down": "yarn polywrap infra down --modules=eth-ens-ipfs",
+    "test:workflow": "yarn test:env:up && sleep 120 && yarn polywrap run -c ./workflows/config.ts; yarn test:env:down"
   },
   "devDependencies": {
     "@gnosis.pm/safe-contracts_1.2.0": "npm:@gnosis.pm/safe-contracts@1.2.0",
     "@gnosis.pm/safe-contracts_1.3.0": "npm:@gnosis.pm/safe-contracts@1.3.0",
-    "@polywrap/wasm-as": "0.6.0",
-    "assemblyscript": "0.19.1"
+    "@polywrap/core-js": "0.7.0",
+    "@polywrap/wasm-as": "0.7.0",
+    "@polywrap/test-env-js": "^0.7.0",
+    "@polywrap/client-js": "^0.7.0",
+    "@types/jest": "26.0.8",
+    "@types/node": "^14.14.21",
+    "assemblyscript": "0.19.1",
+    "jest": "26.6.3",
+    "polywrap": "0.7.0",
+    "ts-jest": "26.5.4",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
   }
 }

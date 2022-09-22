@@ -1,4 +1,4 @@
-import { BigInt, Option } from "@polywrap/wasm-as";
+import { BigInt } from "@polywrap/wasm-as";
 import {
   encodeSetupCallData,
   generateAddress2,

@@ -1,7 +1,7 @@
 import { ClientConfig, PolywrapClientConfig } from "@polywrap/client-js";
 import { Client, PluginModule } from "@polywrap/core-js";
 import { ensResolverPlugin } from "@polywrap/ens-resolver-plugin-js";
-import { ethereumPlugin } from "@polywrap/ethereum-plugin-js";
+import { Connections, Connection, ethereumPlugin } from "@polywrap/ethereum-plugin-js";
 import { ipfsPlugin } from "@polywrap/ipfs-plugin-js";
 import { providers, ensAddresses } from "@polywrap/test-env-js";
 import { abi as abi_1_2_0, bytecode as bytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafeProxyFactory.json";
@@ -63,12 +63,12 @@ function getPlugins(
       {
         uri: "wrap://ens/ethereum.polywrap.eth",
         plugin: ethereumPlugin({
-          networks: {
-            testnet: {
-              provider: ethereum,
+          connections: new Connections({
+            networks: {
+              testnet: new Connection({ provider: ethereum }),
             },
-          },
-          defaultNetwork: "testnet",
+            defaultNetwork: "testnet",
+          }),
         }),
       },
       {

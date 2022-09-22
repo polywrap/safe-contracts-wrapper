@@ -1,32 +1,25 @@
 {
-  "name": "root",
-  "description": "DeFi Wrapper",
+  "name": "safe-wrapper",
+  "description": "",
   "license": "MIT",
   "version": "2.0.0",
   "private": true,
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Niraj-Kamdar/defi-sdk-polywrapper"
-  },
   "workspaces": {
     "packages": [
-      "./packages/**/*"
-    ]
+      "./packages/safe-contracts-wrapper",
+      "./packages/safe-factory-wrapper"
+    ],
+    "nohoist": [ "**/polywrap-datetime-plugin" ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ConsiderItDone/safe-contracts-wrapper"
   },
   "scripts": {
+     "build": "lerna run build --concurrency 1",
+     "test": "lerna run test --concurrency 1"
   },
   "devDependencies": {
-    "@polywrap/wasm-as": "0.6.0",
-    "@types/jest": "27.0.3",
-    "@types/node": "^14.14.21",
-    "argv": "^0.0.2",
-    "assemblyscript": "0.19.1",
-    "dotenv": "^8.0.0",
-    "jest": "26.6.3",
-    "polywrap": "0.4.1",
-    "ts-jest": "26.5.4",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.2.4",
-    "lerna": "^3.22.1"
+    "lerna": "5.5.2"
   }
 }
