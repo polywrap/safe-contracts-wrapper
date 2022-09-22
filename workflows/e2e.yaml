@@ -34,7 +34,7 @@ jobs:
         address: $cases.4.data
         safeMasterCopyAddress: $cases.4.data
         initializer: "0x"
-        saltNonce: 42
+        saltNonce: 0
         connection:
           networkNameOrChainId: "testnet"
     - uri: fs/build
@@ -43,7 +43,7 @@ jobs:
         address: $cases.5.data
         safeMasterCopyAddress: $cases.5.data
         initializer: "0x"
-        saltNonce: 42
+        saltNonce: 1
         connection:
           networkNameOrChainId: "testnet"
     jobs:
@@ -62,7 +62,7 @@ jobs:
           args:
             address: $cases.5.data
             method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)"
-            args: [ $cases.5.data, "0x", "42" ]
+            args: [ $cases.5.data, "0x", "2" ]
             connection:
               networkNameOrChainId: "testnet"
       encode:
@@ -71,4 +71,4 @@ jobs:
           method: encode
           args:
             method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)"
-            args: [ $cases.5.data, "0x", "42" ]
+            args: [ $cases.5.data, "0x", "3" ]
