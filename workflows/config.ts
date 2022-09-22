@@ -4,7 +4,8 @@ import { ensResolverPlugin } from "@polywrap/ens-resolver-plugin-js";
 import { ethereumPlugin } from "@polywrap/ethereum-plugin-js";
 import { ipfsPlugin } from "@polywrap/ipfs-plugin-js";
 import { providers, ensAddresses } from "@polywrap/test-env-js";
-import { abi, bytecode } from "@gnosis.pm/safe-contracts/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
+import { abi as abi_1_2_0, bytecode as bytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafeProxyFactory.json";
+import { abi as abi_1_3_0, bytecode as bytecode_1_3_0 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
 import { WrapManifest } from "@polywrap/wrap-manifest-types-js";
 
 interface TestEnvironment {
@@ -30,11 +31,17 @@ function getPlugins(
   ensAddress: string
 ): Partial<ClientConfig> {
   class AbiPlugin extends PluginModule<{}> {
-    abi(_args: { }, _client: Client): string {
-      return JSON.stringify(abi)
+    abi_1_2_0(_args: { }, _client: Client): string {
+      return JSON.stringify(abi_1_2_0)
     }
-    bytecode(_args: { }, _client: Client): string {
-      return bytecode
+    bytecode_1_2_0(_args: { }, _client: Client): string {
+      return bytecode_1_2_0
+    }
+    abi_1_3_0(_args: { }, _client: Client): string {
+      return JSON.stringify(abi_1_3_0)
+    }
+    bytecode_1_3_0(_args: { }, _client: Client): string {
+      return bytecode_1_3_0
     }
   }
   let abiPlugin = {
