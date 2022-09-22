@@ -40,7 +40,7 @@ export function createProxy(args: Args_createProxy): string | null {
     method: "function createProxyWithNonce(address,bytes memory,uint256)",
     args: [args.safeMasterCopyAddress, args.initializer, args.saltNonce.toString()],
     connection: args.connection,
-    txOverrides: null,
+    txOverrides: args.txOverrides,
   }).unwrap();
 
   // ProxyCreation(address)
@@ -48,6 +48,7 @@ export function createProxy(args: Args_createProxy): string | null {
   // ProxyCreation(address,address)
   const proxyCreation_1_3_0 = "0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235";
   const index = tx.logs.findIndex( (log: Ethereum_Log) => log.topics[0] == proxyCreation_1_2_0 || log.topics[0] == proxyCreation_1_3_0);
+  
   if (index == -1) {
     return null
   }
