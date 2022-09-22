@@ -17,7 +17,8 @@
   },
   "scripts": {
      "build": "lerna run build --concurrency 1",
-     "test": "lerna run test --concurrency 1"
+     "test:proxy": "lerna run test --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
+     "test:safe": "lerna run test --concurrency 1 --scope @consideritdone/safe-factory-wrapper"
   },
   "devDependencies": {
     "lerna": "5.5.2"
