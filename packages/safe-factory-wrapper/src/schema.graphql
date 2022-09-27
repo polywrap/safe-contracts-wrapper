@@ -1,4 +1,4 @@
-#import { Module } into SafeContracts from "wrap://ipfs/QmWTcA4vDAE1pXGeDCV4ct4qSEPuRNjxsmjVmUx5UNpKrh" # "wrap://ens/safe-proxy-factory-wrapper.polywrap.eth"
+#import { Module } into SafeContracts from "wrap://ipfs/QmXxeZpXvy9T2UYcXet4caAJy2QqKAEWTXNT82rJqGA5QV"
 #import { Module, Connection, TxOverrides, StaticTxResult, TxRequest, EventNotification, Network, TxReceipt, TxResponse, Log, Access } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
 #import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
 #import * into Datetime from "wrap://ens/datetime.polywrap.eth"
@@ -13,19 +13,26 @@ type Module {
         safeDeploymentConfig: SafeDeploymentConfig,
         #options: TransactionOptions,
         connection: Ethereum_Connection,
-        txOverrides: Ethereum_TxOverrides
+        txOverrides: Ethereum_TxOverrides,
+        customContractAdressess: CustomContract
     ): SafePayload
 
     predictSafeAddress(
         safeAccountConfig: SafeAccountConfig!,
         safeDeploymentConfig: SafeDeploymentConfig,
         connection: Ethereum_Connection,
+        customContractAdressess: CustomContract
     ):String
 }
 
 enum OperationType {
     Call,
     DelegateCall
+}
+
+type CustomContract {
+    proxyFactoryContract: String
+    safeFactoryContract: String
 }
 
 type SafePayload {
