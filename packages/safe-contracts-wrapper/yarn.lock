@@ -1468,7 +1468,7 @@
     "@polywrap/tracing-js" "0.7.0"
     "@polywrap/wrap-manifest-types-js" "0.7.0"
 
-"@polywrap/client-js@0.7.0":
+"@polywrap/client-js@0.7.0", "@polywrap/client-js@^0.7.0":
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/@polywrap/client-js/-/client-js-0.7.0.tgz#71051850adc0529929394c0279470de51fbbb6ba"
   integrity sha512-aBEs6MxuprANU+wyKEh/gkB7FwTqMzvsFlPrx+QXw4UCnW3PydO5/Jvqmmavah8+FlpA4cenl4gaEQh8V4X05A==
@@ -2832,6 +2832,11 @@ asn1@~0.2.3:
   integrity sha512-ix/FxPn0MDjeyJ7i/yoHGFt/EX6LyNbxSEhPPXODPL+KB0VPk86UYfL0lMdy+KCnv+fmvIzySwaK5COwqVbWTQ==
   dependencies:
     safer-buffer "~2.1.0"
+
+assemblyscript-json@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/assemblyscript-json/-/assemblyscript-json-1.1.0.tgz#49d38bc21f1ac36f2887528a35de6cf7d59c17be"
+  integrity sha512-UbE8ts8csTWQgd5TnSPN7MRV9NveuHv1bVnKmDLoo/tzjqxkmsZb3lu59Uk8H7SGoqdkDSEE049alx/nHnSdFw==
 
 assemblyscript@0.19.1:
   version "0.19.1"

@@ -209,4 +209,81 @@ describe("ProxyFactory", () => {
     expect(response.data).not.toBeNull();
     expect(response.data).toEqual("0x1688f0b9000000000000000000000000f308c38449adef77ae59b3a02b4ea1fa5d1c46e10000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000002a0000000000000000000000000000000000000000000000000000000000000000");
   });
+
+  it("getOwners", async () => {
+    const response = await App.ProxyFactory_Module.getOwners(
+      {
+        address:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+        connection: {networkNameOrChainId:"goerli"}
+      },
+      client,
+      wrapperUri
+    );
+    expect(response).toBeTruthy();
+    expect(response.error).toBeFalsy();
+    expect(response.data).not.toBeNull();
+    expect(response.data).toEqual([]);
+  });
+
+  it("getThreshold",async () => {
+    const response = await App.ProxyFactory_Module.getThreshold(
+      {
+        address:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+        connection: {networkNameOrChainId:"goerli"}
+      },
+      client,
+      wrapperUri
+    );
+    expect(response).toBeTruthy();
+    expect(response.error).toBeFalsy();
+    expect(response.data).not.toBeNull();
+    expect(response.data).toEqual(1);
+  });
+
+  it("isOwner",async () => {
+    const response = await App.ProxyFactory_Module.isOwner(
+      {
+        address:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+        ownerAddress:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+        connection: {networkNameOrChainId:"goerli"}
+      },
+      client,
+      wrapperUri
+    );
+    expect(response).toBeTruthy();
+    expect(response.error).toBeFalsy();
+    expect(response.data).not.toBeNull();
+    expect(response.data).toEqual(false);
+  });
+
+  it("getModules",async () => {
+    const response = await App.ProxyFactory_Module.getModules(
+      {
+        address:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+        connection: {networkNameOrChainId:"goerli"}
+      },
+      client,
+      wrapperUri
+    );
+    expect(response).toBeTruthy();
+    expect(response.error).toBeFalsy();
+    expect(response.data).not.toBeNull();
+    expect(response.data).toEqual([]);
+  });
+
+  it("isModuleEnabled",async () => {
+    const response = await App.ProxyFactory_Module.isModuleEnabled(
+      {
+        address:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+        moduleAddress:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+        connection: {networkNameOrChainId:"goerli"}
+      },
+      client,
+      wrapperUri
+    );
+    expect(response).toBeTruthy();
+    expect(response.error).toBeFalsy();
+    expect(response.data).not.toBeNull();
+    expect(response.data).toEqual(false);
+  });
 });
