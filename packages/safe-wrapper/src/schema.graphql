@@ -1,0 +1,24 @@
+#import { Module } into SafeContracts from "wrap://ipfs/QmTyaVrUsM5P9kLyK2uJ2Uvohgk2A7QSXe9M22mfaeX42D" # "wrap://ens/safe-proxy-factory-wrapper.polywrap.eth"
+#import { Module, Connection, TxOverrides } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
+
+type Env {
+    safeAddress: String!
+    connection: Ethereum_Connection!
+}
+
+type Module {
+    """Owner manager methods"""
+    getOwners: [String!]! @env(required: true)
+    getThreshold: UInt32! @env(required: true)
+    isOwner(ownerAddress: String!): Boolean! @env(required: true)
+    encodeAddOwnerWithThresholdData(ownerAddress: String!, threshold: UInt32): String! @env(required: true)
+    encodeRemoveOwnerData(ownerAddress: String!, threshold: UInt32): String! @env(required: true)
+    encodeSwapOwnerData(oldOwnerAddress: String!, newOwnerAddress: String!): String! @env(required: true)
+    encodeChangeThresholdData(threshold: UInt32!): String! @env(required: true)
+
+    """Module manager methods"""
+    getModules: [String!]! @env(required: true)
+    isModuleEnabled(moduleAddress: String!): Boolean! @env(required: true)
+    encodeEnableModuleData(moduleAddress: String!): String! @env(required: true)
+    encodeDisableModuleData(moduleAddress: String!): String! @env(required: true)
+}
