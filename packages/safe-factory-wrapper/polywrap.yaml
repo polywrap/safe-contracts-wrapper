@@ -12,3 +12,4 @@ source:
       abi: ./node_modules/polywrap-datetime-plugin/build/schema.graphql
 extensions:
   build: ./polywrap.build.yaml
+  deploy: ./polywrap.deploy.yaml
