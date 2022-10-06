@@ -76,7 +76,7 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
   }
 
   let txOverrides: SafeContracts_Ethereum_TxOverrides | null = null;
-
+  
   if (args.txOverrides != null) {
     txOverrides = { value: null, gasLimit: null, gasPrice: null };
     if (args.txOverrides!.value) {
@@ -89,20 +89,44 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
       txOverrides.gasPrice = args.txOverrides!.gasPrice;
     }
   }
-  const chainId = getChainId({connection: args.connection})
+  const chainId = getChainId({ connection: args.connection });
 
   Logger_Module.log({ level: 0, message: "chainId: " + chainId.toString() });
 
-  const safeContractAddress = getSafeContractAddress(
-    safeContractVersion,
-    chainId.toString(),
-    !isL1Safe
-  );
+  let safeContractAddress: string = "";
+  let safeFactoryContractAddress: string = "";
 
-  const safeFactoryContractAddress = getSafeFactoryContractAddress(
-    safeContractVersion,
-    chainId.toString()
-  );
+  if (args.customContractAdressess != null) {
+    if (args.customContractAdressess!.proxyFactoryContract != null) {
+      safeFactoryContractAddress =
+        args.customContractAdressess!.proxyFactoryContract!;
+    } else {
+      safeContractAddress = getSafeContractAddress(
+        safeContractVersion,
+        chainId.toString(),
+        !isL1Safe
+      );
+    }
+    if (args.customContractAdressess!.safeFactoryContract != null) {
+      safeContractAddress = args.customContractAdressess!.safeFactoryContract!;
+    } else {
+      safeFactoryContractAddress = getSafeFactoryContractAddress(
+        safeContractVersion,
+        chainId.toString()
+      );
+    }
+  } else {
+    safeContractAddress = getSafeContractAddress(
+      safeContractVersion,
+      chainId.toString(),
+      !isL1Safe
+    );
+
+    safeFactoryContractAddress = getSafeFactoryContractAddress(
+      safeContractVersion,
+      chainId.toString()
+    );
+  }
 
   Logger_Module.log({
     level: 0,
@@ -187,43 +211,80 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
     }
   }
 
-  const chainId = getChainId({connection: args.connection});
-  const safeContractAddress = getSafeContractAddress(
-    safeContractVersion,
-    chainId.toString(),
-    !isL1Safe
-  );
-  const safeFactoryContractAddress = getSafeFactoryContractAddress(
-    safeContractVersion,
-    chainId.toString()
-  );
+  const chainId = getChainId({ connection: args.connection });
+
+  let safeContractAddress: string = "";
+  let safeFactoryContractAddress: string = "";
+
+  if (args.customContractAdressess != null) {
+    if (args.customContractAdressess!.proxyFactoryContract != null) {
+      safeFactoryContractAddress =
+        args.customContractAdressess!.proxyFactoryContract!;
+    } else {
+      safeContractAddress = getSafeContractAddress(
+        safeContractVersion,
+        chainId.toString(),
+        !isL1Safe
+      );
+    }
+    if (args.customContractAdressess!.safeFactoryContract != null) {
+      safeContractAddress = args.customContractAdressess!.safeFactoryContract!;
+    } else {
+      safeFactoryContractAddress = getSafeFactoryContractAddress(
+        safeContractVersion,
+        chainId.toString()
+      );
+    }
+  } else {
+    safeContractAddress = getSafeContractAddress(
+      safeContractVersion,
+      chainId.toString(),
+      !isL1Safe
+    );
+
+    safeFactoryContractAddress = getSafeFactoryContractAddress(
+      safeContractVersion,
+      chainId.toString()
+    );
+  }
+
   const initializer = encodeSetupCallData(args.safeAccountConfig);
-  Logger_Module.log({level: 0, message: "initializer " + initializer});
+  Logger_Module.log({ level: 0, message: "initializer " + initializer });
 
   const salt = generateSalt(saltNonce, initializer);
   if (salt.isErr) {
-    Logger_Module.log({level: 0, message: "salt error: " + salt.unwrapErr()});
+    Logger_Module.log({ level: 0, message: "salt error: " + salt.unwrapErr() });
     return "";
   }
-  Logger_Module.log({level: 0, message: "salt " + salt.unwrap()});
+  Logger_Module.log({ level: 0, message: "salt " + salt.unwrap() });
 
-  const initCode = getInitCode(safeFactoryContractAddress, safeContractAddress, connection);
+  const initCode = getInitCode(
+    safeFactoryContractAddress,
+    safeContractAddress,
+    connection
+  );
   if (initCode.isErr) {
-    Logger_Module.log({level: 0, message: "initCode error: " + initCode.unwrapErr()});
+    Logger_Module.log({
+      level: 0,
+      message: "initCode error: " + initCode.unwrapErr(),
+    });
     return "";
   }
-  Logger_Module.log({level: 0, message: "initCode " + initCode.unwrap()});
+  Logger_Module.log({ level: 0, message: "initCode " + initCode.unwrap() });
 
   let address = generateAddress2(
     safeFactoryContractAddress,
     salt.unwrap(),
-    initCode.unwrap(),
+    initCode.unwrap()
   );
   if (address.isErr) {
-    Logger_Module.log({level: 0, message: "address error: " + address.unwrapErr()});
+    Logger_Module.log({
+      level: 0,
+      message: "address error: " + address.unwrapErr(),
+    });
     return "";
   }
-  Logger_Module.log({level: 0, message: "address " + address.unwrap()});
+  Logger_Module.log({ level: 0, message: "address " + address.unwrap() });
 
   return address.unwrap();
 }

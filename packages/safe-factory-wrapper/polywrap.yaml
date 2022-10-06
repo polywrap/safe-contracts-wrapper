@@ -6,8 +6,8 @@ source:
   module: ./src/index.ts
   schema: ./src/schema.graphql
   import_abis:
-   # - uri: wrap://ens/safe-proxy-factory-wrapper.polywrap.eth
-   #   redirect: ../safe-proxy-factory-wrapper/src/schema.graphql
+    #- uri: wrap://ens/proxy-factory-as.polywrap.eth
+    #  abi: ../safe-contracts-wrapper/src/schema.graphql
     - uri: wrap://ens/datetime.polywrap.eth
       abi: ./node_modules/polywrap-datetime-plugin/build/schema.graphql
 extensions:

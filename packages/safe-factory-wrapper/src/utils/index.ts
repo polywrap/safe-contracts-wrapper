@@ -120,27 +120,27 @@ export function getSafeFactoryContractAddress(
 export function getMultiSendContractAddress(
   safeVersion: string,
   chainId: string
-): string {
+): string | null {
   const multiSendContractMap = getMultisendContractMap(safeVersion);
 
   const hasMultisendContractAddress = multiSendContractMap.has(chainId);
   if (hasMultisendContractAddress) {
     return <string>multiSendContractMap.get(chainId);
   } else {
-    throw new Error("No multisend contract for provided chainId");
+    return null;
   }
 }
 export function getMultiSendCallOnlyContractAddress(
   safeVersion: string,
   chainId: string
-): string {
+): string | null {
   const multiSendContractMap = getMultisendCallOnlyContractMap(safeVersion);
 
   const hasMultisendContractAddress = multiSendContractMap.has(chainId);
   if (hasMultisendContractAddress) {
     return <string>multiSendContractMap.get(chainId);
   } else {
-    throw new Error("No multisend call only contract for provided chainId");
+    return null;
   }
 }
 
@@ -167,7 +167,7 @@ export function getInitCode(
 ): Result<string, string> {
   const proxyCreationCode = SafeContracts_Module.proxyCreationCode({
     address: safeProxyFactoryAddr,
-    connection: connection
+    connection: connection,
   });
   if (proxyCreationCode.isErr) {
     return proxyCreationCode;
@@ -181,10 +181,15 @@ export function getInitCode(
     return constructorData;
   }
 
-  return Result.Ok<string, string>(proxyCreationCode.unwrap() + constructorData.unwrap().slice(2));
+  return Result.Ok<string, string>(
+    proxyCreationCode.unwrap() + constructorData.unwrap().slice(2)
+  );
 }
 
-export function generateSalt(nonce: string, initializer: string): Result<string, string> {
+export function generateSalt(
+  nonce: string,
+  initializer: string
+): Result<string, string> {
   const encodedNonce = Ethereum_Module.encodeParams({
     types: ["uint256"],
     values: [nonce],
@@ -203,9 +208,7 @@ export function generateSalt(nonce: string, initializer: string): Result<string,
 
   return Ethereum_Module.solidityKeccak256({
     types: ["bytes"],
-    values: [
-      initializerHash.unwrap() + encodedNonce.unwrap().slice(2)
-    ],
+    values: [initializerHash.unwrap() + encodedNonce.unwrap().slice(2)],
   });
 }
 
@@ -219,7 +222,7 @@ export function generateSalt(nonce: string, initializer: string): Result<string,
 export function generateAddress2(
   address: string,
   salt: string,
-  initCode: string,
+  initCode: string
 ): Result<string, string> {
   const initCodeHash = Ethereum_Module.solidityKeccak256({
     types: ["bytes"],
@@ -231,12 +234,7 @@ export function generateAddress2(
 
   const hash = Ethereum_Module.solidityKeccak256({
     types: ["bytes1", "address", "bytes32", "bytes32"],
-    values: [
-      "0xff",
-      address,
-      salt,
-      initCodeHash.unwrap(),
-    ],
+    values: ["0xff", address, salt, initCodeHash.unwrap()],
   });
   if (hash.isErr) {
     return hash;
