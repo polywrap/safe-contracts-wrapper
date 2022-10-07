@@ -1,2 +1,4 @@
 #import * into SafeWrapper from "wrap://ens/safewrapper.eth"
 #import * into SafeFactory from "wrap://ens/safefactory.eth"
+#import * into Ethereum from "ens/ethereum.polywrap.eth"
+

@@ -10,18 +10,32 @@ import path from "path";
 
 import { getPlugins } from "../utils";
 
+import {
+  abi as factoryAbi_1_2_0,
+  bytecode as factoryBytecode_1_2_0,
+} from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafeProxyFactory.json";
+
+import {
+  abi as factoryAbi_1_3_0,
+  bytecode as factoryBytecode_1_3_0,
+} from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
+
+import {
+  abi as safeAbi_1_2_0,
+  bytecode as safeBytecode_1_2_0,
+} from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafe.json";
+
+import {
+  abi as safeAbi_1_3_0,
+  bytecode as safeBytecode_1_3_0,
+} from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
+
 jest.setTimeout(500000);
 
-//export const itif = (condition: boolean) => (condition ? it : it.skip)
-
-export const SAFE_LAST_VERSION = "1.3.0";
-export const SAFE_BASE_VERSION = "1.1.1";
-
-const txOverrides = { gasLimit: "1000000", gasPrice: "20" };
 const owners = ["0xd405aebF7b60eD2cb2Ac4497Bddd292DEe534E82"];
 
 describe("SafeFactory", () => {
-  const CONNECTION = { networkNameOrChainId: "ropsten" };
+  const CONNECTION = { networkNameOrChainId: "testnet" };
 
   let client: PolywrapClient;
 
@@ -32,16 +46,82 @@ describe("SafeFactory", () => {
     ".."
   );
   const wrapperUri = `fs/${wrapperPath}/build`;
+  const ethereumUri = "ens/ethereum.polywrap.eth";
+
+  let proxyContractAddress_v120: string;
+  let proxyContractAddress_v130: string;
+  let safeContractAddress_v120: string;
+  let safeContractAddress_v130: string;
 
   beforeAll(async () => {
     await initTestEnvironment();
 
     const config = getPlugins(
       providers.ethereum,
-      ensAddresses.ensAddress,
-      CONNECTION.networkNameOrChainId
+      providers.ipfs,
+      ensAddresses.ensAddress
     );
+
     client = new PolywrapClient(config);
+
+    /******* Contracts initialization *********/
+
+    const proxyFactoryContractResponse_v120 =
+      await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(factoryAbi_1_2_0),
+          bytecode: factoryBytecode_1_2_0,
+          args: null,
+          connection: CONNECTION,
+        },
+        client,
+        ethereumUri
+      );
+
+    const safeFactoryContractResponsev_120 =
+      await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(safeAbi_1_2_0),
+          bytecode: safeBytecode_1_2_0,
+          args: null,
+          connection: CONNECTION,
+        },
+        client,
+        ethereumUri
+      );
+    const proxyFactoryContractResponse_v130 =
+      await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(factoryAbi_1_3_0),
+          bytecode: factoryBytecode_1_3_0,
+          args: null,
+          connection: CONNECTION,
+        },
+        client,
+        ethereumUri
+      );
+
+    const safeFactoryContractResponsev_130 =
+      await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(safeAbi_1_3_0),
+          bytecode: safeBytecode_1_3_0,
+          args: null,
+          connection: CONNECTION,
+        },
+        client,
+        ethereumUri
+      );
+
+    proxyContractAddress_v120 =
+      proxyFactoryContractResponse_v120.data as string;
+
+    safeContractAddress_v120 = safeFactoryContractResponsev_120.data as string;
+
+    proxyContractAddress_v130 =
+      proxyFactoryContractResponse_v130.data as string;
+
+    safeContractAddress_v130 = safeFactoryContractResponsev_130.data as string;
   });
 
   afterAll(async () => {
@@ -64,7 +144,7 @@ describe("SafeFactory", () => {
     });
   });
 
-  describe("deploySafe", () => {
+  describe("deploySafe with custom contract adressess", () => {
     it("should fail if there are no owners", async () => {
       const deploySafeResponse = await App.Factory_Module.deploySafe(
         {
@@ -73,7 +153,10 @@ describe("SafeFactory", () => {
             threshold: 1,
           },
           connection: CONNECTION,
-          txOverrides: txOverrides,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
@@ -91,7 +174,10 @@ describe("SafeFactory", () => {
             threshold: -1,
           },
           connection: CONNECTION,
-          txOverrides: txOverrides,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
@@ -109,7 +195,10 @@ describe("SafeFactory", () => {
             threshold: 2,
           },
           connection: CONNECTION,
-          txOverrides: txOverrides,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
@@ -130,7 +219,10 @@ describe("SafeFactory", () => {
             saltNonce: "-2",
           },
           connection: CONNECTION,
-          txOverrides: txOverrides,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
@@ -148,7 +240,10 @@ describe("SafeFactory", () => {
             threshold: 1,
           },
           connection: CONNECTION,
-          txOverrides: txOverrides,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v130!,
+            safeFactoryContract: safeContractAddress_v130!,
+          },
         },
         client,
         wrapperUri
@@ -169,7 +264,10 @@ describe("SafeFactory", () => {
             saltNonce: Date.now().toString(),
           },
           connection: CONNECTION,
-          txOverrides: txOverrides,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
@@ -179,7 +277,8 @@ describe("SafeFactory", () => {
       expect(deploySafeResponse.data).toBeTruthy();
     });
 
-    it("should deploy last Safe version by default", async () => {
+    // redundant ?
+    /* it("should deploy last Safe version by default (through custom contract address)", async () => {
       const deploySafeResponse = await App.Factory_Module.deploySafe(
         {
           safeAccountConfig: {
@@ -187,17 +286,21 @@ describe("SafeFactory", () => {
             threshold: 1,
           },
           connection: CONNECTION,
-          txOverrides: txOverrides,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v130!,
+            safeFactoryContract: safeContractAddress_v130!,
+          },
         },
         client,
         wrapperUri
       );
-
+        console.log('deploySafeResponse', deploySafeResponse)
       expect(deploySafeResponse.data).toBeTruthy();
       expect(deploySafeResponse.error).toBeFalsy();
-    });
+    }); */
 
-    it("should fail a specific Safe version on unsupported chain", async () => {
+    // redundant ?
+    /* it("should fail a specific Safe version on unsupported chain (through custom contract address)", async () => {
       const deploySafeResponse = await App.Factory_Module.deploySafe(
         {
           safeAccountConfig: {
@@ -209,7 +312,10 @@ describe("SafeFactory", () => {
             version: "1.2.0",
           },
           connection: CONNECTION,
-          txOverrides: txOverrides,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
@@ -217,9 +323,10 @@ describe("SafeFactory", () => {
 
       expect(deploySafeResponse.error).toBeTruthy();
       expect(deploySafeResponse.data).toBeFalsy();
-    });
+    });  */
 
-    it("should deploy a specific Safe version", async () => {
+    // redundant ?
+    /* it("should deploy a specific Safe version", async () => {
       const deploySafeResponse = await App.Factory_Module.deploySafe(
         {
           safeAccountConfig: {
@@ -231,7 +338,10 @@ describe("SafeFactory", () => {
             version: "1.3.0",
           },
           connection: CONNECTION,
-          txOverrides: txOverrides,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v130!,
+            safeFactoryContract: safeContractAddress_v130!,
+          },
         },
         client,
         wrapperUri
@@ -239,11 +349,11 @@ describe("SafeFactory", () => {
 
       expect(deploySafeResponse.error).toBeFalsy();
       expect(deploySafeResponse.data).toBeTruthy();
-    });
+    }); */
   });
 
-  describe('predictSafeAddress', () => {
-    it('should fail if there are no owners', async () => {
+  describe("predictSafeAddress", () => {
+    it("should fail if there are no owners", async () => {
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
           safeAccountConfig: {
@@ -251,15 +361,19 @@ describe("SafeFactory", () => {
             threshold: 1,
           },
           connection: CONNECTION,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
-      )
+      );
       expect(predictSafeResp.error).toBeTruthy();
       expect(predictSafeResp.data).toBeFalsy();
     });
 
-    it('should fail if the threshold is lower than 0', async () => {
+    it("should fail if the threshold is lower than 0", async () => {
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
           safeAccountConfig: {
@@ -267,15 +381,19 @@ describe("SafeFactory", () => {
             threshold: -1,
           },
           connection: CONNECTION,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
-      )
+      );
       expect(predictSafeResp.error).toBeTruthy();
       expect(predictSafeResp.data).toBeFalsy();
     });
 
-    it('should fail if the threshold is higher than the threshold', async () => {
+    it("should fail if the threshold is higher than the threshold", async () => {
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
           safeAccountConfig: {
@@ -283,15 +401,19 @@ describe("SafeFactory", () => {
             threshold: 2,
           },
           connection: CONNECTION,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
-      )
+      );
       expect(predictSafeResp.error).toBeTruthy();
       expect(predictSafeResp.data).toBeFalsy();
     });
 
-    it('should fail if the saltNonce is lower than 0', async () => {
+    it("should fail if the saltNonce is lower than 0", async () => {
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
           safeAccountConfig: {
@@ -302,15 +424,19 @@ describe("SafeFactory", () => {
             saltNonce: "-2",
           },
           connection: CONNECTION,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
-      )
+      );
       expect(predictSafeResp.error).toBeTruthy();
       expect(predictSafeResp.data).toBeFalsy();
     });
 
-    it('should predict a new Safe with saltNonce', async () =>  {
+    it("should predict a new Safe with saltNonce", async () => {
       const saltNonce = "0x127";
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
@@ -322,10 +448,14 @@ describe("SafeFactory", () => {
             saltNonce: saltNonce,
           },
           connection: CONNECTION,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
-      )
+      );
       const deploySafeResp = await App.Factory_Module.deploySafe(
         {
           safeAccountConfig: {
@@ -336,7 +466,10 @@ describe("SafeFactory", () => {
             saltNonce: saltNonce,
           },
           connection: CONNECTION,
-          txOverrides: txOverrides,
+          customContractAdressess: {
+            proxyFactoryContract: proxyContractAddress_v120!,
+            safeFactoryContract: safeContractAddress_v120!,
+          },
         },
         client,
         wrapperUri
@@ -345,7 +478,9 @@ describe("SafeFactory", () => {
       console.log("deploySafeResp", deploySafeResp);
       expect(predictSafeResp.error).toBeFalsy();
       expect(predictSafeResp.data).toBeTruthy();
-      expect(predictSafeResp.data).toEqual(deploySafeResp.data?.safeAddress.toLowerCase());
+      expect(predictSafeResp.data).toEqual(
+        deploySafeResp.data?.safeAddress.toLowerCase()
+      );
     });
   });
 });

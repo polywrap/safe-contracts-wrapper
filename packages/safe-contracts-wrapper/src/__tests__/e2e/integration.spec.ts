@@ -10,8 +10,10 @@ import path from "path";
 
 import { getPlugins } from "../utils";
 
-import { abi as abi_1_2_0, bytecode as bytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafeProxyFactory.json";
-import { abi as abi_1_3_0, bytecode as bytecode_1_3_0 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
+import { abi as safeProxyFactoryAbi_1_2_0, bytecode as safeProxyFactoryBytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafeProxyFactory.json";
+import { abi as safeProxyFactoryAbi_1_3_0, bytecode as safeProxyFactoryBytecode_1_3_0 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
+//import { abi as safeAbi_1_2_0, bytecode as safeBytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafe.json";
+import { abi as safeAbi_1_3_0, bytecode as safeBytecode_1_3_0 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
 
 jest.setTimeout(500000);
 
@@ -19,6 +21,7 @@ describe("ProxyFactory", () => {
   const CONNECTION = { networkNameOrChainId: "testnet" };
 
   let client: PolywrapClient;
+  const signer = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
 
   const wrapperPath: string = path.join(
     path.resolve(__dirname),
@@ -29,261 +32,333 @@ describe("ProxyFactory", () => {
   const wrapperUri = `fs/${wrapperPath}/build`;
   const ethereumUri = "ens/ethereum.polywrap.eth";
 
-  beforeEach(async () => {
-    await initTestEnvironment();
+  describe("proxies", () => {
+    beforeEach(async () => {
+      await initTestEnvironment();
 
-    const config = getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress);
-    client = new PolywrapClient(config);
+      const config = getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress);
+      client = new PolywrapClient(config);
+    });
+
+    afterEach(async () => {
+      await stopTestEnvironment();
+    });
+
+    it("createProxy 1.2.0", async () => {
+
+      const deployContractResponse = await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(safeProxyFactoryAbi_1_2_0),
+          bytecode: safeProxyFactoryBytecode_1_2_0,
+          args: null,
+          connection: CONNECTION
+        },
+        client,
+        ethereumUri
+      );
+
+      const contractAddress = deployContractResponse.data as string;
+
+      expect(deployContractResponse).toBeTruthy();
+      expect(deployContractResponse.error).toBeFalsy();
+      expect(deployContractResponse.data).toBeTruthy();
+
+      const initCode = "0x";
+      const saltNonce = 42;
+      const response = await App.ProxyFactory_Module.createProxy(
+        {
+          address: contractAddress,
+          safeMasterCopyAddress: contractAddress,
+          initializer: initCode,
+          saltNonce,
+          connection: CONNECTION,
+        },
+        client,
+        wrapperUri
+      );
+
+      expect(response).toBeTruthy();
+      expect(response.error).toBeFalsy();
+      expect(response.data).not.toBeNull();
+      expect(response.data).toEqual("0x0ddb56f661e5bd05fb252f5bc619f74039cd6d63");
+    });
+
+    it("createProxy 1.3.0", async () => {
+
+      const deployContractResponse = await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
+          bytecode: safeProxyFactoryBytecode_1_3_0,
+          args: null,
+          connection: CONNECTION
+        },
+        client,
+        ethereumUri
+      );
+
+      const contractAddress = deployContractResponse.data as string;
+
+      expect(deployContractResponse).toBeTruthy();
+      expect(deployContractResponse.error).toBeFalsy();
+      expect(deployContractResponse.data).toBeTruthy();
+
+      const initCode = "0x";
+      const saltNonce = 42;
+      const response = await App.ProxyFactory_Module.createProxy(
+        {
+          address: contractAddress,
+          safeMasterCopyAddress: contractAddress,
+          initializer: initCode,
+          saltNonce,
+          connection: CONNECTION,
+        },
+        client,
+        wrapperUri
+      );
+
+      expect(response).toBeTruthy();
+      expect(response.error).toBeFalsy();
+      expect(response.data).not.toBeNull();
+      expect(response.data).toEqual("0x1b721366fc1837d57b5d40a82c546e665545c6bc");
+    });
+
+    it("proxyCreationCode", async () => {
+
+      const deployContractResponse = await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
+          bytecode: safeProxyFactoryBytecode_1_3_0,
+          args: null,
+          connection: CONNECTION
+        },
+        client,
+        ethereumUri
+      );
+
+      const contractAddress = deployContractResponse.data as string;
+
+      expect(deployContractResponse).toBeTruthy();
+      expect(deployContractResponse.error).toBeFalsy();
+      expect(deployContractResponse.data).toBeTruthy();
+
+      const response = await App.ProxyFactory_Module.proxyCreationCode(
+        {
+          address: contractAddress,
+          connection: CONNECTION,
+        },
+        client,
+        wrapperUri
+      );
+
+      expect(response).toBeTruthy();
+      expect(response.error).toBeFalsy();
+      expect(response.data).not.toBeNull();
+      expect(response.data).toEqual("0x608060405234801561001057600080fd5b506040516101e63803806101e68339818101604052602081101561003357600080fd5b8101908080519060200190929190505050600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614156100ca576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260228152602001806101c46022913960400191505060405180910390fd5b806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505060ab806101196000396000f3fe608060405273ffffffffffffffffffffffffffffffffffffffff600054167fa619486e0000000000000000000000000000000000000000000000000000000060003514156050578060005260206000f35b3660008037600080366000845af43d6000803e60008114156070573d6000fd5b3d6000f3fea2646970667358221220d1429297349653a4918076d650332de1a1068c5f3e07c5c82360c277770b955264736f6c63430007060033496e76616c69642073696e676c65746f6e20616464726573732070726f7669646564");
+    });
+
+    it("estimateGas", async () => {
+
+      const deployContractResponse = await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
+          bytecode: safeProxyFactoryBytecode_1_3_0,
+          args: null,
+          connection: CONNECTION
+        },
+        client,
+        ethereumUri
+      );
+
+      const contractAddress = deployContractResponse.data as string;
+
+      expect(deployContractResponse).toBeTruthy();
+      expect(deployContractResponse.error).toBeFalsy();
+      expect(deployContractResponse.data).toBeTruthy();
+
+      const initCode = "0x";
+      const saltNonce = 42;
+      const response = await App.ProxyFactory_Module.estimateGas(
+        {
+          address: contractAddress,
+          method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)",
+          args: [contractAddress, initCode, saltNonce.toString()],
+          connection: CONNECTION,
+        },
+        client,
+        wrapperUri
+      );
+
+      expect(response).toBeTruthy();
+      expect(response.error).toBeFalsy();
+      expect(response.data).not.toBeNull();
+      expect(response.data).toEqual("113499");
+    });
+
+    it("encode", async () => {
+
+      const contractAddress = "0xf308c38449adef77ae59b3a02b4ea1fa5d1c46e1";
+      const initCode = "0x";
+      const saltNonce = 42;
+      const response = await App.ProxyFactory_Module.encode(
+        {
+          method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)",
+          args: [contractAddress, initCode, saltNonce.toString()],
+        },
+        client,
+        wrapperUri
+      );
+
+      expect(response).toBeTruthy();
+      expect(response.error).toBeFalsy();
+      expect(response.data).not.toBeNull();
+      expect(response.data).toEqual("0x1688f0b9000000000000000000000000f308c38449adef77ae59b3a02b4ea1fa5d1c46e10000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000002a0000000000000000000000000000000000000000000000000000000000000000");
+    });
+
   });
+  describe("managers", () => {
 
-  afterEach(async () => {
-    await stopTestEnvironment();
-  });
+    let proxyAddress: string;
 
-  it("createProxy 1.2.0", async () => {
+    beforeEach(async () => {
+      await initTestEnvironment();
 
-    const deployContractResponse = await App.Ethereum_Module.deployContract(
-      {
-        abi: JSON.stringify(abi_1_2_0),
-        bytecode: bytecode_1_2_0,
-        args: null,
-        connection: CONNECTION
-      },
-      client,
-      ethereumUri
-    );
+      const config = getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress);
+      client = new PolywrapClient(config);
 
-    const contractAddress = deployContractResponse.data as string;
+      const singletonResponse = await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(safeAbi_1_3_0),
+          bytecode: safeBytecode_1_3_0,
+          args: null,
+          connection: CONNECTION
+        },
+        client,
+        ethereumUri
+      );
 
-    expect(deployContractResponse).toBeTruthy();
-    expect(deployContractResponse.error).toBeFalsy();
-    expect(deployContractResponse.data).toBeTruthy();
+      const singletonAddress = singletonResponse.data as string;
 
-    const initCode = "0x";
-    const saltNonce = 42;
-    const response = await App.ProxyFactory_Module.createProxy(
-      {
-        address: contractAddress,
-        safeMasterCopyAddress: contractAddress,
-        initializer: initCode,
-        saltNonce,
-        connection: CONNECTION,
-      },
-      client,
-      wrapperUri
-    );
+      const safeProxyFactoryResponse = await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(safeProxyFactoryAbi_1_2_0),
+          bytecode: safeProxyFactoryBytecode_1_2_0,
+          args: null,
+          connection: CONNECTION
+        },
+        client,
+        ethereumUri
+      );
 
-    expect(response).toBeTruthy();
-    expect(response.error).toBeFalsy();
-    expect(response.data).not.toBeNull();
-    expect(response.data).toEqual("0x0ddb56f661e5bd05fb252f5bc619f74039cd6d63");
-  });
+      const safeProxyFactoryAddress = safeProxyFactoryResponse.data as string;
 
-  it("createProxy 1.3.0", async () => {
+      const initCode = "0x";
+      const saltNonce = 42;
+      const proxyResponse = await App.ProxyFactory_Module.createProxy(
+        {
+          address: safeProxyFactoryAddress,
+          safeMasterCopyAddress: singletonAddress,
+          initializer: initCode,
+          saltNonce,
+          connection: CONNECTION,
+        },
+        client,
+        wrapperUri
+      );
 
-    const deployContractResponse = await App.Ethereum_Module.deployContract(
-      {
-        abi: JSON.stringify(abi_1_3_0),
-        bytecode: bytecode_1_3_0,
-        args: null,
-        connection: CONNECTION
-      },
-      client,
-      ethereumUri
-    );
+      proxyAddress = proxyResponse.data as string;
 
-    const contractAddress = deployContractResponse.data as string;
+      await App.Ethereum_Module.callContractMethod(
+        {
+          address: proxyAddress,
+          method: "function setup( address[] calldata _owners, uint256 _threshold, address to, bytes calldata data, address fallbackHandler, address paymentToken, uint256 payment, address payable paymentReceiver ) external",
+          args: [JSON.stringify([signer]), "1", signer, "0x", signer, signer, "0", signer],
+          connection: CONNECTION
+        },
+        client,
+        ethereumUri
+      );
 
-    expect(deployContractResponse).toBeTruthy();
-    expect(deployContractResponse.error).toBeFalsy();
-    expect(deployContractResponse.data).toBeTruthy();
+    });
 
-    const initCode = "0x";
-    const saltNonce = 42;
-    const response = await App.ProxyFactory_Module.createProxy(
-      {
-        address: contractAddress,
-        safeMasterCopyAddress: contractAddress,
-        initializer: initCode,
-        saltNonce,
-        connection: CONNECTION,
-      },
-      client,
-      wrapperUri
-    );
+    afterEach(async () => {
+      await stopTestEnvironment();
+    });
 
-    expect(response).toBeTruthy();
-    expect(response.error).toBeFalsy();
-    expect(response.data).not.toBeNull();
-    expect(response.data).toEqual("0x1b721366fc1837d57b5d40a82c546e665545c6bc");
-  });
+    it("getThreshold",async () => {
+      const response = await App.ProxyFactory_Module.getThreshold(
+        {
+          address: proxyAddress,
+        },
+        client,
+        wrapperUri
+      );
 
-  it("proxyCreationCode", async () => {
+      expect(response).toBeTruthy();
+      expect(response.error).toBeFalsy();
+      expect(response.data).not.toBeNull();
+      expect(response.data).toEqual(1);
+    });
 
-    const deployContractResponse = await App.Ethereum_Module.deployContract(
-      {
-        abi: JSON.stringify(abi_1_3_0),
-        bytecode: bytecode_1_3_0,
-        args: null,
-        connection: CONNECTION
-      },
-      client,
-      ethereumUri
-    );
+    it("getOwners",async () => {
+      const response = await App.ProxyFactory_Module.getOwners(
+        {
+          address: proxyAddress,
+        },
+        client,
+        wrapperUri
+      );
 
-    const contractAddress = deployContractResponse.data as string;
+      expect(response).toBeTruthy();
+      expect(response.error).toBeFalsy();
+      expect(response.data).not.toBeNull();
+      expect(response.data).toEqual([signer]);
+    });
 
-    expect(deployContractResponse).toBeTruthy();
-    expect(deployContractResponse.error).toBeFalsy();
-    expect(deployContractResponse.data).toBeTruthy();
+    it("isOwner",async () => {
+      const response = await App.ProxyFactory_Module.isOwner(
+        {
+          address: proxyAddress,
+          ownerAddress: signer
+        },
+        client,
+        wrapperUri
+      );
 
-    const response = await App.ProxyFactory_Module.proxyCreationCode(
-      {
-        address: contractAddress,
-        connection: CONNECTION,
-      },
-      client,
-      wrapperUri
-    );
+      expect(response).toBeTruthy();
+      expect(response.error).toBeFalsy();
+      expect(response.data).not.toBeNull();
+      expect(response.data).toEqual(true);
+    });
 
-    expect(response).toBeTruthy();
-    expect(response.error).toBeFalsy();
-    expect(response.data).not.toBeNull();
-    expect(response.data).toEqual("0x608060405234801561001057600080fd5b506040516101e63803806101e68339818101604052602081101561003357600080fd5b8101908080519060200190929190505050600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614156100ca576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260228152602001806101c46022913960400191505060405180910390fd5b806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505060ab806101196000396000f3fe608060405273ffffffffffffffffffffffffffffffffffffffff600054167fa619486e0000000000000000000000000000000000000000000000000000000060003514156050578060005260206000f35b3660008037600080366000845af43d6000803e60008114156070573d6000fd5b3d6000f3fea2646970667358221220d1429297349653a4918076d650332de1a1068c5f3e07c5c82360c277770b955264736f6c63430007060033496e76616c69642073696e676c65746f6e20616464726573732070726f7669646564");
-  });
+    it("getModules",async () => {
+      const response = await App.ProxyFactory_Module.getModules(
+        {
+          address: proxyAddress,
+        },
+        client,
+        wrapperUri
+      );
 
-  it("estimateGas", async () => {
+      expect(response).toBeTruthy();
+      expect(response.error).toBeFalsy();
+      expect(response.data).not.toBeNull();
+      expect(response.data).toEqual([]);
+    });
 
-    const deployContractResponse = await App.Ethereum_Module.deployContract(
-      {
-        abi: JSON.stringify(abi_1_3_0),
-        bytecode: bytecode_1_3_0,
-        args: null,
-        connection: CONNECTION
-      },
-      client,
-      ethereumUri
-    );
+    it("isModuleEnabled",async () => {
+      const response = await App.ProxyFactory_Module.isModuleEnabled(
+        {
+          address: proxyAddress,
+          moduleAddress: signer
+        },
+        client,
+        wrapperUri
+      );
 
-    const contractAddress = deployContractResponse.data as string;
-
-    expect(deployContractResponse).toBeTruthy();
-    expect(deployContractResponse.error).toBeFalsy();
-    expect(deployContractResponse.data).toBeTruthy();
-
-    const initCode = "0x";
-    const saltNonce = 42;
-    const response = await App.ProxyFactory_Module.estimateGas(
-      {
-        address: contractAddress,
-        method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)",
-        args: [contractAddress, initCode, saltNonce.toString()],
-        connection: CONNECTION,
-      },
-      client,
-      wrapperUri
-    );
-
-    expect(response).toBeTruthy();
-    expect(response.error).toBeFalsy();
-    expect(response.data).not.toBeNull();
-    expect(response.data).toEqual("113499");
-  });
-
-  it("encode", async () => {
-
-    const contractAddress = "0xf308c38449adef77ae59b3a02b4ea1fa5d1c46e1";
-    const initCode = "0x";
-    const saltNonce = 42;
-    const response = await App.ProxyFactory_Module.encode(
-      {
-        method: "function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce)",
-        args: [contractAddress, initCode, saltNonce.toString()],
-      },
-      client,
-      wrapperUri
-    );
-
-    expect(response).toBeTruthy();
-    expect(response.error).toBeFalsy();
-    expect(response.data).not.toBeNull();
-    expect(response.data).toEqual("0x1688f0b9000000000000000000000000f308c38449adef77ae59b3a02b4ea1fa5d1c46e10000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000002a0000000000000000000000000000000000000000000000000000000000000000");
-  });
-
-  it("getOwners", async () => {
-    const response = await App.ProxyFactory_Module.getOwners(
-      {
-        address:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
-        connection: {networkNameOrChainId:"goerli"}
-      },
-      client,
-      wrapperUri
-    );
-    expect(response).toBeTruthy();
-    expect(response.error).toBeFalsy();
-    expect(response.data).not.toBeNull();
-    expect(response.data).toEqual([]);
-  });
-
-  it("getThreshold",async () => {
-    const response = await App.ProxyFactory_Module.getThreshold(
-      {
-        address:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
-        connection: {networkNameOrChainId:"goerli"}
-      },
-      client,
-      wrapperUri
-    );
-    expect(response).toBeTruthy();
-    expect(response.error).toBeFalsy();
-    expect(response.data).not.toBeNull();
-    expect(response.data).toEqual(1);
-  });
-
-  it("isOwner",async () => {
-    const response = await App.ProxyFactory_Module.isOwner(
-      {
-        address:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
-        ownerAddress:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
-        connection: {networkNameOrChainId:"goerli"}
-      },
-      client,
-      wrapperUri
-    );
-    expect(response).toBeTruthy();
-    expect(response.error).toBeFalsy();
-    expect(response.data).not.toBeNull();
-    expect(response.data).toEqual(false);
-  });
-
-  it("getModules",async () => {
-    const response = await App.ProxyFactory_Module.getModules(
-      {
-        address:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
-        connection: {networkNameOrChainId:"goerli"}
-      },
-      client,
-      wrapperUri
-    );
-    expect(response).toBeTruthy();
-    expect(response.error).toBeFalsy();
-    expect(response.data).not.toBeNull();
-    expect(response.data).toEqual([]);
-  });
-
-  it("isModuleEnabled",async () => {
-    const response = await App.ProxyFactory_Module.isModuleEnabled(
-      {
-        address:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
-        moduleAddress:"0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
-        connection: {networkNameOrChainId:"goerli"}
-      },
-      client,
-      wrapperUri
-    );
-    expect(response).toBeTruthy();
-    expect(response.error).toBeFalsy();
-    expect(response.data).not.toBeNull();
-    expect(response.data).toEqual(false);
+      expect(response).toBeTruthy();
+      expect(response.error).toBeFalsy();
+      expect(response.data).not.toBeNull();
+      expect(response.data).toEqual(false);
+    });
   });
 });

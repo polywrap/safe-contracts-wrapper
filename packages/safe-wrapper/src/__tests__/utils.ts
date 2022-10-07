@@ -52,7 +52,7 @@ export function getPlugins(
               [network]: new Connection({
                 provider: `https://${network}.infura.io/v3/9d16956e670e4429b9fc821128eb259c`, // ethereum,
                 signer: new Wallet(
-                  "8ca435f1321b8043d984d95776cf53f570f2e296f86a8b0c9ddbd7c537cee6a2"
+                 "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d" 
                 ),
               }),
               testnet: new Connection({ provider: ethereum }),

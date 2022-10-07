@@ -1,4 +1,5 @@
 #import { Module, Connection, TxOverrides } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
+#import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
 
 type Module {
     """

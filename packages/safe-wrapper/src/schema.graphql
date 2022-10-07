@@ -1,5 +1,6 @@
-#import { Module } into SafeContracts from "wrap://ipfs/QmTyaVrUsM5P9kLyK2uJ2Uvohgk2A7QSXe9M22mfaeX42D" # "wrap://ens/safe-proxy-factory-wrapper.polywrap.eth"
+#import { Module } into SafeContracts from "wrap://ipfs/Qmf723nErXYFht5vaR4LVmFJfG8ssJip2iAGVVVYzX5qJL"
 #import { Module, Connection, TxOverrides } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
+#import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
 
 type Env {
     safeAddress: String!

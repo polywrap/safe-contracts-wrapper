@@ -12,14 +12,17 @@ import {
   Args_isOwner,
   Env,
   Ethereum_Module,
-  SafeContracts_Module
+  SafeContracts_Module,
+  Logger_Module,
 } from "./wrap";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
 
 function sameString(str1: string, str2: string): bool {
-  return str1.toLowerCase() === str2.toLowerCase()
+  const s1 = str1.toLowerCase();
+  const s2 = str2.toLowerCase();
+  return s1 == s2
 }
 
 export function isZeroAddress(address: string): bool {
@@ -176,7 +179,7 @@ export function encodeSwapOwnerData(args: Args_encodeSwapOwnerData, env: Env): s
   validateOwnerAddress(args.oldOwnerAddress);
   validateOwnerAddress(args.newOwnerAddress);
   const owners = getOwners({}, env);
-  validateAddressIsOwnerAndGetPrev(args.newOwnerAddress, owners)
+  validateAddressIsNotOwner(args.newOwnerAddress, owners)
   const prevOwnerAddress = validateAddressIsOwnerAndGetPrev(args.oldOwnerAddress, owners);
   const result = Ethereum_Module.encodeFunction({
     method: "function swapOwner(address prevOwner, address oldOwner, address newOwner) public",
