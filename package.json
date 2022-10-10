@@ -7,7 +7,8 @@
   "workspaces": {
     "packages": [
       "./packages/safe-contracts-wrapper",
-      "./packages/safe-factory-wrapper"
+      "./packages/safe-factory-wrapper",
+      "./packages/safe-wrapper"
     ],
     "nohoist": [ "**/polywrap-datetime-plugin" ]
   },
