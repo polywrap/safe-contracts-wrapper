@@ -22,6 +22,7 @@ import {
 jest.setTimeout(1200000);
 describe("Safe Wrapper", () => {
   const wrapper = App.SafeWrapper_Module;
+  const factory = App.SafeFactory_Module;
   const connection = { networkNameOrChainId: "testnet" };
   const txOverrides = { gasLimit: "1000000", gasPrice: "20" };
   const signer = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
@@ -69,7 +70,6 @@ describe("Safe Wrapper", () => {
           abi: JSON.stringify(factoryAbi_1_3_0),
           bytecode: factoryBytecode_1_3_0,
           args: null,
-          connection,
         },
         client,
         ethereumUri
@@ -84,7 +84,6 @@ describe("Safe Wrapper", () => {
           abi: JSON.stringify(safeAbi_1_3_0),
           bytecode: safeBytecode_1_3_0,
           args: null,
-          connection,
         },
         client,
         ethereumUri
@@ -92,13 +91,12 @@ describe("Safe Wrapper", () => {
 
     safeContractAddress_v130 = safeFactoryContractResponsev_130.data as string;
 
-    const safeResponse = await App.SafeFactory_Module.deploySafe(
+    const safeResponse = await factory.deploySafe(
       {
         safeAccountConfig: {
           owners: owners,
           threshold: 1,
         },
-        connection,
 	txOverrides,
         customContractAdressess: {
           proxyFactoryContract: proxyContractAddress_v130!,
@@ -165,7 +163,6 @@ describe("Safe Wrapper", () => {
       expect(resp.error).toBeFalsy();
       expect(resp.data).not.toBeNull();
     });
-    // TODO: encodeRemoveOwnerData fails when owner count will be less than threshold
 
     it("encodeSwapOwnerData", async () => {
       const resp = await wrapper.encodeSwapOwnerData({ oldOwnerAddress: owners[0], newOwnerAddress: someAddr }, client, wrapperUri);
@@ -173,7 +170,11 @@ describe("Safe Wrapper", () => {
       expect(resp.error).toBeFalsy();
       expect(resp.data).not.toBeNull();
     });
-    // TODO: encodeSwapOwnerData when new owner is already an owner
+
+    it("encodeSwapOwnerData fails", async () => {
+      const resp = await wrapper.encodeSwapOwnerData({ oldOwnerAddress: owners[0], newOwnerAddress: owners[1] }, client, wrapperUri);
+      expect(resp.error?.toString()).toContain("Address provided is already an owner");
+    });
 
     it("encodeChangeThresholdData", async () => {
       const resp = await wrapper.encodeChangeThresholdData({ threshold: 2 }, client, wrapperUri);
@@ -208,23 +209,8 @@ describe("Safe Wrapper", () => {
     });
 
     it("encodeDisableModuleData", async () => {
-      const data = "0x";
-      const a = await App.Ethereum_Module.callContractMethod(
-        {
-          address: safeAddress,
-          method: "function execTransaction( address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address payable refundReceiver, bytes memory signatures ) public payable virtual returns (bool success)",
-          args: [safeAddress, "0", data, "1", "0", "0", "0", "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000", "0x"],
-          connection
-        },
-        client,
-        ethereumUri
-      );
-      console.log(a)
-
       const resp = await wrapper.encodeDisableModuleData({ moduleAddress: someAddr }, client, wrapperUri);
-      expect(resp).toBeTruthy();
-      expect(resp.error).toBeFalsy();
-      expect(resp.data).not.toBeNull();
+      expect(resp.error?.toString()).toContain("Module provided is not enabled yet");
     });
   });
 });

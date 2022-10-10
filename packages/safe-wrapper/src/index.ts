@@ -25,6 +25,15 @@ function sameString(str1: string, str2: string): bool {
   return s1 == s2
 }
 
+function findIndex(item: string, items: string[]): i32 {
+  for (let i = 0, ln = items.length; i < ln; i++) {
+    if (sameString(item, items[i])) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 export function isZeroAddress(address: string): bool {
   return sameString(address, ZERO_ADDRESS)
 }
@@ -35,15 +44,6 @@ function isSentinelAddress(address: string): bool {
 
 export function isRestrictedAddress(address: string): bool {
   return isZeroAddress(address) || isSentinelAddress(address)
-}
-
-function findIndex(item: string, items: string[]): i32 {
-  for (let i = 0, ln = items.length; i < ln; i++) {
-    if (sameString(item, items[i])) {
-      return i;
-    }
-  }
-  return -1;
 }
 
 function validateOwnerAddress(ownerAddress: string): void {
@@ -224,7 +224,7 @@ export function encodeEnableModuleData(args: Args_encodeEnableModuleData, env: E
   validateModuleAddress(args.moduleAddress);
   validateModuleIsNotEnabled(args.moduleAddress, getModules({}, env));
   const result = Ethereum_Module.encodeFunction({
-    method: "function enableModule(address module) public ",
+    method: "function enableModule(address module) public",
     args: [args.moduleAddress],
   });
   return result.unwrap();
