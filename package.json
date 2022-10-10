@@ -7,7 +7,8 @@
   "workspaces": {
     "packages": [
       "./packages/safe-contracts-wrapper",
-      "./packages/safe-factory-wrapper"
+      "./packages/safe-factory-wrapper",
+      "./packages/safe-wrapper"
     ],
     "nohoist": [ "**/polywrap-datetime-plugin" ]
   },
@@ -17,8 +18,9 @@
   },
   "scripts": {
      "build": "lerna run build --concurrency 1",
-     "test:proxy": "lerna run test --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
-     "test:safe": "lerna run test --concurrency 1 --scope @consideritdone/safe-factory-wrapper"
+     "test:contracts": "lerna run test --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
+     "test:factory": "lerna run test --concurrency 1 --scope @consideritdone/safe-factory-wrapper",
+     "test:safe": "lerna run test --concurrency 1 --scope @consideritdone/safe-wrapper"
   },
   "devDependencies": {
     "lerna": "5.5.2"

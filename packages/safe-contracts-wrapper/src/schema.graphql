@@ -1,4 +1,5 @@
 #import { Module, Connection, TxOverrides } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
+#import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
 
 type Module {
     """
@@ -29,4 +30,34 @@ type Module {
         method: String!
         args: [String!]!
     ): String!
+
+    """
+    GnosisSafeContractEthers methods
+    """
+    getOwners(
+        address: String!
+        connection: Ethereum_Connection
+    ): [String!]!
+
+    getThreshold(
+        address: String!
+        connection: Ethereum_Connection
+    ): UInt32!
+
+    isOwner(
+        address: String!
+        ownerAddress: String!
+        connection: Ethereum_Connection
+    ): Boolean!
+
+    getModules(
+        address: String!
+        connection: Ethereum_Connection
+    ): [String!]!
+
+    isModuleEnabled(
+        address: String!
+        moduleAddress: String!
+        connection: Ethereum_Connection
+    ): Boolean!
 }
