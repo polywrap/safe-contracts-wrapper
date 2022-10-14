@@ -7,6 +7,15 @@ type Env {
     connection: Ethereum_Connection!
 }
 
+type SafeTransaction {
+    data: String!
+    to: String!
+    value: UInt32
+    operation: UInt8
+    signatures: Map @annotate(type: "Map<String!, String!>")
+    # TODO: add txOverrides
+}
+
 type Module {
     """Owner manager methods"""
     getOwners: [String!]! @env(required: true)
@@ -22,4 +31,8 @@ type Module {
     isModuleEnabled(moduleAddress: String!): Boolean! @env(required: true)
     encodeEnableModuleData(moduleAddress: String!): String! @env(required: true)
     encodeDisableModuleData(moduleAddress: String!): String! @env(required: true)
+
+    """Transaction manager methods"""
+    createTransaction(tx: SafeTransactionData!): SafeTransaction!
+    addSignature(tx: SafeTransaction!): SafeTransaction!
 }

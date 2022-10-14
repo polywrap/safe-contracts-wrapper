@@ -10,10 +10,13 @@ import {
   Args_getThreshold,
   Args_isModuleEnabled,
   Args_isOwner,
+  Args_createTransaction,
+  Args_addSignature,
   Env,
   Ethereum_Module,
   SafeContracts_Module,
   Logger_Module,
+  SafeTransaction,
 } from "./wrap";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -238,4 +241,30 @@ export function encodeDisableModuleData(args: Args_encodeDisableModuleData, env:
     args: [prevModuleAddress, args.moduleAddress],
   });
   return result.unwrap();
+}
+
+export function createTransaction(args: Args_createTransaction): SafeTransaction {
+  // TODO: if args.tx.data is parsed as an array, create multisend tx
+  const standardizedTxs = {
+    to: args.tx.to,
+    value: args.tx.value,
+    data: args.tx.data,
+    operation: args.tx.operation ?? 0, // 0 is Call, 1 is DelegateCall
+    signatures: args.tx.signatures
+    // TODO add txOverrides
+    // baseGas: args.tx.baseGas ?? 0,
+    // gasPrice: args.tx.gasPrice ?? 0,
+    // gasToken: args.tx.gasToken || ZERO_ADDRESS,
+    // refundReceiver: args.tx.refundReceiver || ZERO_ADDRESS,
+    // nonce: args.tx.nonce ?? (await safeContract.getNonce())
+  }
+  return standardizedTxs;
+}
+
+export function addSignature(args: Args_addSignature): string {
+  const address = Ethereum_Module.getSignerAddress().unwrap();
+  const signature = Ethereum_Module.signMessage(args.tx.data).unwrap()
+  let tx_new = args.tx;
+  tx_new.signatures[address] = signature;
+  return tx_new;
 }
