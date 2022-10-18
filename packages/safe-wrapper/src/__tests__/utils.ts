@@ -4,28 +4,40 @@ import { Connection, Connections, ethereumPlugin } from "@polywrap/ethereum-plug
 import { dateTimePlugin } from "polywrap-datetime-plugin";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
 import { Wallet } from "ethers";
+import { ipfsPlugin } from "@polywrap/ipfs-plugin-js";
+import { defaultIpfsProviders } from "@polywrap/client-config-builder-js";
 
 export function getPlugins(
   ethereum: string,
+  ipfs: string,
   ensAddress: string,
   network: string,
 ): Partial<ClientConfig> {
   return {
+    envs: [
+      {
+        uri: "wrap://ens/ipfs.polywrap.eth",
+        env: {
+          provider: ipfs,
+          fallbackProviders: defaultIpfsProviders,
+        },
+      },
+    ],
     redirects: [
       {
-        from: "wrap://ens/safe-proxy-factory-wrapper.polywrap.eth",
-        to: `wrap://ipfs/QmTyaVrUsM5P9kLyK2uJ2Uvohgk2A7QSXe9M22mfaeX42D`,
+        from: "wrap://ens/safe-contracts-wrapper.polywrap.eth",
+        to: "wrap://ipfs/QmUaomUYZp5b7rEuCtqB5Lbwozds8krvVZokqYpdTut8W7",
       },
       {
-        from: "wrap://ens/safefactory.eth",
-        to: "wrap://ipfs/QmPajKxGQZwU1PW22dSEKq8eLHhmRs7rsDVraC8S1gfxda",
+        from: "wrap://ens/safe-factory-wrapper.eth",
+        to: "wrap://ipfs/QmNotdnQwE4frJ4Gqt46UyAphQoasHujH5D1DPpKENEPq5",
       }
     ],
     plugins: [
-      /*{
+      {
         uri: "wrap://ens/ipfs.polywrap.eth",
-        plugin: ipfsPlugin({ provider: ipfs }),
-      },*/
+        plugin: ipfsPlugin({}),
+      },
       {
         uri: "wrap://ens/ens.polywrap.eth",
         plugin: ensResolverPlugin({ addresses: { testnet: ensAddress } }),
@@ -52,7 +64,7 @@ export function getPlugins(
               [network]: new Connection({
                 provider: `https://${network}.infura.io/v3/9d16956e670e4429b9fc821128eb259c`, // ethereum,
                 signer: new Wallet(
-                 "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d" 
+                  "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
                 ),
               }),
               testnet: new Connection({ provider: ethereum }),

@@ -15,7 +15,7 @@ import {
   Env,
   Ethereum_Module,
   SafeContracts_Module,
-  Logger_Module,
+  // Logger_Module,
   SafeTransaction,
 } from "./wrap";
 
@@ -50,7 +50,7 @@ export function isRestrictedAddress(address: string): bool {
 }
 
 function validateOwnerAddress(ownerAddress: string): void {
-  const isValidAddress = Ethereum_Module.checkAddress({address: ownerAddress});
+  const isValidAddress = Ethereum_Module.checkAddress({ address: ownerAddress });
   if (!isValidAddress || isRestrictedAddress(ownerAddress)) {
     throw new Error('Invalid owner address provided')
   }
@@ -84,8 +84,8 @@ function validateThreshold(threshold: number, numOwners: number): void {
 }
 
 function validateModuleAddress(moduleAddress: string): void {
-  const isValidAddress = Ethereum_Module.checkAddress({address: moduleAddress});
-  if (!isValidAddress.unwrap() || isRestrictedAddress(moduleAddress)){
+  const isValidAddress = Ethereum_Module.checkAddress({ address: moduleAddress });
+  if (!isValidAddress.unwrap() || isRestrictedAddress(moduleAddress)) {
     throw new Error('Invalid module address provided')
   }
 }
@@ -247,8 +247,8 @@ export function createTransaction(args: Args_createTransaction): SafeTransaction
   // TODO: if args.tx.data is parsed as an array, create multisend tx
   const standardizedTxs = {
     to: args.tx.to,
-    value: args.tx.value,
     data: args.tx.data,
+    value: args.tx.value ?? 0,
     operation: args.tx.operation ?? 0, // 0 is Call, 1 is DelegateCall
     signatures: args.tx.signatures
     // TODO add txOverrides
@@ -261,7 +261,7 @@ export function createTransaction(args: Args_createTransaction): SafeTransaction
   return standardizedTxs;
 }
 
-export function addSignature(args: Args_addSignature): string {
+export function addSignature(args: Args_addSignature): SafeTransaction {
   const address = Ethereum_Module.getSignerAddress().unwrap();
   const signature = Ethereum_Module.signMessage(args.tx.data).unwrap()
   let tx_new = args.tx;

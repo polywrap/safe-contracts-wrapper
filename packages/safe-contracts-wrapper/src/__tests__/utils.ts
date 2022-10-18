@@ -4,6 +4,7 @@ import { Connection, Connections, ethereumPlugin } from "@polywrap/ethereum-plug
 import { ipfsPlugin } from "@polywrap/ipfs-plugin-js";
 import { Wallet } from "ethers";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
+import { defaultIpfsProviders } from "@polywrap/client-config-builder-js";
 
 export function getPlugins(
   ethereum: string,
@@ -11,11 +12,19 @@ export function getPlugins(
   ensAddress: string,
 ): Partial<ClientConfig> {
   return {
-    redirects: [],
+    envs: [
+      {
+        uri: "wrap://ens/ipfs.polywrap.eth",
+        env: {
+          provider: ipfs,
+          fallbackProviders: defaultIpfsProviders,
+        },
+      },
+    ],
     plugins: [
       {
         uri: "wrap://ens/ipfs.polywrap.eth",
-        plugin: ipfsPlugin({ provider: ipfs }),
+        plugin: ipfsPlugin({}),
       },
       {
         uri: "wrap://ens/ens.polywrap.eth",
@@ -35,7 +44,7 @@ export function getPlugins(
         plugin: ethereumPlugin({
           connections: new Connections({
             networks: {
-              testnet: new Connection({ 
+              testnet: new Connection({
                 provider: ethereum,
                 signer: new Wallet("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"),
               }),

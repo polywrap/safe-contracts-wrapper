@@ -78,7 +78,11 @@ describe("SafeFactory", () => {
         ethereumUri
       );
 
-    const safeFactoryContractResponsev_120 =
+    if (!proxyFactoryContractResponse_v120.ok) throw proxyFactoryContractResponse_v120.error;
+    proxyContractAddress_v120 =
+      proxyFactoryContractResponse_v120.value as string;
+
+    const safeFactoryContractResponse_v120 =
       await App.Ethereum_Module.deployContract(
         {
           abi: JSON.stringify(safeAbi_1_2_0),
@@ -89,6 +93,10 @@ describe("SafeFactory", () => {
         client,
         ethereumUri
       );
+
+    if (!safeFactoryContractResponse_v120.ok) throw safeFactoryContractResponse_v120.error;
+    safeContractAddress_v120 = safeFactoryContractResponse_v120.value as string;
+
     const proxyFactoryContractResponse_v130 =
       await App.Ethereum_Module.deployContract(
         {
@@ -101,7 +109,11 @@ describe("SafeFactory", () => {
         ethereumUri
       );
 
-    const safeFactoryContractResponsev_130 =
+    if (!proxyFactoryContractResponse_v130.ok) throw proxyFactoryContractResponse_v130.error;
+    proxyContractAddress_v130 =
+      proxyFactoryContractResponse_v130.value as string;
+
+    const safeFactoryContractResponse_v130 =
       await App.Ethereum_Module.deployContract(
         {
           abi: JSON.stringify(safeAbi_1_3_0),
@@ -113,15 +125,8 @@ describe("SafeFactory", () => {
         ethereumUri
       );
 
-    proxyContractAddress_v120 =
-      proxyFactoryContractResponse_v120.data as string;
-
-    safeContractAddress_v120 = safeFactoryContractResponsev_120.data as string;
-
-    proxyContractAddress_v130 =
-      proxyFactoryContractResponse_v130.data as string;
-
-    safeContractAddress_v130 = safeFactoryContractResponsev_130.data as string;
+    if (!safeFactoryContractResponse_v130.ok) throw safeFactoryContractResponse_v130.error;
+    safeContractAddress_v130 = safeFactoryContractResponse_v130.value as string;
   });
 
   afterAll(async () => {
@@ -138,9 +143,9 @@ describe("SafeFactory", () => {
         wrapperUri
       );
 
-      expect(chainIdResponse).toBeTruthy();
-      expect(chainIdResponse.data).toBeTruthy();
-      expect(chainIdResponse.error).toBeFalsy();
+      if (!chainIdResponse.ok) throw chainIdResponse.error;
+      expect(chainIdResponse.value).not.toBeNull();
+      expect(chainIdResponse.value).toEqual("1337");
     });
   });
 
@@ -162,8 +167,10 @@ describe("SafeFactory", () => {
         wrapperUri
       );
 
-      expect(deploySafeResponse.error).toBeTruthy();
-      expect(deploySafeResponse.data).toBeFalsy();
+      expect(deploySafeResponse.ok).toEqual(false);
+      if (!deploySafeResponse.ok) {
+        expect(deploySafeResponse.error?.toString()).toMatch("Owner list must have at least one owner");
+      }
     });
 
     it("should fail if the threshold is lower than 0", async () => {
@@ -183,8 +190,10 @@ describe("SafeFactory", () => {
         wrapperUri
       );
 
-      expect(deploySafeResponse.error).toBeTruthy();
-      expect(deploySafeResponse.data).toBeFalsy();
+      expect(deploySafeResponse.ok).toEqual(false);
+      if (!deploySafeResponse.ok) {
+        expect(deploySafeResponse.error?.toString()).toMatch("unsigned integer cannot be negative");
+      }
     });
 
     it("should fail if the threshold is higher than the owners length", async () => {
@@ -204,8 +213,10 @@ describe("SafeFactory", () => {
         wrapperUri
       );
 
-      expect(deploySafeResponse.error).toBeTruthy();
-      expect(deploySafeResponse.data).toBeFalsy();
+      expect(deploySafeResponse.ok).toEqual(false);
+      if (!deploySafeResponse.ok) {
+        expect(deploySafeResponse.error?.toString()).toMatch("Threshold must be lower than or equal to owners length");
+      }
     });
 
     it("should fail if the saltNonce is lower than 0", async () => {
@@ -213,7 +224,7 @@ describe("SafeFactory", () => {
         {
           safeAccountConfig: {
             owners: owners,
-            threshold: 2,
+            threshold: 1,
           },
           safeDeploymentConfig: {
             saltNonce: "-2",
@@ -228,8 +239,10 @@ describe("SafeFactory", () => {
         wrapperUri
       );
 
-      expect(deploySafeResponse.error).toBeTruthy();
-      expect(deploySafeResponse.data).toBeFalsy();
+      expect(deploySafeResponse.ok).toEqual(false);
+      if (!deploySafeResponse.ok) {
+        expect(deploySafeResponse.error?.toString()).toMatch("saltNonce must be greater than or equal to 0");
+      }
     });
 
     it("should deploy a new Safe without saltNonce", async () => {
@@ -249,8 +262,9 @@ describe("SafeFactory", () => {
         wrapperUri
       );
 
-      expect(deploySafeResponse.error).toBeFalsy();
-      expect(deploySafeResponse.data).toBeTruthy();
+      if (!deploySafeResponse.ok) throw deploySafeResponse.error;
+      expect(deploySafeResponse.value).not.toBeNull();
+      expect(deploySafeResponse.value?.safeAddress).toMatch("0x");
     });
 
     it("should deploy a new Safe with saltNonce", async () => {
@@ -273,8 +287,9 @@ describe("SafeFactory", () => {
         wrapperUri
       );
 
-      expect(deploySafeResponse.error).toBeFalsy();
-      expect(deploySafeResponse.data).toBeTruthy();
+      if (!deploySafeResponse.ok) throw deploySafeResponse.error;
+      expect(deploySafeResponse.value).not.toBeNull();
+      expect(deploySafeResponse.value?.safeAddress).toMatch("0x");
     });
 
     // redundant ?
@@ -369,8 +384,11 @@ describe("SafeFactory", () => {
         client,
         wrapperUri
       );
-      expect(predictSafeResp.error).toBeTruthy();
-      expect(predictSafeResp.data).toBeFalsy();
+
+      expect(predictSafeResp.ok).toEqual(false);
+      if (!predictSafeResp.ok) {
+        expect(predictSafeResp.error?.toString()).toMatch("Owner list must have at least one owner");
+      }
     });
 
     it("should fail if the threshold is lower than 0", async () => {
@@ -389,8 +407,11 @@ describe("SafeFactory", () => {
         client,
         wrapperUri
       );
-      expect(predictSafeResp.error).toBeTruthy();
-      expect(predictSafeResp.data).toBeFalsy();
+
+      expect(predictSafeResp.ok).toEqual(false);
+      if (!predictSafeResp.ok) {
+        expect(predictSafeResp.error?.toString()).toMatch("unsigned integer cannot be negative");
+      }
     });
 
     it("should fail if the threshold is higher than the threshold", async () => {
@@ -409,8 +430,11 @@ describe("SafeFactory", () => {
         client,
         wrapperUri
       );
-      expect(predictSafeResp.error).toBeTruthy();
-      expect(predictSafeResp.data).toBeFalsy();
+
+      expect(predictSafeResp.ok).toEqual(false);
+      if (!predictSafeResp.ok) {
+        expect(predictSafeResp.error?.toString()).toMatch("Threshold must be lower than or equal to owners length");
+      }
     });
 
     it("should fail if the saltNonce is lower than 0", async () => {
@@ -418,7 +442,7 @@ describe("SafeFactory", () => {
         {
           safeAccountConfig: {
             owners: owners,
-            threshold: 2,
+            threshold: 1,
           },
           safeDeploymentConfig: {
             saltNonce: "-2",
@@ -432,8 +456,11 @@ describe("SafeFactory", () => {
         client,
         wrapperUri
       );
-      expect(predictSafeResp.error).toBeTruthy();
-      expect(predictSafeResp.data).toBeFalsy();
+
+      expect(predictSafeResp.ok).toEqual(false);
+      if (!predictSafeResp.ok) {
+        expect(predictSafeResp.error?.toString()).toMatch("saltNonce must be greater than or equal to 0");
+      }
     });
 
     it("should predict a new Safe with saltNonce", async () => {
@@ -456,6 +483,11 @@ describe("SafeFactory", () => {
         client,
         wrapperUri
       );
+
+      if (!predictSafeResp.ok) throw predictSafeResp.error;
+      expect(predictSafeResp.value).not.toBeNull();
+      expect(predictSafeResp.value).toEqual("0x0e867d43af4cae8d5d0c65c5d8ad8177ec08519f");
+
       const deploySafeResp = await App.Factory_Module.deploySafe(
         {
           safeAccountConfig: {
@@ -474,13 +506,12 @@ describe("SafeFactory", () => {
         client,
         wrapperUri
       );
-      console.log("predictSafeResp", predictSafeResp);
-      console.log("deploySafeResp", deploySafeResp);
-      expect(predictSafeResp.error).toBeFalsy();
-      expect(predictSafeResp.data).toBeTruthy();
-      expect(predictSafeResp.data).toEqual(
-        deploySafeResp.data?.safeAddress.toLowerCase()
-      );
+
+      if (!deploySafeResp.ok) throw deploySafeResp.error;
+      expect(deploySafeResp.value).not.toBeNull();
+      expect(deploySafeResp.value?.safeAddress).toEqual("0x0e867d43af4cae8d5d0c65c5d8ad8177ec08519f");
+
+      expect(predictSafeResp.value).toEqual(deploySafeResp.value?.safeAddress);
     });
   });
 });

@@ -13,6 +13,7 @@ import {
   Args_isModuleEnabled,
 } from "./wrap";
 import { BigInt } from "@polywrap/wasm-as";
+import { JSON } from "assemblyscript-json";
 
 export function encode(args: Args_encode): string {
   return Ethereum_Module.encodeFunction({
@@ -71,7 +72,20 @@ export function getOwners(args: Args_getOwners): string[] {
     connection: args.connection,
   }).unwrap();
 
-  return resp.split(",")
+  const v = JSON.parse(resp);
+  if (!v.isArr) {
+    throw new Error("ethereum value is not array: " + v.stringify());
+  }
+  const arr = (v as JSON.Arr).valueOf();
+  const result: string[] = [];
+  for (let i = 0; i < arr.length; i++) {
+    let s = arr[i];
+    if (!s.isString) {
+      throw new Error("ethereum value element is not string: " + s.stringify());
+    }
+    result.push((s as JSON.Str).valueOf());
+  }
+  return result;
 }
 
 export function getThreshold(args: Args_getThreshold): u32 {
@@ -105,6 +119,7 @@ export function getModules(args: Args_getModules): string[] {
     args: ["0x0000000000000000000000000000000000000001", "0xa"],
     connection: args.connection
   }).unwrap();
+  // TODO; rewrite to json
   const comma = resp.lastIndexOf(",");
   const arr = resp.substring(0, comma);
   if (arr.includes(",")) {

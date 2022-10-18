@@ -1,4 +1,4 @@
-#import { Module } into SafeContracts from "wrap://ipfs/Qmf723nErXYFht5vaR4LVmFJfG8ssJip2iAGVVVYzX5qJL"
+#import { Module } into SafeContracts from "wrap://ipfs/QmUaomUYZp5b7rEuCtqB5Lbwozds8krvVZokqYpdTut8W7"
 #import { Module, Connection, TxOverrides, StaticTxResult, TxRequest, EventNotification, Network, TxReceipt, TxResponse, Log, Access } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
 #import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
 #import * into Datetime from "wrap://ens/datetime.polywrap.eth"
