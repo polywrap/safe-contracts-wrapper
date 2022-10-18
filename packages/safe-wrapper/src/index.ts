@@ -18,6 +18,7 @@ import {
   // Logger_Module,
   SafeTransaction,
 } from "./wrap";
+import { Box } from "@polywrap/wasm-as";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
@@ -245,26 +246,53 @@ export function encodeDisableModuleData(args: Args_encodeDisableModuleData, env:
 
 export function createTransaction(args: Args_createTransaction): SafeTransaction {
   // TODO: if args.tx.data is parsed as an array, create multisend tx
-  const standardizedTxs = {
-    to: args.tx.to,
-    data: args.tx.data,
-    value: args.tx.value ?? 0,
-    operation: args.tx.operation ?? 0, // 0 is Call, 1 is DelegateCall
-    signatures: args.tx.signatures
-    // TODO add txOverrides
-    // baseGas: args.tx.baseGas ?? 0,
-    // gasPrice: args.tx.gasPrice ?? 0,
-    // gasToken: args.tx.gasToken || ZERO_ADDRESS,
-    // refundReceiver: args.tx.refundReceiver || ZERO_ADDRESS,
-    // nonce: args.tx.nonce ?? (await safeContract.getNonce())
+
+  // let value: Box<u32> = args.tx.value != null ? args.tx.value : <u32>0;
+
+  // 0 is Call, 1 is DelegateCall
+  // let operation = args.tx.operation != null ? args.tx.operation : <u8>0;
+
+  if (args.tx.value == null) {
+    args.tx.value = "0";
   }
-  return standardizedTxs;
+  if (args.tx.operation == null) {
+    args.tx.operation = Box.from(<u8>0);
+  }
+  // tx.signatures = args.tx.signatures;
+  // TODO add txOverrides
+  // baseGas: args.tx.baseGas ?? 0,
+  // gasPrice: args.tx.gasPrice ?? 0,
+  // gasToken: args.tx.gasToken || ZERO_ADDRESS,
+  // refundReceiver: args.tx.refundReceiver || ZERO_ADDRESS,
+  // nonce: args.tx.nonce ?? (await safeContract.getNonce())
+
+  return args.tx;
 }
 
-export function addSignature(args: Args_addSignature): SafeTransaction {
-  const address = Ethereum_Module.getSignerAddress().unwrap();
-  const signature = Ethereum_Module.signMessage(args.tx.data).unwrap()
-  let tx_new = args.tx;
-  tx_new.signatures[address] = signature;
-  return tx_new;
+export function addSignature(args: Args_addSignature, env: Env): SafeTransaction {
+  const address = Ethereum_Module.getSignerAddress({
+    connection: {
+      node: env.connection.node,
+      networkNameOrChainId: env.connection.networkNameOrChainId,
+    },
+  }).unwrap();
+
+  const signature = Ethereum_Module.signMessage({
+    message: args.tx.data,
+    connection: {
+      node: env.connection.node,
+      networkNameOrChainId: env.connection.networkNameOrChainId,
+    },
+  }).unwrap()
+
+  let signatures = args.tx.signatures;
+  if (signatures == null) {
+    signatures = new Map<string, string>();
+  }
+  if (signatures != null) {
+    signatures.set(address, signature);
+  }
+  args.tx.signatures = signatures;
+
+  return args.tx;
 }

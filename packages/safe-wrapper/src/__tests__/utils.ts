@@ -23,16 +23,6 @@ export function getPlugins(
         },
       },
     ],
-    redirects: [
-      {
-        from: "wrap://ens/safe-contracts-wrapper.polywrap.eth",
-        to: "wrap://ipfs/QmUaomUYZp5b7rEuCtqB5Lbwozds8krvVZokqYpdTut8W7",
-      },
-      {
-        from: "wrap://ens/safe-factory-wrapper.eth",
-        to: "wrap://ipfs/QmNotdnQwE4frJ4Gqt46UyAphQoasHujH5D1DPpKENEPq5",
-      }
-    ],
     plugins: [
       {
         uri: "wrap://ens/ipfs.polywrap.eth",
@@ -44,7 +34,6 @@ export function getPlugins(
       },
       {
         uri: "wrap://ens/datetime.polywrap.eth",
-        //@ts-ignore
         plugin: dateTimePlugin({}),
       },
       {

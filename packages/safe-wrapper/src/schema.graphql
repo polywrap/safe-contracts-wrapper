@@ -10,7 +10,7 @@ type Env {
 type SafeTransaction {
     data: String!
     to: String!
-    value: UInt32
+    value: String!
     operation: UInt8
     signatures: Map @annotate(type: "Map<String!, String!>")
     # TODO: add txOverrides
@@ -33,6 +33,6 @@ type Module {
     encodeDisableModuleData(moduleAddress: String!): String! @env(required: true)
 
     """Transaction manager methods"""
-    createTransaction(tx: SafeTransactionData!): SafeTransaction!
-    addSignature(tx: SafeTransaction!): SafeTransaction!
+    createTransaction(tx: SafeTransaction!): SafeTransaction!
+    addSignature(tx: SafeTransaction!): SafeTransaction! @env(required: true)
 }
