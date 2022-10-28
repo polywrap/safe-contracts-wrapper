@@ -35,5 +35,5 @@ type Module {
     """Transaction manager methods"""
     createTransaction(tx: SafeTransaction!): SafeTransaction!
     addSignature(tx: SafeTransaction!): SafeTransaction! @env(required: true)
-    getTransactionHash(data: [String!]!): Ethereum_TxReceipt @env(required: true)
+    getTransactionHash(data: [String!]!): String @env(required: true)
 }

@@ -531,7 +531,7 @@ describe("Safe Wrapper", () => {
       /*       console.log("txHash", txHash);
       console.log("sdkSigned", sdkSigned); */
 
-      const resp = await wrapper.createTransaction(
+/*       const resp = await wrapper.createTransaction(
         {
           tx: {
             to: safe.address,
@@ -547,17 +547,17 @@ describe("Safe Wrapper", () => {
         },
         client,
         wrapperUri
-      );
+      ); */
 
       //@ts-ignore
-      const wrapperTransaction = resp.value as SafeWrapper_SafeTransaction;
+/*       const wrapperTransaction = resp.value as SafeWrapper_SafeTransaction;
       const signed = await wrapper.addSignature(
         { tx: wrapperTransaction },
         client,
         wrapperUri
-      );
+      ); */
 
-      console.log("signed", signed);
+      //console.log("signed", signed);
 
       /* const signed = await client.invoke({
         method: "signMessage",
@@ -578,6 +578,9 @@ describe("Safe Wrapper", () => {
         {
           data: [
             account1.address,
+            "10",
+            "0x",
+            "0",
             "0",
             "0",
             "0",

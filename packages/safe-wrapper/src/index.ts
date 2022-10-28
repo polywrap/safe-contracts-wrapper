@@ -322,13 +322,12 @@ export function createTransaction(
 export function getTransactionHash(
   args: Args_getTransactionHash,
   env: Env
-): Ethereum_TxReceipt {
-  const res = Ethereum_Module.callContractMethodAndWait({
+): string {
+  const res = Ethereum_Module.callContractView({
     address: env.safeAddress,
-    method: "function getTransactionHash(address receiver, uint256 safeTxGas, uint256 dataGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 _nonce) public returns (bytes32)",
+    method: "function getTransactionHash(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 _nonce) public view returns (bytes32)",
     args: args.data,
-    connection: env.connection,
-    txOverrides: null,
+    connection: env.connection
   }).unwrap();
 
   return res;
