@@ -21,6 +21,9 @@ import {
 } from "./wrap";
 import { Box } from "@polywrap/wasm-as";
 import { Args_getTransactionHash } from "./wrap/Module";
+import { arrayify, getTransactionHashArgs } from "./utils";
+import { Args_getHashSignature } from "./wrap/Module/serialization";
+import { crypto } from "@graphprotocol/graph-ts";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
@@ -323,11 +326,21 @@ export function getTransactionHash(
   args: Args_getTransactionHash,
   env: Env
 ): string {
+  if (!args.tx.nonce) {
+    args.tx.nonce = Ethereum_Module.getSignerTransactionCount({
+      connection: env.connection,
+      blockTag: null,
+    }).unwrap();
+  }
+
+  const contractArgs = getTransactionHashArgs(args.tx, args.tx.nonce!);
+
   const res = Ethereum_Module.callContractView({
     address: env.safeAddress,
-    method: "function getTransactionHash(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 _nonce) public view returns (bytes32)",
-    args: args.data,
-    connection: env.connection
+    method:
+      "function getTransactionHash(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 _nonce) public view returns (bytes32)",
+    args: contractArgs,
+    connection: env.connection,
   }).unwrap();
 
   return res;
@@ -343,9 +356,16 @@ export function addSignature(
       networkNameOrChainId: env.connection.networkNameOrChainId,
     },
   }).unwrap();
-  
+
+  const transactionHash = getTransactionHash({ tx: args.tx }, env);
+
+  //TODO should sign array, not string
+  // https://github.com/safe-global/safe-core-sdk/blob/cc2515c5a77bf611c8f1877f98fdb1510164f177/packages/safe-ethers-lib/src/EthersAdapter.ts#L169
+  // https://github.com/ethers-io/ethers.js/blob/01aea705ce60b1c42d2f465b162cb339a0e94392/packages/wallet/src.ts/index.ts#L129
+  // https://github.com/ethers-io/ethers.js/blob/01aea705ce60b1c42d2f465b162cb339a0e94392/packages/hash/src.ts/message.ts
+
   const signature = Ethereum_Module.signMessage({
-    message: args.tx.data,
+    message: arrayify(transactionHash).toString(),
     connection: {
       node: env.connection.node,
       networkNameOrChainId: env.connection.networkNameOrChainId,
@@ -362,4 +382,35 @@ export function addSignature(
   args.tx.signatures = signatures;
 
   return args.tx;
+}
+
+export function getHashSignature(
+  args: Args_getHashSignature,
+  env: Env
+): String {
+  /* const arr = arrayify(args.hash);
+
+   const messagePrefix = "\x19Ethereum Signed Message:\n";
+
+      String.UTF8.encode(messagePrefix);
+      String.UTF8.encode(String(arr.length));
+      Arra
+
+const concated = concat([
+  toUtf8Bytes(messagePrefix),
+  toUtf8Bytes(String(message.length)),
+  message
+])
+
+return crypto.keccak256(concated); */
+
+  const signature = Ethereum_Module.signMessage({
+    message: args.hash,
+    connection: {
+      node: env.connection.node,
+      networkNameOrChainId: env.connection.networkNameOrChainId,
+    },
+  }).unwrap();
+
+  return signature;
 }

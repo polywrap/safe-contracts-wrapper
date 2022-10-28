@@ -44,7 +44,6 @@ export async function getPlugins(
 ): Promise<Partial<ClientConfig>> {
   const network = await ethersProvider.getNetwork();
 
-  console.log("network", network);
   return {
     envs: [
       {

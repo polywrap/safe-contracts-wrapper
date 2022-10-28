@@ -237,36 +237,13 @@ describe("Safe Wrapper", () => {
       const [account1] = accounts;
       const safe = await getSafeWithOwners([account1.address]);
       const ethAdapter = await getEthAdapter(account1.signer);
+
       const safeSdk = await Safe.create({
         ethAdapter,
         safeAddress: safe.address,
         //@ts-ignore
         contractNetworks,
       });
-      const adapterChain = await ethAdapter.getChainId();
-      const adapterSigner = await ethAdapter.getSignerAddress();
-
-      console.log("adapterChain", adapterChain);
-      console.log("adapterSigner", adapterSigner);
-
-      const wrapperChain = await App.Ethereum_Module.getNetwork(
-        {
-          connection: connection,
-        },
-        client,
-        ethereumUri
-      );
-      const wrapperSigner = await App.Ethereum_Module.getSignerAddress(
-        {
-          connection: connection,
-        },
-        client,
-        ethereumUri
-      );
-
-      console.log("wrapperChain:", wrapperChain);
-      //@ts-ignore
-      console.log("wrapperSigner:", wrapperSigner.value);
 
       const nonce = await ethAdapter.getNonce(account1.address);
 
@@ -279,37 +256,45 @@ describe("Safe Wrapper", () => {
         },
       });
 
-      const txHash = await safeSdk.getTransactionHash(tx);
-      console.log("txHash:", txHash);
-
-      const sdkSigned = await safeSdk.signTransactionHash(txHash);
-
-      //console.log('safeSdk', chaindId)
-
- /*      const result = await App.SafeWrapper_Module.addSignature(
+      /* 
+       const result = await App.SafeWrapper_Module.addSignature(
         {
           tx: {
-            data: txHash,
+            data: tx.data.data,
             to: tx.data.to,
-            value: tx.data.value,
-            operation: null,
-            signatures: null,
+            value: tx.data.value
           },
         },
         client,
         wrapperUri
       );
 
-      console.log("wrapper result", result);
- */
-      const wrapperSigned = await App.Ethereum_Module.signMessage(
+      
+      console.log("wrapper result", result); */
+
+      const txHash = await safeSdk.getTransactionHash(tx);
+      console.log("txHash:", txHash);
+
+      const sdkSigned = await safeSdk.signTransactionHash(txHash);
+
+      const wrapperSigned = await App.SafeWrapper_Module.getHashSignature(
+        { hash: txHash },
+        client,
+        wrapperUri
+      );
+
+      //console.log('safeSdk', chaindId)
+
+      // Working example sdkSigned = wrapperSigned
+
+      /*  const wrapperSigned = await App.Ethereum_Module.signMessage(
         {
           //@ts-ignore
           message: ethers.utils.arrayify(txHash),
         },
         client,
         ethereumUri
-      );
+      ); */
 
       //@ts-ignore
       const signedHash = wrapperSigned.value;
