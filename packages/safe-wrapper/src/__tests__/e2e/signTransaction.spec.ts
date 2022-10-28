@@ -31,7 +31,6 @@ import { abi as multisendCallOnlyAbi } from "@gnosis.pm/safe-contracts_1.3.0/bui
 import { Client } from "@polywrap/core-js";
 //@ts-ignore
 import { bufferToHex, ecrecover, pubToAddress } from "ethereumjs-util";
-const SimpleKeyring = require("eth-simple-keyring");
 
 jest.setTimeout(1200000);
 
@@ -287,9 +286,26 @@ describe("Safe Wrapper", () => {
 
       //console.log('safeSdk', chaindId)
 
+ /*      const result = await App.SafeWrapper_Module.addSignature(
+        {
+          tx: {
+            data: txHash,
+            to: tx.data.to,
+            value: tx.data.value,
+            operation: null,
+            signatures: null,
+          },
+        },
+        client,
+        wrapperUri
+      );
+
+      console.log("wrapper result", result);
+ */
       const wrapperSigned = await App.Ethereum_Module.signMessage(
         {
-          message: txHash,
+          //@ts-ignore
+          message: ethers.utils.arrayify(txHash),
         },
         client,
         ethereumUri
@@ -307,21 +323,6 @@ describe("Safe Wrapper", () => {
         txHash,
         account1.address
       );
-
-      const keyring = new SimpleKeyring();
-
-      const decryptedMessage = await keyring.decryptMessage(
-        account1.address,
-        wrapperSigned
-      );
-
-      const decryptedMessage2 = await keyring.decryptMessage(
-        account1.address,
-        sdkSigned
-      );
-
-      console.log("decryptedMessage", decryptedMessage);
-      console.log("decryptedMessageSDK", decryptedMessage2);
 
       console.log("sdkSigned", sdkSigned);
       console.log("wrapperAdjustedSignature", wrapperAdjustedSignature);

@@ -31,7 +31,6 @@
   },
   "dependencies": {
     "@gnosis.pm/safe-ethers-lib": "^1.6.1",
-    "eth-simple-keyring": "^4.2.0",
     "ethers": "5.7.1",
     "polywrap-datetime-plugin": "npm:@fetsorn/polywrap-datetime-plugin@0.4.0"
   }
