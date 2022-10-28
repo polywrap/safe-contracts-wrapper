@@ -17,8 +17,10 @@ import {
   SafeContracts_Module,
   // Logger_Module,
   SafeTransaction,
+  Ethereum_TxReceipt,
 } from "./wrap";
 import { Box } from "@polywrap/wasm-as";
+import { Args_getTransactionHash } from "./wrap/Module";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
@@ -26,7 +28,7 @@ const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
 function sameString(str1: string, str2: string): bool {
   const s1 = str1.toLowerCase();
   const s2 = str2.toLowerCase();
-  return s1 == s2
+  return s1 == s2;
 }
 
 function findIndex(item: string, items: string[]): i32 {
@@ -39,35 +41,43 @@ function findIndex(item: string, items: string[]): i32 {
 }
 
 export function isZeroAddress(address: string): bool {
-  return sameString(address, ZERO_ADDRESS)
+  return sameString(address, ZERO_ADDRESS);
 }
 
 function isSentinelAddress(address: string): bool {
-  return sameString(address, SENTINEL_ADDRESS)
+  return sameString(address, SENTINEL_ADDRESS);
 }
 
 export function isRestrictedAddress(address: string): bool {
-  return isZeroAddress(address) || isSentinelAddress(address)
+  return isZeroAddress(address) || isSentinelAddress(address);
 }
 
 function validateOwnerAddress(ownerAddress: string): void {
-  const isValidAddress = Ethereum_Module.checkAddress({ address: ownerAddress });
+  const isValidAddress = Ethereum_Module.checkAddress({
+    address: ownerAddress,
+  });
   if (!isValidAddress || isRestrictedAddress(ownerAddress)) {
-    throw new Error('Invalid owner address provided')
+    throw new Error("Invalid owner address provided");
   }
 }
 
-function validateAddressIsNotOwner(ownerAddress: string, owners: string[]): void {
+function validateAddressIsNotOwner(
+  ownerAddress: string,
+  owners: string[]
+): void {
   const ownerIndex = findIndex(ownerAddress, owners);
   if (ownerIndex >= 0) {
-    throw new Error('Address provided is already an owner')
+    throw new Error("Address provided is already an owner");
   }
 }
 
-function validateAddressIsOwnerAndGetPrev(ownerAddress: string, owners: string[]): string {
+function validateAddressIsOwnerAndGetPrev(
+  ownerAddress: string,
+  owners: string[]
+): string {
   const ownerIndex = findIndex(ownerAddress, owners);
   if (ownerIndex < 0) {
-    throw new Error('Address provided is not an owner');
+    throw new Error("Address provided is not an owner");
   }
   if (ownerIndex == 0) {
     return SENTINEL_ADDRESS;
@@ -77,31 +87,39 @@ function validateAddressIsOwnerAndGetPrev(ownerAddress: string, owners: string[]
 
 function validateThreshold(threshold: number, numOwners: number): void {
   if (threshold <= 0) {
-    throw new Error('Threshold needs to be greater than 0')
+    throw new Error("Threshold needs to be greater than 0");
   }
   if (threshold > numOwners) {
-    throw new Error('Threshold cannot exceed owner count')
+    throw new Error("Threshold cannot exceed owner count");
   }
 }
 
 function validateModuleAddress(moduleAddress: string): void {
-  const isValidAddress = Ethereum_Module.checkAddress({ address: moduleAddress });
+  const isValidAddress = Ethereum_Module.checkAddress({
+    address: moduleAddress,
+  });
   if (!isValidAddress.unwrap() || isRestrictedAddress(moduleAddress)) {
-    throw new Error('Invalid module address provided')
+    throw new Error("Invalid module address provided");
   }
 }
 
-function validateModuleIsNotEnabled(moduleAddress: string, modules: string[]): void {
+function validateModuleIsNotEnabled(
+  moduleAddress: string,
+  modules: string[]
+): void {
   const moduleIndex = findIndex(moduleAddress, modules);
   if (moduleIndex >= 0) {
-    throw new Error('Module provided is already enabled')
+    throw new Error("Module provided is already enabled");
   }
 }
 
-function validateModuleIsEnabledAndGetPrev(moduleAddress: string, modules: string[]): string {
+function validateModuleIsEnabledAndGetPrev(
+  moduleAddress: string,
+  modules: string[]
+): string {
   const moduleIndex = findIndex(moduleAddress, modules);
   if (moduleIndex < 0) {
-    throw new Error('Module provided is not enabled yet')
+    throw new Error("Module provided is not enabled yet");
   }
   if (moduleIndex == 0) {
     return SENTINEL_ADDRESS;
@@ -143,7 +161,10 @@ export function isOwner(args: Args_isOwner, env: Env): bool {
   return result.unwrap();
 }
 
-export function encodeAddOwnerWithThresholdData(args: Args_encodeAddOwnerWithThresholdData, env: Env): string {
+export function encodeAddOwnerWithThresholdData(
+  args: Args_encodeAddOwnerWithThresholdData,
+  env: Env
+): string {
   validateOwnerAddress(args.ownerAddress);
   const owners = getOwners({}, env);
   validateAddressIsNotOwner(args.ownerAddress, owners);
@@ -155,16 +176,23 @@ export function encodeAddOwnerWithThresholdData(args: Args_encodeAddOwnerWithThr
   }
   validateThreshold(threshold, owners.length + 1);
   const result = Ethereum_Module.encodeFunction({
-    method: "function addOwnerWithThreshold(address owner, uint256 _threshold) public",
+    method:
+      "function addOwnerWithThreshold(address owner, uint256 _threshold) public",
     args: [args.ownerAddress, threshold.toString(16)],
   });
   return result.unwrap();
 }
 
-export function encodeRemoveOwnerData(args: Args_encodeRemoveOwnerData, env: Env): string {
+export function encodeRemoveOwnerData(
+  args: Args_encodeRemoveOwnerData,
+  env: Env
+): string {
   validateOwnerAddress(args.ownerAddress);
   const owners = getOwners({}, env);
-  const prevOwnerAddress = validateAddressIsOwnerAndGetPrev(args.ownerAddress, owners);
+  const prevOwnerAddress = validateAddressIsOwnerAndGetPrev(
+    args.ownerAddress,
+    owners
+  );
   let threshold: u32 = 0;
   if (args.threshold !== null) {
     threshold = args.threshold!.unwrap();
@@ -173,27 +201,38 @@ export function encodeRemoveOwnerData(args: Args_encodeRemoveOwnerData, env: Env
   }
   validateThreshold(threshold, owners.length - 1);
   const result = Ethereum_Module.encodeFunction({
-    method: "function removeOwner(address prevOwner, address owner, uint256 _threshold) public",
+    method:
+      "function removeOwner(address prevOwner, address owner, uint256 _threshold) public",
     args: [prevOwnerAddress, args.ownerAddress, threshold.toString(16)],
   });
   return result.unwrap();
 }
 
-export function encodeSwapOwnerData(args: Args_encodeSwapOwnerData, env: Env): string {
+export function encodeSwapOwnerData(
+  args: Args_encodeSwapOwnerData,
+  env: Env
+): string {
   validateOwnerAddress(args.oldOwnerAddress);
   validateOwnerAddress(args.newOwnerAddress);
   const owners = getOwners({}, env);
-  validateAddressIsNotOwner(args.newOwnerAddress, owners)
-  const prevOwnerAddress = validateAddressIsOwnerAndGetPrev(args.oldOwnerAddress, owners);
+  validateAddressIsNotOwner(args.newOwnerAddress, owners);
+  const prevOwnerAddress = validateAddressIsOwnerAndGetPrev(
+    args.oldOwnerAddress,
+    owners
+  );
   const result = Ethereum_Module.encodeFunction({
-    method: "function swapOwner(address prevOwner, address oldOwner, address newOwner) public",
+    method:
+      "function swapOwner(address prevOwner, address oldOwner, address newOwner) public",
     args: [prevOwnerAddress, args.oldOwnerAddress, args.newOwnerAddress],
   });
   return result.unwrap();
 }
 
-export function encodeChangeThresholdData(args: Args_encodeChangeThresholdData, env: Env): string {
-  validateThreshold(args.threshold, getOwners({}, env).length)
+export function encodeChangeThresholdData(
+  args: Args_encodeChangeThresholdData,
+  env: Env
+): string {
+  validateThreshold(args.threshold, getOwners({}, env).length);
   const result = Ethereum_Module.encodeFunction({
     method: "function changeThreshold(uint256 _threshold) public",
     args: [args.threshold.toString(16)],
@@ -224,7 +263,10 @@ export function isModuleEnabled(args: Args_isModuleEnabled, env: Env): bool {
   return result.unwrap();
 }
 
-export function encodeEnableModuleData(args: Args_encodeEnableModuleData, env: Env): string {
+export function encodeEnableModuleData(
+  args: Args_encodeEnableModuleData,
+  env: Env
+): string {
   validateModuleAddress(args.moduleAddress);
   validateModuleIsNotEnabled(args.moduleAddress, getModules({}, env));
   const result = Ethereum_Module.encodeFunction({
@@ -234,9 +276,15 @@ export function encodeEnableModuleData(args: Args_encodeEnableModuleData, env: E
   return result.unwrap();
 }
 
-export function encodeDisableModuleData(args: Args_encodeDisableModuleData, env: Env): string {
+export function encodeDisableModuleData(
+  args: Args_encodeDisableModuleData,
+  env: Env
+): string {
   validateModuleAddress(args.moduleAddress);
-  const prevModuleAddress = validateModuleIsEnabledAndGetPrev(args.moduleAddress, getModules({}, env));
+  const prevModuleAddress = validateModuleIsEnabledAndGetPrev(
+    args.moduleAddress,
+    getModules({}, env)
+  );
   const result = Ethereum_Module.encodeFunction({
     method: "function disableModule(address prevModule, address module) public",
     args: [prevModuleAddress, args.moduleAddress],
@@ -244,7 +292,9 @@ export function encodeDisableModuleData(args: Args_encodeDisableModuleData, env:
   return result.unwrap();
 }
 
-export function createTransaction(args: Args_createTransaction): SafeTransaction {
+export function createTransaction(
+  args: Args_createTransaction
+): SafeTransaction {
   // TODO: if args.tx.data is parsed as an array, create multisend tx
 
   // let value: Box<u32> = args.tx.value != null ? args.tx.value : <u32>0;
@@ -269,7 +319,25 @@ export function createTransaction(args: Args_createTransaction): SafeTransaction
   return args.tx;
 }
 
-export function addSignature(args: Args_addSignature, env: Env): SafeTransaction {
+export function getTransactionHash(
+  args: Args_getTransactionHash,
+  env: Env
+): Ethereum_TxReceipt {
+  const res = Ethereum_Module.callContractMethodAndWait({
+    address: env.safeAddress,
+    method: "function getTransactionHash(address receiver, uint256 safeTxGas, uint256 dataGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 _nonce) public returns (bytes32)",
+    args: args.data,
+    connection: env.connection,
+    txOverrides: null,
+  }).unwrap();
+
+  return res;
+}
+
+export function addSignature(
+  args: Args_addSignature,
+  env: Env
+): SafeTransaction {
   const address = Ethereum_Module.getSignerAddress({
     connection: {
       node: env.connection.node,
@@ -283,7 +351,7 @@ export function addSignature(args: Args_addSignature, env: Env): SafeTransaction
       node: env.connection.node,
       networkNameOrChainId: env.connection.networkNameOrChainId,
     },
-  }).unwrap()
+  }).unwrap();
 
   let signatures = args.tx.signatures;
   if (signatures == null) {

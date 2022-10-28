@@ -8,24 +8,27 @@ import {
 } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
 import { getPlugins } from "../utils";
-import Safe, { ContractNetworksConfig } from '@gnosis.pm/safe-core-sdk'
-import { SafeTransactionDataPartial, EthAdapter } from '@gnosis.pm/safe-core-sdk-types'
-import EthersAdapter, { EthersAdapterConfig } from '@gnosis.pm/safe-ethers-lib';
-import { ethers, Wallet } from 'ethers';
-import { Signer } from '@ethersproject/abstract-signer'
-import { AddressZero } from '@ethersproject/constants'
+import Safe, { ContractNetworksConfig } from "@gnosis.pm/safe-core-sdk";
+import {
+  SafeTransactionDataPartial,
+  EthAdapter,
+} from "@gnosis.pm/safe-core-sdk-types";
+import EthersAdapter, { EthersAdapterConfig } from "@gnosis.pm/safe-ethers-lib";
+import { ethers, Wallet } from "ethers";
+import { Signer } from "@ethersproject/abstract-signer";
+import { AddressZero } from "@ethersproject/constants";
 import {
   Gnosis_safe as GnosisSafe_V1_1_1,
   // Multi_send as MultiSend_V1_1_1,
   // Proxy_factory as ProxyFactory_V1_1_1
-} from '@gnosis.pm/safe-ethers-lib/dist/typechain/src/ethers-v5/v1.1.1'
-import { Gnosis_safe as GnosisSafe_V1_2_0 } from '@gnosis.pm/safe-ethers-lib/dist/typechain/src/ethers-v5/v1.2.0/'
+} from "@gnosis.pm/safe-ethers-lib/dist/typechain/src/ethers-v5/v1.1.1";
+import { Gnosis_safe as GnosisSafe_V1_2_0 } from "@gnosis.pm/safe-ethers-lib/dist/typechain/src/ethers-v5/v1.2.0/";
 import {
   Gnosis_safe as GnosisSafe_V1_3_0,
   // Multi_send as MultiSend_V1_3_0,
   // Multi_send_call_only as MultiSendCallOnly_V1_3_0,
   // Proxy_factory as ProxyFactory_V1_3_0
-} from '@gnosis.pm/safe-ethers-lib/dist/typechain/src/ethers-v5/v1.3.0/'
+} from "@gnosis.pm/safe-ethers-lib/dist/typechain/src/ethers-v5/v1.3.0/";
 
 import {
   abi as factoryAbi_1_3_0,
@@ -46,6 +49,8 @@ import {
   abi as multisendCallOnlyAbi,
   bytecode as multisendCallOnlyBytecode,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/libraries/MultiSendCallOnly.sol/MultiSendCallOnly.json";
+import { SafeWrapper_SafeTransaction } from "../types/wrap";
+import { Client } from "@polywrap/core-js";
 
 jest.setTimeout(1200000);
 describe("Safe Wrapper", () => {
@@ -63,7 +68,7 @@ describe("Safe Wrapper", () => {
   const ethereumUri = "ens/ethereum.polywrap.eth";
   let safeAddress: string;
 
-  let client: PolywrapClient;
+  let client: Client;
   const wrapperPath: string = path.join(
     path.resolve(__dirname),
     "..",
@@ -96,7 +101,7 @@ describe("Safe Wrapper", () => {
       connection.networkNameOrChainId
     );
 
-    client = new PolywrapClient(plugins);
+    client = new PolywrapClient(plugins) as unknown as Client;
 
     const proxyFactoryContractResponse_v130 =
       await App.Ethereum_Module.deployContract(
@@ -109,7 +114,8 @@ describe("Safe Wrapper", () => {
         ethereumUri
       );
 
-    if (!proxyFactoryContractResponse_v130.ok) throw proxyFactoryContractResponse_v130.error;
+    if (!proxyFactoryContractResponse_v130.ok)
+      throw proxyFactoryContractResponse_v130.error;
     proxyContractAddress_v130 =
       proxyFactoryContractResponse_v130.value as string;
 
@@ -124,7 +130,8 @@ describe("Safe Wrapper", () => {
         ethereumUri
       );
 
-    if (!safeFactoryContractResponse_v130.ok) throw safeFactoryContractResponse_v130.error;
+    if (!safeFactoryContractResponse_v130.ok)
+      throw safeFactoryContractResponse_v130.error;
     safeContractAddress_v130 = safeFactoryContractResponse_v130.value as string;
 
     const safeResponse = await factory.deploySafe(
@@ -146,44 +153,44 @@ describe("Safe Wrapper", () => {
     if (!safeResponse.ok) throw safeResponse.error;
     safeAddress = safeResponse.value!.safeAddress;
 
-    const multisendResponse =
-      await App.Ethereum_Module.deployContract(
-        {
-          abi: JSON.stringify(multisendAbi),
-          bytecode: multisendBytecode,
-          args: null,
-        },
-        client,
-        ethereumUri
-      );
+    const multisendResponse = await App.Ethereum_Module.deployContract(
+      {
+        abi: JSON.stringify(multisendAbi),
+        bytecode: multisendBytecode,
+        args: null,
+      },
+      client,
+      ethereumUri
+    );
 
     if (!multisendResponse.ok) throw multisendResponse.error;
     multisendAddress = multisendResponse.value as string;
 
-    const multisendCallOnlyResponse =
-      await App.Ethereum_Module.deployContract(
-        {
-          abi: JSON.stringify(multisendCallOnlyAbi),
-          bytecode: multisendCallOnlyBytecode,
-          args: null,
-        },
-        client,
-        ethereumUri
-      );
+    const multisendCallOnlyResponse = await App.Ethereum_Module.deployContract(
+      {
+        abi: JSON.stringify(multisendCallOnlyAbi),
+        bytecode: multisendCallOnlyBytecode,
+        args: null,
+      },
+      client,
+      ethereumUri
+    );
 
     if (!multisendCallOnlyResponse.ok) throw multisendCallOnlyResponse.error;
     multisendCallOnlyAddress = multisendCallOnlyResponse.value as string;
 
     client = new PolywrapClient({
       ...plugins,
-      envs: [{
-        uri: wrapperUri,
-        env: {
-          safeAddress: safeAddress,
-          connection: connection,
-        }
-      }]
-    })
+      envs: [
+        {
+          uri: wrapperUri,
+          env: {
+            safeAddress: safeAddress,
+            connection: connection,
+          },
+        },
+      ],
+    }) as unknown as Client;
   });
 
   afterAll(async () => {
@@ -195,7 +202,9 @@ describe("Safe Wrapper", () => {
       const resp = await wrapper.getOwners({}, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
-      expect(resp.value!.map((a: any) => a.toLowerCase())).toEqual(owners.map(a => a.toLowerCase()));
+      expect(resp.value!.map((a: any) => a.toLowerCase())).toEqual(
+        owners.map((a) => a.toLowerCase())
+      );
     });
 
     it("getThreshold", async () => {
@@ -206,43 +215,69 @@ describe("Safe Wrapper", () => {
     });
 
     it("isOwner", async () => {
-      const resp = await wrapper.isOwner({ ownerAddress: owners[0] }, client, wrapperUri);
+      const resp = await wrapper.isOwner(
+        { ownerAddress: owners[0] },
+        client,
+        wrapperUri
+      );
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).toEqual(true);
     });
 
     it("encodeAddOwnerWithThresholdData", async () => {
-      const resp = await wrapper.encodeAddOwnerWithThresholdData({ ownerAddress: someAddr }, client, wrapperUri);
+      const resp = await wrapper.encodeAddOwnerWithThresholdData(
+        { ownerAddress: someAddr },
+        client,
+        wrapperUri
+      );
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
     });
 
     it("encodeRemoveOwnerData", async () => {
-      const resp = await wrapper.encodeRemoveOwnerData({ ownerAddress: owners[0] }, client, wrapperUri);
+      const resp = await wrapper.encodeRemoveOwnerData(
+        { ownerAddress: owners[0] },
+        client,
+        wrapperUri
+      );
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
     });
 
     it("encodeSwapOwnerData", async () => {
-      const resp = await wrapper.encodeSwapOwnerData({ oldOwnerAddress: owners[0], newOwnerAddress: someAddr }, client, wrapperUri);
+      const resp = await wrapper.encodeSwapOwnerData(
+        { oldOwnerAddress: owners[0], newOwnerAddress: someAddr },
+        client,
+        wrapperUri
+      );
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
     });
 
     it("encodeSwapOwnerData fails", async () => {
-      const resp = await wrapper.encodeSwapOwnerData({ oldOwnerAddress: owners[0], newOwnerAddress: owners[1] }, client, wrapperUri);
+      const resp = await wrapper.encodeSwapOwnerData(
+        { oldOwnerAddress: owners[0], newOwnerAddress: owners[1] },
+        client,
+        wrapperUri
+      );
 
       if (!resp.ok) {
-        expect(resp.error?.toString()).toMatch("Address provided is already an owner");
+        expect(resp.error?.toString()).toMatch(
+          "Address provided is already an owner"
+        );
       }
     });
 
     it("encodeChangeThresholdData", async () => {
-      const resp = await wrapper.encodeChangeThresholdData({ threshold: 2 }, client, wrapperUri);
+      const resp = await wrapper.encodeChangeThresholdData(
+        { threshold: 2 },
+        client,
+        wrapperUri
+      );
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
@@ -259,7 +294,11 @@ describe("Safe Wrapper", () => {
     });
 
     it("isModuleEnabled", async () => {
-      const resp = await wrapper.isModuleEnabled({ moduleAddress: someAddr }, client, wrapperUri);
+      const resp = await wrapper.isModuleEnabled(
+        { moduleAddress: someAddr },
+        client,
+        wrapperUri
+      );
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
@@ -267,28 +306,40 @@ describe("Safe Wrapper", () => {
     });
 
     it("encodeEnableModuleData", async () => {
-      const resp = await wrapper.encodeEnableModuleData({ moduleAddress: someAddr }, client, wrapperUri);
+      const resp = await wrapper.encodeEnableModuleData(
+        { moduleAddress: someAddr },
+        client,
+        wrapperUri
+      );
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
     });
 
     it("encodeDisableModuleData", async () => {
-      const resp = await wrapper.encodeDisableModuleData({ moduleAddress: someAddr }, client, wrapperUri);
+      const resp = await wrapper.encodeDisableModuleData(
+        { moduleAddress: someAddr },
+        client,
+        wrapperUri
+      );
       if (!resp.ok) {
-        expect(resp.error?.toString()).toMatch("Module provided is not enabled yet");
+        expect(resp.error?.toString()).toMatch(
+          "Module provided is not enabled yet"
+        );
       }
     });
   });
 
-  describe.only('createTransaction', () => {
+  describe("createTransaction", () => {
     const safeVersionDeployed = "1.3.0";
 
     const setupTests = async () => ({
-      accounts: [{
-        signer: wallet,
-        address: signer
-      }],
+      accounts: [
+        {
+          signer: wallet,
+          address: signer,
+        },
+      ],
       contractNetworks: {
         1337: {
           multiSendAddress: multisendAddress,
@@ -298,70 +349,192 @@ describe("Safe Wrapper", () => {
           safeMasterCopyAddress: safeContractAddress_v130,
           safeMasterCopyAbi: safeAbi_1_3_0,
           safeProxyFactoryAddress: proxyContractAddress_v130,
-          safeProxyFactoryAbi: factoryAbi_1_3_0
-        }
-      }
-    })
+          safeProxyFactoryAbi: factoryAbi_1_3_0,
+        },
+      },
+    });
 
     const getSafeWithOwners = async (
       owners: string[],
       threshold?: number
     ): Promise<GnosisSafe_V1_3_0 | GnosisSafe_V1_2_0 | GnosisSafe_V1_1_1> => {
-      const safe = new ethers.ContractFactory(safeAbi_1_3_0, safeBytecode_1_3_0)
+      const safe = new ethers.ContractFactory(
+        safeAbi_1_3_0,
+        safeBytecode_1_3_0
+      );
       const template = safe.attach(safeContractAddress_v130);
-      return template as GnosisSafe_V1_3_0 | GnosisSafe_V1_2_0 | GnosisSafe_V1_1_1
-    }
+      return template as
+        | GnosisSafe_V1_3_0
+        | GnosisSafe_V1_2_0
+        | GnosisSafe_V1_1_1;
+    };
 
     const getEthAdapter = async (signer: Signer): Promise<EthAdapter> => {
-      let ethAdapter: EthAdapter
-      signer = signer.connect(new ethers.providers.JsonRpcProvider(providers.ethereum))
-      const ethersAdapterConfig: EthersAdapterConfig = { ethers, signer }
-      ethAdapter = new EthersAdapter(ethersAdapterConfig)
-      return ethAdapter
-    }
+      let ethAdapter: EthAdapter;
+      signer = signer.connect(
+        new ethers.providers.JsonRpcProvider(providers.ethereum)
+      );
+      const ethersAdapterConfig: EthersAdapterConfig = { ethers, signer };
+      ethAdapter = new EthersAdapter(ethersAdapterConfig);
+      return ethAdapter;
+    };
 
-    it('should create a single transaction with gasPrice=0', async () => {
-      const { accounts, contractNetworks } = await setupTests()
-      const [account1] = accounts
-      const safe = await getSafeWithOwners([account1.address])
-      const ethAdapter = await getEthAdapter(account1.signer)
+    it("should create a single transaction with gasPrice=0", async () => {
+      const { accounts, contractNetworks } = await setupTests();
+      const [account1] = accounts;
+      const safe = await getSafeWithOwners([account1.address]);
+      const ethAdapter = await getEthAdapter(account1.signer);
       const safeSdk = await Safe.create({
         ethAdapter,
         safeAddress: safe.address,
-        contractNetworks
-      })
+        contractNetworks,
+      });
       const safeTransactionData: SafeTransactionDataPartial = {
         to: account1.address,
-        value: '500000000000000000', // 0.5 ETH
-        data: '0x',
+        value: "500000000000000000", // 0.5 ETH
+        data: "0x",
         baseGas: 111,
         gasPrice: 0,
-        gasToken: '0x333',
-        refundReceiver: '0x444',
+        gasToken: "0x333",
+        refundReceiver: "0x444",
         nonce: 555,
-        safeTxGas: 666
-      }
-      const tx = await safeSdk.createTransaction({ safeTransactionData })
-      expect(tx.data.to).toEqual(account1.address)
-      expect(tx.data.value).toEqual('500000000000000000')
-      expect(tx.data.data).toEqual('0x')
-      expect(tx.data.baseGas).toEqual(111)
-      expect(tx.data.gasPrice).toEqual(0)
-      expect(tx.data.gasToken).toEqual('0x333')
-      expect(tx.data.refundReceiver).toEqual('0x444')
-      expect(tx.data.nonce).toEqual(555)
-      expect(tx.data.safeTxGas).toEqual(safeVersionDeployed >= '1.3.0' ? 0 : 666)
-    })
+        safeTxGas: 666,
+      };
+      const tx = await safeSdk.createTransaction({ safeTransactionData });
+      expect(tx.data.to).toEqual(account1.address);
+      expect(tx.data.value).toEqual("500000000000000000");
+      expect(tx.data.data).toEqual("0x");
+      expect(tx.data.baseGas).toEqual(111);
+      expect(tx.data.gasPrice).toEqual(0);
+      expect(tx.data.gasToken).toEqual("0x333");
+      expect(tx.data.refundReceiver).toEqual("0x444");
+      expect(tx.data.nonce).toEqual(555);
+      expect(tx.data.safeTxGas).toEqual(
+        safeVersionDeployed >= "1.3.0" ? 0 : 666
+      );
+    });
 
-    it('should create a single transaction with gasPrice=0', async () => {
-      const { accounts } = await setupTests()
+    it("should create a single transaction with gasPrice=0", async () => {
+      const { accounts } = await setupTests();
       const [account1] = accounts;
       const resp = await wrapper.createTransaction(
         {
           tx: {
             to: account1.address,
             value: "500000000000000000", // 0.5 ETH
-            data: '0x',
+            data: "0x",
+            // baseGas: 111,
+            // gasPrice: 0,
+            // gasToken: '0x333',
+            // refundReceiver: '0x444',
+            // nonce: 555,
+            // safeTxGas: 666
+          },
+        },
+        client,
+        wrapperUri
+      );
+
+      if (!resp.ok) throw resp.error;
+      expect(resp.value).not.toBeNull();
+      const tx = resp.value;
+
+      expect(tx.to).toEqual(account1.address);
+      expect(tx.value).toEqual("500000000000000000");
+      expect(tx.data).toEqual("0x");
+      // expect(tx.data.baseGas).toEqual(111)
+      // expect(tx.data.gasPrice).toEqual(0)
+      // expect(tx.data.gasToken).toEqual('0x333')
+      // expect(tx.data.refundReceiver).toEqual('0x444')
+      // expect(tx.data.nonce).toEqual(555)
+      // expect(tx.data.safeTxGas).toEqual(safeVersionDeployed >= '1.3.0' ? 0 : 666)
+    });
+  });
+
+  describe.only("SignTransaction", () => {
+    const safeVersionDeployed = "1.3.0";
+
+    const setupTests = async () => ({
+      accounts: [
+        {
+          signer: wallet,
+          address: signer,
+        },
+      ],
+      contractNetworks: {
+        1337: {
+          multiSendAddress: multisendAddress,
+          multiSendAbi: multisendAbi,
+          multiSendCallOnlyAddress: multisendCallOnlyAddress,
+          multiSendCallOnlyAbi: multisendCallOnlyAbi,
+          safeMasterCopyAddress: safeContractAddress_v130,
+          safeMasterCopyAbi: safeAbi_1_3_0,
+          safeProxyFactoryAddress: proxyContractAddress_v130,
+          safeProxyFactoryAbi: factoryAbi_1_3_0,
+        },
+      },
+    });
+
+    const getSafeWithOwners = async (
+      owners: string[],
+      threshold?: number
+    ): Promise<GnosisSafe_V1_3_0 | GnosisSafe_V1_2_0 | GnosisSafe_V1_1_1> => {
+      const safe = new ethers.ContractFactory(
+        safeAbi_1_3_0,
+        safeBytecode_1_3_0
+      );
+      const template = safe.attach(safeContractAddress_v130);
+      return template as
+        | GnosisSafe_V1_3_0
+        | GnosisSafe_V1_2_0
+        | GnosisSafe_V1_1_1;
+    };
+
+    const getEthAdapter = async (signer: Signer): Promise<EthAdapter> => {
+      let ethAdapter: EthAdapter;
+      signer = signer.connect(
+        new ethers.providers.JsonRpcProvider(providers.ethereum)
+      );
+      const ethersAdapterConfig: EthersAdapterConfig = { ethers, signer };
+      ethAdapter = new EthersAdapter(ethersAdapterConfig);
+      return ethAdapter;
+    };
+
+    it("should sign transaction transaction with gasPrice=0", async () => {
+      const { accounts, contractNetworks } = await setupTests();
+      const [account1] = accounts;
+      const safe = await getSafeWithOwners([account1.address]);
+      const ethAdapter = await getEthAdapter(account1.signer);
+      const safeSdk = await Safe.create({
+        ethAdapter,
+        safeAddress: safe.address,
+        contractNetworks,
+      });
+      const safeTransactionData: SafeTransactionDataPartial = {
+        to: safe.address,
+        value: "50000000000", // 0.5 ETH
+        data: "0x",
+        //baseGas: 111,
+        //gasPrice: 0,
+        //gasToken: '0x333',
+        //refundReceiver: '0x444',operation:0,
+        //nonce: 556,
+        //safeTxGas: 666
+      };
+      //const tx = await safeSdk.createTransaction({ safeTransactionData });
+      //const txHash = await safeSdk.getTransactionHash(tx);
+      //const manualTxhash = await safe.getTransactionHash(account1.address, "23", "0x", '0', '0', '111','0','0x333', '0x444','557');
+      //const sdkSigned = await safeSdk.signTransactionHash(txHash);
+      //console.log("manualTxhash", manualTxhash);
+      /*       console.log("txHash", txHash);
+      console.log("sdkSigned", sdkSigned); */
+
+              const resp = await wrapper.createTransaction(
+        {
+          tx: {
+            to: safe.address,
+            value: "50000000000", // 0.5 ETH
+            data: '0xf28e37966b33682cb8c78e9e15d914f329381581fa6540db7cf00bb4ef0d01052e12a7be2b87712c8cd52c9a1596f98599f98a11c8afd3dde7d5f261cba2d32720',
             // baseGas: 111,
             // gasPrice: 0,
             // gasToken: '0x333',
@@ -373,20 +546,46 @@ describe("Safe Wrapper", () => {
         client,
         wrapperUri);
 
-      if (!resp.ok) throw resp.error;
-      expect(resp.value).not.toBeNull();
-      const tx = resp.value;
+        //@ts-ignore
+        const wrapperTransaction = resp.value as SafeWrapper_SafeTransaction
+        const signed = await wrapper.addSignature({tx:wrapperTransaction},client, wrapperUri)
+         console.log('signed', signed)
+      /*       const signer = await App.Ethereum_Module.getSignerAddress(
+        { connection: connection },
+        client,
+        "wrap://ens/ethereum.polywrap.eth"
+      );
+      console.log("Signer", signer); */
+      /*       const signed = await client.invoke({
+        method: "signMessage",
+        uri: "wrap://ens/ethereum.polywrap.eth",
+        args: { message: txHash, connection: connection },
+      }); */
+      /*       const signed = await App.Ethereum_Module.signMessage(
+        { message: txHash, connection: connection },
+        client,
+        "wrap://ens/ethereum.polywrap.eth"
+      ); */
+      //console.log("wrapper Signed", signed);
 
-      expect(tx.to).toEqual(account1.address)
-      expect(tx.value).toEqual("500000000000000000")
-      expect(tx.data).toEqual('0x')
-      // expect(tx.data.baseGas).toEqual(111)
-      // expect(tx.data.gasPrice).toEqual(0)
-      // expect(tx.data.gasToken).toEqual('0x333')
-      // expect(tx.data.refundReceiver).toEqual('0x444')
-      // expect(tx.data.nonce).toEqual(555)
-      // expect(tx.data.safeTxGas).toEqual(safeVersionDeployed >= '1.3.0' ? 0 : 666)
-    })
-  })
+      const ZERO_ADDRESS = `0x${"0".repeat(40)}`;
 
+      const hash = await wrapper.getTransactionHash(
+        {
+          data: [
+            account1.address,
+            "0",
+            "0",
+            "0",
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "557",
+          ],
+        },
+        client,
+        wrapperUri
+      );
+      console.log("hash", hash);
+    });
+  });
 });

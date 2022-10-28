@@ -51,7 +51,7 @@ export function getPlugins(
           connections: new Connections({
             networks: {
               [network]: new Connection({
-                provider: `https://${network}.infura.io/v3/9d16956e670e4429b9fc821128eb259c`, // ethereum,
+                provider: network, // ethereum,
                 signer: new Wallet(
                   "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
                 ),

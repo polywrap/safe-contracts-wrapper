@@ -1,5 +1,5 @@
 #import { Module } into SafeContracts from "wrap://ipfs/QmUaomUYZp5b7rEuCtqB5Lbwozds8krvVZokqYpdTut8W7"
-#import { Module, Connection, TxOverrides } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
+#import { Module, Connection, TxOverrides, TxReceipt } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
 #import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
 
 type Env {
@@ -35,4 +35,5 @@ type Module {
     """Transaction manager methods"""
     createTransaction(tx: SafeTransaction!): SafeTransaction!
     addSignature(tx: SafeTransaction!): SafeTransaction! @env(required: true)
+    getTransactionHash(data: [String!]!): Ethereum_TxReceipt @env(required: true)
 }
