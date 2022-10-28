@@ -343,7 +343,7 @@ export function addSignature(
       networkNameOrChainId: env.connection.networkNameOrChainId,
     },
   }).unwrap();
-
+  
   const signature = Ethereum_Module.signMessage({
     message: args.tx.data,
     connection: {
