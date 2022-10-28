@@ -523,45 +523,49 @@ describe("Safe Wrapper", () => {
       };
       //const tx = await safeSdk.createTransaction({ safeTransactionData });
       //const txHash = await safeSdk.getTransactionHash(tx);
+
       //const manualTxhash = await safe.getTransactionHash(account1.address, "23", "0x", '0', '0', '111','0','0x333', '0x444','557');
+
       //const sdkSigned = await safeSdk.signTransactionHash(txHash);
       //console.log("manualTxhash", manualTxhash);
       /*       console.log("txHash", txHash);
       console.log("sdkSigned", sdkSigned); */
 
-              const resp = await wrapper.createTransaction(
+      const resp = await wrapper.createTransaction(
         {
           tx: {
             to: safe.address,
             value: "50000000000", // 0.5 ETH
-            data: '0xf28e37966b33682cb8c78e9e15d914f329381581fa6540db7cf00bb4ef0d01052e12a7be2b87712c8cd52c9a1596f98599f98a11c8afd3dde7d5f261cba2d32720',
+            data: "0xf28e37966b33682cb8c78e9e15d914f329381581fa6540db7cf00bb4ef0d01052e12a7be2b87712c8cd52c9a1596f98599f98a11c8afd3dde7d5f261cba2d32720",
             // baseGas: 111,
             // gasPrice: 0,
             // gasToken: '0x333',
             // refundReceiver: '0x444',
             // nonce: 555,
             // safeTxGas: 666
-          }
+          },
         },
         client,
-        wrapperUri);
-
-        //@ts-ignore
-        const wrapperTransaction = resp.value as SafeWrapper_SafeTransaction
-        const signed = await wrapper.addSignature({tx:wrapperTransaction},client, wrapperUri)
-         console.log('signed', signed)
-      /*       const signer = await App.Ethereum_Module.getSignerAddress(
-        { connection: connection },
-        client,
-        "wrap://ens/ethereum.polywrap.eth"
+        wrapperUri
       );
-      console.log("Signer", signer); */
-      /*       const signed = await client.invoke({
+
+      //@ts-ignore
+      const wrapperTransaction = resp.value as SafeWrapper_SafeTransaction;
+      const signed = await wrapper.addSignature(
+        { tx: wrapperTransaction },
+        client,
+        wrapperUri
+      );
+
+      console.log("signed", signed);
+
+      /* const signed = await client.invoke({
         method: "signMessage",
         uri: "wrap://ens/ethereum.polywrap.eth",
         args: { message: txHash, connection: connection },
       }); */
-      /*       const signed = await App.Ethereum_Module.signMessage(
+
+      /* const signed = await App.Ethereum_Module.signMessage(
         { message: txHash, connection: connection },
         client,
         "wrap://ens/ethereum.polywrap.eth"
