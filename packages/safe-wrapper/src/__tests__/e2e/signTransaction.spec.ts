@@ -307,6 +307,7 @@ describe("Safe Wrapper", () => {
 
       expect(sdkSigned.data).toEqual(ethAdjustedSignature); 
       
+      
       ------------------------------------------------------------------------*/
 
       //@ts-ignore
@@ -314,31 +315,19 @@ describe("Safe Wrapper", () => {
 
       console.log("wrapperSignature", signedHash);
 
-      //@ts-ignore
-      const wrapperAdjustedSignature = adjustVInSignature(
-        "eth_sign",
-        signedHash,
-        txHash,
-        account1.address
-      );
+      const wrapperAdjustedSignature =
+        await App.SafeWrapper_Module.adjustSignature(
+          {
+            signature: signedHash,
+            txHash: txHash,
+          },
+          client,
+          wrapperUri
+        );
 
       console.log("sdkSigned", sdkSigned);
       console.log("wrapperAdjustedSignature", wrapperAdjustedSignature);
       expect(sdkSigned.data).toEqual(wrapperAdjustedSignature);
-
-      /* const signed = await client.invoke({
-        method: "signMessage",
-        uri: "wrap://ens/ethereum.polywrap.eth",
-        args: { message: txHash, connection: connection },
-      }); */
-
-      /*       const signed = await App.Ethereum_Module.signMessage(
-        { message: txHash, connection: connection },
-        client,
-        "wrap://ens/ethereum.polywrap.eth"
-      );
-      console.log("wrapper Signed", signed);
-    }); */
     });
 
     it.only("Should arraify correctly", async () => {
@@ -367,7 +356,7 @@ describe("Safe Wrapper", () => {
 
       const txHash = await safeSdk.getTransactionHash(tx);
 
-      console.log('txHash: ', txHash)
+      console.log("txHash: ", txHash);
       /*       const bytesResp = await App.SafeWrapper_Module.getBytesArray(
         { hash: txHash },
         client,
@@ -391,22 +380,33 @@ describe("Safe Wrapper", () => {
       const ethHashed = ethers.utils.hashMessage(ethBytes);
       console.log("ethHashed", ethHashed);
         */
-      
+
       const wrapperSigned = await App.SafeWrapper_Module.getHashSignature(
         { hash: txHash },
         client,
         wrapperUri
       );
 
-      const adjustedSignature = await App.SafeWrapper_Module.
-
-      console.log("wrapperSigned", wrapperSigned);
-      console.log("wrapperSigned", wrapperSigned.ok);
       //@ts-ignore
-      //console.log("wrapperSigned", wrapperSigned.value);
+      const signedHash = wrapperSigned.value;
+
+      const wrapperAdjustedSignature =
+        await App.SafeWrapper_Module.adjustSignature(
+          {
+            signature: signedHash,
+            txHash: txHash,
+          },
+          client,
+          wrapperUri
+        );
+
+      console.log("wrapperAdjustedSignature", wrapperAdjustedSignature);
 
       const sdkSigned = await safeSdk.signTransactionHash(txHash);
+
       console.log("sdkSigned", sdkSigned);
+      //@ts-ignore
+      expect(sdkSigned.data).toEqual(wrapperAdjustedSignature.value);
     });
   });
 });
