@@ -285,16 +285,29 @@ describe("Safe Wrapper", () => {
 
       //console.log('safeSdk', chaindId)
 
-      // Working example sdkSigned = wrapperSigned
+      /*---------------------- Working example sdkSigned = wrapperSigned
 
-      /*  const wrapperSigned = await App.Ethereum_Module.signMessage(
+       const ethSigned = await App.Ethereum_Module.signMessage(
         {
           //@ts-ignore
           message: ethers.utils.arrayify(txHash),
         },
         client,
         ethereumUri
-      ); */
+      );
+
+      const ethAdjustedSignature = adjustVInSignature(
+        "eth_sign",
+        //@ts-ignore
+        ethSigned.value,
+        txHash,
+        account1.address
+      );
+      console.log("ethAdjusted", ethAdjustedSignature);
+
+      expect(sdkSigned.data).toEqual(ethAdjustedSignature); 
+      
+      ------------------------------------------------------------------------*/
 
       //@ts-ignore
       const signedHash = wrapperSigned.value;

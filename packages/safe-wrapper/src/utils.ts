@@ -56,13 +56,21 @@ export function getTransactionHashArgs(
   ];
 }
 
-export function arrayify(value: string): i32[] {
-  let hex = (value).substring(2);
+export function arrayify(value: string): Uint8Array {
+  /*   let hex = (value).substring(2);
 
   const result = new Array<i32>();;
   for (let i = 0; i < hex.length; i += 2) {
     result.push(<i32>parseInt(hex.substring(i, i + 2), 16));
   }
-
+  
   return result // Uint8Array.wrap(ArrayBuffer.from(result));
+  
+   */
+  const buffer = toUtf8Bytes(value);
+  return Uint8Array.wrap(buffer);
+}
+
+export function toUtf8Bytes(value: string): ArrayBuffer {
+  return String.UTF8.encode(value);
 }

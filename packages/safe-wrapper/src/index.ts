@@ -21,9 +21,9 @@ import {
 } from "./wrap";
 import { Box } from "@polywrap/wasm-as";
 import { Args_getTransactionHash } from "./wrap/Module";
-import { arrayify, getTransactionHashArgs } from "./utils";
+import { arrayify, getTransactionHashArgs, toUtf8Bytes } from "./utils";
 import { Args_getHashSignature } from "./wrap/Module/serialization";
-import { crypto } from "@graphprotocol/graph-ts";
+import { ByteArray, crypto } from "@graphprotocol/graph-ts";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
@@ -388,22 +388,37 @@ export function getHashSignature(
   args: Args_getHashSignature,
   env: Env
 ): String {
-  /* const arr = arrayify(args.hash);
+  const transactionHash = args.hash;
+  const byteArray = arrayify(transactionHash);
 
-   const messagePrefix = "\x19Ethereum Signed Message:\n";
+  const messagePrefix = "\x19Ethereum Signed Message:\n";
 
-      String.UTF8.encode(messagePrefix);
-      String.UTF8.encode(String(arr.length));
-      Arra
+  // const arr = arrayify(args.hash);
+  //String.UTF8.encode(messagePrefix);
+  // String.UTF8.encode(String(arr.length));
+  //arr
 
-const concated = concat([
-  toUtf8Bytes(messagePrefix),
-  toUtf8Bytes(String(message.length)),
-  message
-])
-
-return crypto.keccak256(concated); */
-
+  const a = Uint8Array.wrap(toUtf8Bytes(messagePrefix));
+  const b = Uint8Array.wrap(toUtf8Bytes(byteArray.length.toString()));
+  const c = byteArray;
+  
+  const alen = a.length;
+  const blen = b.length;
+  const clen = c.length;
+  const d = new Uint8Array(alen + blen + clen);
+  
+  d.set(a);
+  d.set(b, alen);
+  d.set(c, alen + blen);
+  
+  const concated = d;
+  
+  /*
+  */
+ 
+ 
+  return crypto.keccak256(ByteArray.fromHexString(concated.toString())).toHexString(); 
+  
   const signature = Ethereum_Module.signMessage({
     message: args.hash,
     connection: {
