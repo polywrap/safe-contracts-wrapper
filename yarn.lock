@@ -715,10 +715,10 @@
     bech32 "1.1.4"
     ws "7.4.6"
 
-"@ethersproject/providers@5.7.2":
-  version "5.7.2"
-  resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.7.2.tgz#f8b1a4f275d7ce58cf0a2eec222269a08beb18cb"
-  integrity sha512-g34EWZ1WWAVgr4aptGlVBF8mhl3VWjv+8hoAnzStu8Ah22VHBsuGzP17eb6xDVRzw895G4W7vvx60lFFur/1Rg==
+"@ethersproject/providers@5.7.1", "@ethersproject/providers@^5.0.0":
+  version "5.7.1"
+  resolved "https://registry.npmjs.org/@ethersproject/providers/-/providers-5.7.1.tgz"
+  integrity sha512-vZveG/DLyo+wk4Ga1yx6jSEHrLPgmTt+dFv0dv8URpVCRf0jVhalps1jq/emN/oXnMRsC7cQgAF32DcXLL7BPQ==
   dependencies:
     "@ethersproject/abstract-provider" "^5.7.0"
     "@ethersproject/abstract-signer" "^5.7.0"
@@ -741,10 +741,10 @@
     bech32 "1.1.4"
     ws "7.4.6"
 
-"@ethersproject/providers@^5.0.0":
-  version "5.7.1"
-  resolved "https://registry.npmjs.org/@ethersproject/providers/-/providers-5.7.1.tgz"
-  integrity sha512-vZveG/DLyo+wk4Ga1yx6jSEHrLPgmTt+dFv0dv8URpVCRf0jVhalps1jq/emN/oXnMRsC7cQgAF32DcXLL7BPQ==
+"@ethersproject/providers@5.7.2":
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.7.2.tgz#f8b1a4f275d7ce58cf0a2eec222269a08beb18cb"
+  integrity sha512-g34EWZ1WWAVgr4aptGlVBF8mhl3VWjv+8hoAnzStu8Ah22VHBsuGzP17eb6xDVRzw895G4W7vvx60lFFur/1Rg==
   dependencies:
     "@ethersproject/abstract-provider" "^5.7.0"
     "@ethersproject/abstract-signer" "^5.7.0"
@@ -978,6 +978,7 @@
   integrity sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==
 
 "@gnosis.pm/safe-contracts@^1.3.0", "@gnosis.pm/safe-contracts_1.3.0@npm:@gnosis.pm/safe-contracts@1.3.0":
+  name "@gnosis.pm/safe-contracts_1.3.0"
   version "1.3.0"
   resolved "https://registry.npmjs.org/@gnosis.pm/safe-contracts/-/safe-contracts-1.3.0.tgz"
   integrity sha512-1p+1HwGvxGUVzVkFjNzglwHrLNA67U/axP0Ct85FzzH8yhGJb4t9jDjPYocVMzLorDoWAfKicGy1akPY9jXRVw==
@@ -1041,6 +1042,13 @@
     "@gnosis.pm/safe-core-sdk-types" "^1.6.1"
     "@gnosis.pm/safe-core-sdk-utils" "^1.4.1"
     ethers "^5.7.1"
+
+"@graphprotocol/graph-ts@^0.28.1":
+  version "0.28.1"
+  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.28.1.tgz#271affc77deb5a4a7c3f95d4b3b1daaa9818e51c"
+  integrity sha512-1wMLQ0cu84/6Ml3zcz9ya1zFzrDAzCj0dIGZ7Rz9upnRSXg5jjqU4DefO/OYrl2K2/OPso9hSAr6I4aue2pL1Q==
+  dependencies:
+    assemblyscript "0.19.10"
 
 "@graphql-tools/batch-execute@8.5.1":
   version "8.5.1"
@@ -4380,6 +4388,14 @@ assemblyscript@0.19.1:
     binaryen "101.0.0-nightly.20210527"
     long "^4.0.0"
 
+assemblyscript@0.19.10:
+  version "0.19.10"
+  resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.19.10.tgz#7ede6d99c797a219beb4fa4614c3eab9e6343c8e"
+  integrity sha512-HavcUBXB3mBTRGJcpvaQjmnmaqKHBGREjSPNsIvnAk2f9dj78y4BkMaSSdvBQYWcDDzsHQjyUC8stICFkD1Odg==
+  dependencies:
+    binaryen "101.0.0-nightly.20210723"
+    long "^4.0.0"
+
 assert-plus@1.0.0, assert-plus@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/assert-plus/-/assert-plus-1.0.0.tgz"
@@ -4661,6 +4677,11 @@ binaryen@101.0.0-nightly.20210527:
   version "101.0.0-nightly.20210527"
   resolved "https://registry.npmjs.org/binaryen/-/binaryen-101.0.0-nightly.20210527.tgz"
   integrity sha512-dbKentJwA6H0LfI+pRuzNNzAooJwYFNrg1L8rRw8j6rlfkU815ytNLO+uDzGNcltYehUa5ERZFJHPIdqX12n0w==
+
+binaryen@101.0.0-nightly.20210723:
+  version "101.0.0-nightly.20210723"
+  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-101.0.0-nightly.20210723.tgz#b6bb7f3501341727681a03866c0856500eec3740"
+  integrity sha512-eioJNqhHlkguVSbblHOtLqlhtC882SOEPKmNFZaDuz1hzQjolxZ+eu3/kaS10n3sGPONsIZsO7R9fR00UyhEUA==
 
 bl@^4.0.0, bl@^4.0.3, bl@^4.1.0:
   version "4.1.0"
@@ -6917,6 +6938,42 @@ ethers@5.0.7:
     "@ethersproject/wallet" "^5.0.0"
     "@ethersproject/web" "^5.0.0"
     "@ethersproject/wordlists" "^5.0.0"
+
+ethers@5.7.1:
+  version "5.7.1"
+  resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.7.1.tgz#48c83a44900b5f006eb2f65d3ba6277047fd4f33"
+  integrity sha512-5krze4dRLITX7FpU8J4WscXqADiKmyeNlylmmDLbS95DaZpBhDe2YSwRQwKXWNyXcox7a3gBgm/MkGXV1O1S/Q==
+  dependencies:
+    "@ethersproject/abi" "5.7.0"
+    "@ethersproject/abstract-provider" "5.7.0"
+    "@ethersproject/abstract-signer" "5.7.0"
+    "@ethersproject/address" "5.7.0"
+    "@ethersproject/base64" "5.7.0"
+    "@ethersproject/basex" "5.7.0"
+    "@ethersproject/bignumber" "5.7.0"
+    "@ethersproject/bytes" "5.7.0"
+    "@ethersproject/constants" "5.7.0"
+    "@ethersproject/contracts" "5.7.0"
+    "@ethersproject/hash" "5.7.0"
+    "@ethersproject/hdnode" "5.7.0"
+    "@ethersproject/json-wallets" "5.7.0"
+    "@ethersproject/keccak256" "5.7.0"
+    "@ethersproject/logger" "5.7.0"
+    "@ethersproject/networks" "5.7.1"
+    "@ethersproject/pbkdf2" "5.7.0"
+    "@ethersproject/properties" "5.7.0"
+    "@ethersproject/providers" "5.7.1"
+    "@ethersproject/random" "5.7.0"
+    "@ethersproject/rlp" "5.7.0"
+    "@ethersproject/sha2" "5.7.0"
+    "@ethersproject/signing-key" "5.7.0"
+    "@ethersproject/solidity" "5.7.0"
+    "@ethersproject/strings" "5.7.0"
+    "@ethersproject/transactions" "5.7.0"
+    "@ethersproject/units" "5.7.0"
+    "@ethersproject/wallet" "5.7.0"
+    "@ethersproject/web" "5.7.1"
+    "@ethersproject/wordlists" "5.7.0"
 
 ethers@^4.0.32:
   version "4.0.49"

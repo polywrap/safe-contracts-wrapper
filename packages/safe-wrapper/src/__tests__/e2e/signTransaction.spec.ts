@@ -340,5 +340,73 @@ describe("Safe Wrapper", () => {
       console.log("wrapper Signed", signed);
     }); */
     });
+
+    it.only("Should arraify correctly", async () => {
+      const { accounts, contractNetworks } = await setupTests();
+      const [account1] = accounts;
+      const safe = await getSafeWithOwners([account1.address]);
+      const ethAdapter = await getEthAdapter(account1.signer);
+
+      const safeSdk = await Safe.create({
+        ethAdapter,
+        safeAddress: safe.address,
+        //@ts-ignore
+        contractNetworks,
+      });
+
+      const nonce = await ethAdapter.getNonce(account1.address);
+
+      const tx = await safeSdk.createTransaction({
+        safeTransactionData: {
+          data: "0x",
+          value: "50000",
+          to: account1.address,
+          nonce: nonce + 1,
+        },
+      });
+
+      const txHash = await safeSdk.getTransactionHash(tx);
+
+      console.log('txHash: ', txHash)
+      /*       const bytesResp = await App.SafeWrapper_Module.getBytesArray(
+        { hash: txHash },
+        client,
+        wrapperUri
+      );
+
+      //@ts-ignore
+      const bytesArr = bytesResp.value as Uint8Array;
+
+      console.log("wrapperUint8Arr", bytesArr);
+
+      const wrapperHashed = await App.SafeWrapper_Module.getHashedMessage(
+        { bytes: bytesArr },
+        client,
+        wrapperUri
+      );
+
+      console.log("wrapperHashed", wrapperHashed); */
+      /*  const ethBytes = ethers.utils.arrayify(txHash);
+      console.log("ethBytes", ethBytes);
+      const ethHashed = ethers.utils.hashMessage(ethBytes);
+      console.log("ethHashed", ethHashed);
+        */
+      
+      const wrapperSigned = await App.SafeWrapper_Module.getHashSignature(
+        { hash: txHash },
+        client,
+        wrapperUri
+      );
+
+      const adjustedSignature = await App.SafeWrapper_Module.
+
+      console.log("wrapperSigned", wrapperSigned);
+      console.log("wrapperSigned", wrapperSigned.ok);
+      //@ts-ignore
+      //console.log("wrapperSigned", wrapperSigned.value);
+
+      const sdkSigned = await safeSdk.signTransactionHash(txHash);
+      console.log("sdkSigned", sdkSigned);
+    });
   });
 });

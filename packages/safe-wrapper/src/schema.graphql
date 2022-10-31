@@ -49,4 +49,17 @@ type Module {
     getHashSignature(
         hash: String!
     ): String @env(required: true)
+
+    getBytesArray(
+        hash: String!
+    ): Bytes @env(required: true)
+
+    getHashedMessage(
+        bytes: Bytes!
+    ): String! @env(required: true)
+
+    adjustSignature(
+        signature: String!
+        txHash: String!
+    ): String! @env(required: true)
 }

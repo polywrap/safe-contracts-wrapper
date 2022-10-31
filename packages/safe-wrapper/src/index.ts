@@ -17,13 +17,16 @@ import {
   SafeContracts_Module,
   // Logger_Module,
   SafeTransaction,
-  Ethereum_TxReceipt,
 } from "./wrap";
 import { Box } from "@polywrap/wasm-as";
 import { Args_getTransactionHash } from "./wrap/Module";
-import { arrayify, getTransactionHashArgs, toUtf8Bytes } from "./utils";
-import { Args_getHashSignature } from "./wrap/Module/serialization";
-import { ByteArray, crypto } from "@graphprotocol/graph-ts";
+import { adjustVInSignature, arrayify, getTransactionHashArgs } from "./utils";
+import {
+  Args_adjustSignature,
+  Args_getBytesArray,
+  Args_getHashedMessage,
+  Args_getHashSignature,
+} from "./wrap/Module/serialization";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
@@ -364,8 +367,10 @@ export function addSignature(
   // https://github.com/ethers-io/ethers.js/blob/01aea705ce60b1c42d2f465b162cb339a0e94392/packages/wallet/src.ts/index.ts#L129
   // https://github.com/ethers-io/ethers.js/blob/01aea705ce60b1c42d2f465b162cb339a0e94392/packages/hash/src.ts/message.ts
 
+  const hashedMessage = getHashSignature({ hash: transactionHash }, env);
+
   const signature = Ethereum_Module.signMessage({
-    message: arrayify(transactionHash).toString(),
+    message: hashedMessage,
     connection: {
       node: env.connection.node,
       networkNameOrChainId: env.connection.networkNameOrChainId,
@@ -387,40 +392,13 @@ export function addSignature(
 export function getHashSignature(
   args: Args_getHashSignature,
   env: Env
-): String {
+): string {
   const transactionHash = args.hash;
-  const byteArray = arrayify(transactionHash);
 
-  const messagePrefix = "\x19Ethereum Signed Message:\n";
+  const byteArray = getBytesArray({ hash: transactionHash }, env)!;
 
-  // const arr = arrayify(args.hash);
-  //String.UTF8.encode(messagePrefix);
-  // String.UTF8.encode(String(arr.length));
-  //arr
-
-  const a = Uint8Array.wrap(toUtf8Bytes(messagePrefix));
-  const b = Uint8Array.wrap(toUtf8Bytes(byteArray.length.toString()));
-  const c = byteArray;
-  
-  const alen = a.length;
-  const blen = b.length;
-  const clen = c.length;
-  const d = new Uint8Array(alen + blen + clen);
-  
-  d.set(a);
-  d.set(b, alen);
-  d.set(c, alen + blen);
-  
-  const concated = d;
-  
-  /*
-  */
- 
- 
-  return crypto.keccak256(ByteArray.fromHexString(concated.toString())).toHexString(); 
-  
-  const signature = Ethereum_Module.signMessage({
-    message: args.hash,
+  const signature = Ethereum_Module.signMessageBytes({
+    bytes: byteArray,
     connection: {
       node: env.connection.node,
       networkNameOrChainId: env.connection.networkNameOrChainId,
@@ -428,4 +406,38 @@ export function getHashSignature(
   }).unwrap();
 
   return signature;
+}
+
+export function adjustSignature(args: Args_adjustSignature, env: Env): string {
+  const address = Ethereum_Module.getSignerAddress({
+    connection: {
+      node: env.connection.node,
+      networkNameOrChainId: env.connection.networkNameOrChainId,
+    },
+  }).unwrap();
+
+  return adjustVInSignature("eth_sign", args.signature, args.txHash, address);
+}
+
+export function getBytesArray(
+  args: Args_getBytesArray,
+  env: Env
+): ArrayBuffer | null {
+  return arrayify(args.hash).buffer;
+}
+
+export function getHashedMessage(
+  args: Args_getHashedMessage,
+  env: Env
+): string {
+  const messagePrefix = "\x19Ethereum Signed Message:\n";
+
+  return Ethereum_Module.solidityKeccak256({
+    types: ["string", "string", "bytes"],
+    values: [
+      messagePrefix,
+      args.bytes.byteLength.toString(),
+      "[" + Uint8Array.wrap(args.bytes).toString() + "]",
+    ],
+  }).unwrap();
 }
