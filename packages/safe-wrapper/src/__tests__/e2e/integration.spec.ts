@@ -450,6 +450,6 @@ describe("Safe Wrapper", () => {
       // expect(tx.data.nonce).toEqual(555)
       // expect(tx.data.safeTxGas).toEqual(safeVersionDeployed >= '1.3.0' ? 0 : 666)
     });
-  }); */
+  }); 
 
 });

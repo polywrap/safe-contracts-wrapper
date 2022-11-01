@@ -15,18 +15,20 @@ import {
   Env,
   Ethereum_Module,
   SafeContracts_Module,
-  // Logger_Module,
   SafeTransaction,
+  SignSignature,
+  Logger_Module,
 } from "./wrap";
+
 import { Box } from "@polywrap/wasm-as";
 import { Args_getTransactionHash } from "./wrap/Module";
-import { adjustVInSignature, arrayify, getTransactionHashArgs } from "./utils";
 import {
-  Args_adjustSignature,
-  Args_getBytesArray,
-  Args_getHashedMessage,
-  Args_getHashSignature,
-} from "./wrap/Module/serialization";
+  adjustVInSignature,
+  arrayify,
+  createTransactionFromPartial,
+  getTransactionHashArgs,
+} from "./utils";
+import { Args_signTransactionHash } from "./wrap/Module/serialization";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
@@ -299,54 +301,23 @@ export function encodeDisableModuleData(
 }
 
 export function createTransaction(
-  args: Args_createTransaction
-): SafeTransaction {
-  // TODO: if args.tx.data is parsed as an array, create multisend tx
-
-  // let value: Box<u32> = args.tx.value != null ? args.tx.value : <u32>0;
-
-  // 0 is Call, 1 is DelegateCall
-  // let operation = args.tx.operation != null ? args.tx.operation : <u8>0;
-
-  if (args.tx.value == null) {
-    args.tx.value = "0";
-  }
-  if (args.tx.operation == null) {
-    args.tx.operation = Box.from(<u8>0);
-  }
-  // tx.signatures = args.tx.signatures;
-  // TODO add txOverrides
-  // baseGas: args.tx.baseGas ?? 0,
-  // gasPrice: args.tx.gasPrice ?? 0,
-  // gasToken: args.tx.gasToken || ZERO_ADDRESS,
-  // refundReceiver: args.tx.refundReceiver || ZERO_ADDRESS,
-  // nonce: args.tx.nonce ?? (await safeContract.getNonce())
-
-  return args.tx;
-}
-
-export function getTransactionHash(
-  args: Args_getTransactionHash,
+  args: Args_createTransaction,
   env: Env
-): string {
-  if (!args.tx.nonce) {
-    args.tx.nonce = Ethereum_Module.getSignerTransactionCount({
-      connection: env.connection,
-      blockTag: null,
-    }).unwrap();
+): SafeTransaction {
+  const transactionData = createTransactionFromPartial(args.tx);
+
+  if (!transactionData.nonce) {
+    transactionData.nonce = Box.from(
+      Ethereum_Module.getSignerTransactionCount({
+        connection: env.connection,
+        blockTag: null,
+      })
+        .unwrap()
+        .toUInt32()
+    );
   }
 
-  const contractArgs = getTransactionHashArgs(args.tx, args.tx.nonce!);
-
-  const res = Ethereum_Module.callContractView({
-    address: env.safeAddress,
-    method:
-      "function getTransactionHash(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 _nonce) public view returns (bytes32)",
-    args: contractArgs,
-    connection: env.connection,
-  }).unwrap();
-
-  return res;
+  return { data: transactionData, signatures: new Map<string, string>() };
 }
 
 export function addSignature(
@@ -360,43 +331,65 @@ export function addSignature(
     },
   }).unwrap();
 
-  const transactionHash = getTransactionHash({ tx: args.tx }, env);
+  const transactionHash = getTransactionHash({ tx: args.tx.data }, env);
 
-  //TODO should sign array, not string
-  // https://github.com/safe-global/safe-core-sdk/blob/cc2515c5a77bf611c8f1877f98fdb1510164f177/packages/safe-ethers-lib/src/EthersAdapter.ts#L169
-  // https://github.com/ethers-io/ethers.js/blob/01aea705ce60b1c42d2f465b162cb339a0e94392/packages/wallet/src.ts/index.ts#L129
-  // https://github.com/ethers-io/ethers.js/blob/01aea705ce60b1c42d2f465b162cb339a0e94392/packages/hash/src.ts/message.ts
-
-  const hashedMessage = getHashSignature({ hash: transactionHash }, env);
-
-  const signature = Ethereum_Module.signMessage({
-    message: hashedMessage,
-    connection: {
-      node: env.connection.node,
-      networkNameOrChainId: env.connection.networkNameOrChainId,
-    },
-  }).unwrap();
+  const signature = signTransactionHash({ hash: transactionHash }, env);
 
   let signatures = args.tx.signatures;
   if (signatures == null) {
     signatures = new Map<string, string>();
   }
   if (signatures != null) {
-    signatures.set(address, signature);
+    signatures.set(address, signature.data);
   }
   args.tx.signatures = signatures;
 
   return args.tx;
 }
 
-export function getHashSignature(
-  args: Args_getHashSignature,
+export function getTransactionHash(
+  args: Args_getTransactionHash,
   env: Env
 ): string {
-  const transactionHash = args.hash;
+  let nonce = args.tx.nonce;
 
-  const byteArray = getBytesArray({ hash: transactionHash }, env)!;
+  if (nonce == null) {
+    nonce = Box.from(
+      Ethereum_Module.getSignerTransactionCount({
+        connection: env.connection,
+        blockTag: null,
+      })
+        .unwrap()
+        .toUInt32()
+    );
+  }
 
+  const recreatedTx = createTransactionFromPartial(args.tx);
+
+  const contractArgs = getTransactionHashArgs(recreatedTx, nonce!.unwrap());
+
+  const res = Ethereum_Module.callContractView({
+    address: env.safeAddress,
+    method:
+      "function getTransactionHash(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 _nonce) public view returns (bytes32)",
+    args: contractArgs,
+    connection: env.connection,
+  }).unwrap();
+
+  return res;
+}
+
+export function signTransactionHash(
+  args: Args_signTransactionHash,
+  env: Env
+): SignSignature {
+  const signer = Ethereum_Module.getSignerAddress({
+    connection: env.connection,
+  }).unwrap();
+
+  const byteArray = arrayify(args.hash).buffer;
+
+  // TODO polywrap ethereum-plugin implementation required
   const signature = Ethereum_Module.signMessageBytes({
     bytes: byteArray,
     connection: {
@@ -405,39 +398,12 @@ export function getHashSignature(
     },
   }).unwrap();
 
-  return signature;
-}
+  const adjustedSignature = adjustVInSignature(
+    "eth_sign",
+    signature,
+    args.hash,
+    signer
+  );
 
-export function adjustSignature(args: Args_adjustSignature, env: Env): string {
-  const address = Ethereum_Module.getSignerAddress({
-    connection: {
-      node: env.connection.node,
-      networkNameOrChainId: env.connection.networkNameOrChainId,
-    },
-  }).unwrap();
-
-  return adjustVInSignature("eth_sign", args.signature, args.txHash, address);
-}
-
-export function getBytesArray(
-  args: Args_getBytesArray,
-  env: Env
-): ArrayBuffer | null {
-  return arrayify(args.hash).buffer;
-}
-
-export function getHashedMessage(
-  args: Args_getHashedMessage,
-  env: Env
-): string {
-  const messagePrefix = "\x19Ethereum Signed Message:\n";
-
-  return Ethereum_Module.solidityKeccak256({
-    types: ["string", "string", "bytes"],
-    values: [
-      messagePrefix,
-      args.bytes.byteLength.toString(),
-      "[" + Uint8Array.wrap(args.bytes).toString() + "]",
-    ],
-  }).unwrap();
+  return { signer: signer, data: adjustedSignature };
 }

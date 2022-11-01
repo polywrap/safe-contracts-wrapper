@@ -1,5 +1,6 @@
-import { BigInt } from "@polywrap/wasm-as";
+import { BigInt, Box } from "@polywrap/wasm-as";
 import { SafeTransaction, Ethereum_Module } from "./wrap";
+import { SafeTransactionData } from "./wrap/SafeTransactionData";
 
 export const ZERO_ADDRESS = `0x${"0".repeat(40)}`;
 
@@ -11,10 +12,10 @@ export function isHexString(value: string): boolean {
 }
 
 export function getTransactionHashArgs(
-  tx: SafeTransaction,
-  nonce: BigInt
+  tx: SafeTransactionData,
+  nonce: u32
 ): string[] {
-  let safeTxGas = BigInt.from("0");
+  /*   let safeTxGas = BigInt.from("0");
   let baseGas = BigInt.from("0");
   let gasPrice = BigInt.from("0");
   let gasToken = ZERO_ADDRESS;
@@ -26,7 +27,7 @@ export function getTransactionHashArgs(
   }
 
   //TODO check if bigints and != 0
-  if (tx.safeTxGas) {
+  if (tx.safeTxGas != null) {
     safeTxGas = tx.safeTxGas!;
   }
   if (tx.baseGas) {
@@ -40,18 +41,18 @@ export function getTransactionHashArgs(
   }
   if (tx.refundReceiver != null) {
     refundReceiver = tx.refundReceiver!;
-  }
+  } */
 
   return [
     tx.to,
     tx.value,
     tx.data,
-    operation.toString(),
-    safeTxGas.toString(),
-    baseGas.toString(),
-    gasPrice.toString(),
-    gasToken,
-    refundReceiver,
+    tx.operation!.unwrap().toString(),
+    tx.safeTxGas!.unwrap().toString(),
+    tx.baseGas!.unwrap().toString(),
+    tx.gasPrice!.unwrap().toString(),
+    tx.gasToken!,
+    tx.refundReceiver!,
     nonce.toString(),
   ];
 }
@@ -170,4 +171,37 @@ export const adjustVInSignature = (
   }
   signature = signature.slice(0, -2) + signatureV.toString(16);
   return signature;
+};
+
+export const createTransactionFromPartial = (
+  transactionData: SafeTransactionData
+): SafeTransactionData => {
+  // TODO: if args.tx.data is parsed as an array, create multisend tx
+  // let value: Box<u32> = args.tx.value != null ? args.tx.value : <u32>0;
+
+  if (transactionData.baseGas == null) {
+    transactionData.baseGas = Box.from(<u32>0);
+  }
+
+  if (transactionData.gasPrice == null) {
+    transactionData.gasPrice = Box.from(<u32>0);
+  }
+
+  if (transactionData.safeTxGas == null) {
+    transactionData.safeTxGas = Box.from(<u32>0);
+  }
+
+  if (transactionData.operation == null) {
+    transactionData.operation = Box.from(<u8>0); // 0 is Call, 1 is DelegateCall
+  }
+
+  if (transactionData.gasToken == null) {
+    transactionData.gasToken = ZERO_ADDRESS;
+  }
+
+  if (transactionData.refundReceiver == null) {
+    transactionData.refundReceiver = ZERO_ADDRESS;
+  }
+
+  return transactionData;
 };

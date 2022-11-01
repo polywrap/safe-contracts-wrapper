@@ -8,19 +8,27 @@ type Env {
 }
 
 type SafeTransaction {
+    signatures: Map @annotate(type: "Map<String!, String!>")
+    data: SafeTransactionData!
+}
+
+type SafeTransactionData {
     data: String!
     to: String!
     value: String!
     operation: UInt8
-    signatures: Map @annotate(type: "Map<String!, String!>")
-
-    safeTxGas: BigInt
-    baseGas: BigInt
-    gasPrice: BigInt
+    safeTxGas: UInt32 #BigInt
+    baseGas: UInt32 #BigInt
+    gasPrice: UInt32 #BigInt
     gasToken: String
     refundReceiver: String
-    nonce: BigInt
+    nonce: UInt32 #BigInt
     # TODO: add txOverrides
+}
+
+type SignSignature {
+    signer: String!
+    data: String!
 }
 
 type Module {
@@ -40,26 +48,8 @@ type Module {
     encodeDisableModuleData(moduleAddress: String!): String! @env(required: true)
 
     """Transaction manager methods"""
-    createTransaction(tx: SafeTransaction!): SafeTransaction!
+    createTransaction(tx: SafeTransactionData!): SafeTransaction! @env(required: true)
     addSignature(tx: SafeTransaction!): SafeTransaction! @env(required: true)
-    getTransactionHash(
-        tx:SafeTransaction!
-    ): String @env(required: true)
-
-    getHashSignature(
-        hash: String!
-    ): String @env(required: true)
-
-    getBytesArray(
-        hash: String!
-    ): Bytes @env(required: true)
-
-    getHashedMessage(
-        bytes: Bytes!
-    ): String! @env(required: true)
-
-    adjustSignature(
-        signature: String!
-        txHash: String!
-    ): String! @env(required: true)
+    getTransactionHash(tx: SafeTransactionData!): String @env(required: true)
+    signTransactionHash(hash: String!): SignSignature! @env(required: true)
 }
