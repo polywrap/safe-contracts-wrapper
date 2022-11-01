@@ -86,7 +86,7 @@ describe("Safe Wrapper", () => {
         proxyContractAddress,
         safeContractAddress,
         multisendAddress,
-        multisendAddress,
+        multisendCallOnlyAddress,
       },
     ] = await setupContractNetworks(client);
 
