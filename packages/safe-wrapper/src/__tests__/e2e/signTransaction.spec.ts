@@ -108,7 +108,7 @@ describe("Safe Wrapper", () => {
     await stopTestEnvironment();
   });
 
-  describe.only("SignTransaction", () => {
+  describe("SignTransaction", () => {
     const setupTests = async () => {
       return {
         accounts: [
@@ -324,7 +324,7 @@ describe("Safe Wrapper", () => {
       expect(wrapperSigned).toEqual(sdkSigned);
     });
 
-    it.only("Should create and sign transaction SDK-like", async () => {
+    it("Should create and sign transaction SDK-like", async () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
       const ethAdapter = await getEthAdapter(account1.signer);
