@@ -381,7 +381,7 @@ describe("Safe Wrapper", () => {
       //@ts-ignore
       const wrapperSigned = wrapperSignedResult.value as SafeTransaction;
 
-      console.log("sdkSigned", sdkSigned);
+      // console.log("sdkSigned", sdkSigned);
       // console.log("wrapperSigned", wrapperSigned);
 
       expect(wrapperSigned.data).toEqual(sdkSigned.data);
