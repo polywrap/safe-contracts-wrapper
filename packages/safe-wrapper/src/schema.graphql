@@ -8,7 +8,7 @@ type Env {
 }
 
 type SafeTransaction {
-    signatures: Map @annotate(type: "Map<String!, String!>")
+    signatures: Map @annotate(type: "Map<String!, SignSignature!>")
     data: SafeTransactionData!
 }
 

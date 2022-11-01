@@ -317,7 +317,7 @@ export function createTransaction(
     );
   }
 
-  return { data: transactionData, signatures: new Map<string, string>() };
+  return { data: transactionData, signatures: new Map<string, SignSignature>() };
 }
 
 export function addSignature(
@@ -337,10 +337,10 @@ export function addSignature(
 
   let signatures = args.tx.signatures;
   if (signatures == null) {
-    signatures = new Map<string, string>();
+    signatures = new Map<string, SignSignature>();
   }
   if (signatures != null) {
-    signatures.set(address, signature.data);
+    signatures.set(address, signature);
   }
   args.tx.signatures = signatures;
 

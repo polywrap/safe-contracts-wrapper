@@ -27,7 +27,8 @@ import { abi as multisendCallOnlyAbi } from "@gnosis.pm/safe-contracts_1.3.0/bui
 //import { SafeWrapper_SafeTransaction } from "../types/wrap";
 import { Client } from "@polywrap/core-js";
 //@ts-ignore
-import { bufferToHex, ecrecover, pubToAddress } from "ethereumjs-util";
+import { zeroAddress } from "ethereumjs-util";
+import { SafeTransaction } from "../../wrap";
 
 jest.setTimeout(1200000);
 
@@ -189,6 +190,44 @@ describe("Safe Wrapper", () => {
       expect(wrapperTx).toEqual(sdkTx);
     });
 
+    it.skip("Should create SDK-like transaction based on minimal transaction data ", async () => {
+      const { accounts, contractNetworks } = await setupTests();
+      const [account1] = accounts;
+      const ethAdapter = await getEthAdapter(account1.signer);
+
+      const safeSdk = await Safe.create({
+        ethAdapter,
+        safeAddress: safeAddress,
+        //@ts-ignore
+        contractNetworks,
+      });
+
+      /*       const nonce = (await ethAdapter.getNonce(account1.address)) + 1;
+       */
+      const safeTransactionData: SafeTransactionDataPartial = {
+        to: account1.address,
+        value: "500000000000000000", // 0.5 ETH
+        data: "0x",
+      };
+
+      const sdkTx = await safeSdk.createTransaction({
+        safeTransactionData: { ...safeTransactionData /* nonce: nonce */ },
+      });
+
+      const wrapperTxResult = await App.SafeWrapper_Module.createTransaction(
+        {
+          tx: safeTransactionData,
+        },
+        client,
+        wrapperUri
+      );
+
+      //@ts-ignore
+      const wrapperTx = wrapperTxResult.value;
+
+      expect(wrapperTx).toEqual(sdkTx);
+    });
+
     it("Should return transaction hash SDK-like", async () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
@@ -283,6 +322,73 @@ describe("Safe Wrapper", () => {
       //console.log("sdkSigned", sdkSigned);
 
       expect(wrapperSigned).toEqual(sdkSigned);
+    });
+
+    it.only("Should create and sign transaction SDK-like", async () => {
+      const { accounts, contractNetworks } = await setupTests();
+      const [account1] = accounts;
+      const ethAdapter = await getEthAdapter(account1.signer);
+
+      const safeSdk = await Safe.create({
+        ethAdapter,
+        safeAddress: safeAddress,
+        //@ts-ignore
+        contractNetworks,
+      });
+
+      const nonce = (await ethAdapter.getNonce(account1.address)) + 1;
+
+      const safeTransactionData: SafeTransactionDataPartial = {
+        to: account1.address,
+        value: "500000000000000000", // 0.5 ETH
+        data: "0x",
+        baseGas: 111,
+        gasPrice: 453,
+        gasToken: zeroAddress(),
+        refundReceiver: zeroAddress(),
+        safeTxGas: 0, //TODO find out why created from sdk transaction transforms this value to 0
+        operation: 0,
+      };
+
+      const sdkTx = await safeSdk.createTransaction({
+        safeTransactionData: { ...safeTransactionData, nonce: nonce },
+      });
+      const wrapperTxResult = await App.SafeWrapper_Module.createTransaction(
+        {
+          tx: {
+            ...safeTransactionData,
+            safeTxGas: safeTransactionData.safeTxGas,
+            baseGas: safeTransactionData.baseGas,
+            gasPrice: safeTransactionData.gasPrice,
+            nonce: nonce,
+          },
+        },
+        client,
+        wrapperUri
+      );
+
+      //@ts-ignore
+      const wrapperTx = wrapperTxResult.value;
+
+      const sdkSigned = await safeSdk.signTransaction(sdkTx);
+
+      const wrapperSignedResult = await App.SafeWrapper_Module.addSignature(
+        { tx: wrapperTx },
+        client,
+        wrapperUri
+      );
+
+      //@ts-ignore
+      const wrapperSigned = wrapperSignedResult.value as SafeTransaction;
+
+      console.log("sdkSigned", sdkSigned);
+      // console.log("wrapperSigned", wrapperSigned);
+
+      expect(wrapperSigned.data).toEqual(sdkSigned.data);
+
+      expect(wrapperSigned.signatures!.values()).toEqual(
+        sdkSigned.signatures.values()
+      );
     });
   });
 });
