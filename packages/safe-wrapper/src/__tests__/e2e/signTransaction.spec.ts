@@ -190,7 +190,7 @@ describe("Safe Wrapper", () => {
       expect(wrapperTx).toEqual(sdkTx);
     });
 
-    it.skip("Should create SDK-like transaction based on minimal transaction data ", async () => {
+    it.only("Should create SDK-like transaction based on minimal transaction data ", async () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
       const ethAdapter = await getEthAdapter(account1.signer);
@@ -224,7 +224,7 @@ describe("Safe Wrapper", () => {
 
       //@ts-ignore
       const wrapperTx = wrapperTxResult.value;
-
+      console.log('wrapperTx', wrapperTx)
       expect(wrapperTx).toEqual(sdkTx);
     });
 

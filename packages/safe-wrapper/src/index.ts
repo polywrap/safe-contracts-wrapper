@@ -17,7 +17,6 @@ import {
   SafeContracts_Module,
   SafeTransaction,
   SignSignature,
-  Logger_Module,
 } from "./wrap";
 
 import { Box } from "@polywrap/wasm-as";
@@ -317,7 +316,10 @@ export function createTransaction(
     );
   }
 
-  return { data: transactionData, signatures: new Map<string, SignSignature>() };
+  return {
+    data: transactionData,
+    signatures: new Map<string, SignSignature>(),
+  };
 }
 
 export function addSignature(

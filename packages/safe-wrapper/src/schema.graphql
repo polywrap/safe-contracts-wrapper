@@ -16,6 +16,19 @@ type SafeTransactionData {
     data: String!
     to: String!
     value: String!
+    operation: UInt8!
+    safeTxGas: UInt32! #BigInt
+    baseGas: UInt32! #BigInt
+    gasPrice: UInt32! #BigInt
+    gasToken: String!
+    refundReceiver: String!
+    nonce: UInt32! #BigInt
+}
+
+type SafeTransactionDataPartial {
+    data: String!
+    to: String!
+    value: String!
     operation: UInt8
     safeTxGas: UInt32 #BigInt
     baseGas: UInt32 #BigInt
@@ -48,8 +61,8 @@ type Module {
     encodeDisableModuleData(moduleAddress: String!): String! @env(required: true)
 
     """Transaction manager methods"""
-    createTransaction(tx: SafeTransactionData!): SafeTransaction! @env(required: true)
+    createTransaction(tx: SafeTransactionDataPartial!): SafeTransaction! @env(required: true)
     addSignature(tx: SafeTransaction!): SafeTransaction! @env(required: true)
-    getTransactionHash(tx: SafeTransactionData!): String @env(required: true)
+    getTransactionHash(tx: SafeTransactionDataPartial!): String @env(required: true)
     signTransactionHash(hash: String!): SignSignature! @env(required: true)
 }
