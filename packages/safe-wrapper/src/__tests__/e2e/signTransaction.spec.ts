@@ -28,7 +28,7 @@ import { abi as multisendCallOnlyAbi } from "@gnosis.pm/safe-contracts_1.3.0/bui
 import { Client } from "@polywrap/core-js";
 //@ts-ignore
 import { zeroAddress } from "ethereumjs-util";
-import { SafeTransaction } from "../../wrap";
+import { SafeTransaction, SafeTransactionData } from "../../wrap";
 
 jest.setTimeout(1200000);
 
@@ -154,43 +154,56 @@ describe("Safe Wrapper", () => {
 
       const nonce = (await ethAdapter.getNonce(account1.address)) + 1;
 
-      const safeTransactionData: SafeTransactionDataPartial = {
+      const safeTransactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
-        data: "0x",
+        data: "0x00",
         baseGas: 111,
         gasPrice: 453,
         gasToken: "0x333",
         refundReceiver: "0x444",
-        safeTxGas: 0, //TODO find out why created from sdk transaction transforms this value to 0
-        operation: 0,
+        safeTxGas: 2, //TODO find out why created from sdk transaction transforms this value to 0
+        operation: 1,
+        nonce: nonce,
       };
 
       const sdkTx = await safeSdk.createTransaction({
-        safeTransactionData: { ...safeTransactionData, nonce: nonce },
+        safeTransactionData,
       });
 
       const wrapperTxResult = await App.SafeWrapper_Module.createTransaction(
         {
           tx: {
             ...safeTransactionData,
-            safeTxGas: safeTransactionData.safeTxGas,
-            baseGas: safeTransactionData.baseGas,
-            gasPrice: safeTransactionData.gasPrice,
-            nonce: nonce,
+            safeTxGas: String(safeTransactionData.safeTxGas),
+            baseGas: String(safeTransactionData.baseGas),
+            gasPrice: String(safeTransactionData.gasPrice),
+            nonce: String(nonce),
+            operation: String(safeTransactionData.operation),
           },
         },
         client,
         wrapperUri
       );
 
-      //@ts-ignore
-      const wrapperTx = wrapperTxResult.value;
+      !wrapperTxResult.ok && console.log("wrapperTx", wrapperTxResult);
 
-      expect(wrapperTx).toEqual(sdkTx);
+      //@ts-ignore
+      const wrapperTxData = wrapperTxResult.value.data as SafeTransactionData;
+      const sdkTxData = sdkTx.data;
+
+      expect(wrapperTxData.to).toEqual(sdkTxData.to);
+      expect(wrapperTxData.value).toEqual(sdkTxData.value);
+      expect(wrapperTxData.data).toEqual(sdkTxData.data);
+      expect(wrapperTxData.baseGas).toEqual(sdkTxData.baseGas.toString());
+      expect(wrapperTxData.gasPrice).toEqual(sdkTxData.gasPrice.toString());
+      expect(wrapperTxData.gasToken).toEqual(sdkTxData.gasToken);
+      expect(wrapperTxData.refundReceiver).toEqual(sdkTxData.refundReceiver);
+      expect(wrapperTxData.nonce).toEqual(sdkTxData.nonce.toString());
+      expect(wrapperTxData.safeTxGas).toEqual(sdkTxData.safeTxGas.toString());
     });
 
-    it.only("Should create SDK-like transaction based on minimal transaction data ", async () => {
+    it("Should create SDK-like transaction based on minimal transaction data ", async () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
       const ethAdapter = await getEthAdapter(account1.signer);
@@ -204,7 +217,7 @@ describe("Safe Wrapper", () => {
 
       /*       const nonce = (await ethAdapter.getNonce(account1.address)) + 1;
        */
-      const safeTransactionData: SafeTransactionDataPartial = {
+      const safeTransactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
         data: "0x",
@@ -222,10 +235,21 @@ describe("Safe Wrapper", () => {
         wrapperUri
       );
 
+      !wrapperTxResult.ok && console.log("wrapperTx", wrapperTxResult);
+
       //@ts-ignore
-      const wrapperTx = wrapperTxResult.value;
-      console.log('wrapperTx', wrapperTx)
-      expect(wrapperTx).toEqual(sdkTx);
+      const wrapperTxData = wrapperTxResult.value.data;
+      const sdkTxData = sdkTx.data;
+
+      expect(wrapperTxData.to).toEqual(sdkTxData.to);
+      expect(wrapperTxData.value).toEqual(sdkTxData.value);
+      expect(wrapperTxData.data).toEqual(sdkTxData.data);
+      expect(wrapperTxData.baseGas).toEqual(sdkTxData.baseGas.toString());
+      expect(wrapperTxData.gasPrice).toEqual(sdkTxData.gasPrice.toString());
+      expect(wrapperTxData.gasToken).toEqual(sdkTxData.gasToken);
+      expect(wrapperTxData.refundReceiver).toEqual(sdkTxData.refundReceiver);
+      expect(wrapperTxData.nonce).toEqual(sdkTxData.nonce.toString());
+      expect(wrapperTxData.safeTxGas).toEqual(sdkTxData.safeTxGas.toString());
     });
 
     it("Should return transaction hash SDK-like", async () => {
@@ -259,15 +283,18 @@ describe("Safe Wrapper", () => {
         {
           tx: {
             ...tx.data,
-            safeTxGas: safeTxGas,
-            baseGas: baseGas,
-            gasPrice: gasPrice,
-            nonce: txNonce,
+            safeTxGas: String(safeTxGas),
+            baseGas: String(baseGas),
+            gasPrice: String(gasPrice),
+            nonce: String(txNonce),
+            operation: String(tx.data.operation),
           },
         },
         client,
         wrapperUri
       );
+
+      !wrapperHashResult.ok && console.log(wrapperHashResult);
 
       //@ts-ignore
       const wrapperHash = wrapperHashResult.value as string;
@@ -357,10 +384,11 @@ describe("Safe Wrapper", () => {
         {
           tx: {
             ...safeTransactionData,
-            safeTxGas: safeTransactionData.safeTxGas,
-            baseGas: safeTransactionData.baseGas,
-            gasPrice: safeTransactionData.gasPrice,
-            nonce: nonce,
+            safeTxGas: String(safeTransactionData.safeTxGas),
+            baseGas: String(safeTransactionData.baseGas),
+            gasPrice: String(safeTransactionData.gasPrice),
+            nonce: String(nonce),
+            operation: String(safeTransactionData.operation),
           },
         },
         client,
@@ -384,11 +412,24 @@ describe("Safe Wrapper", () => {
       // console.log("sdkSigned", sdkSigned);
       // console.log("wrapperSigned", wrapperSigned);
 
-      expect(wrapperSigned.data).toEqual(sdkSigned.data);
+      //expect(wrapperSigned.data).toEqual(sdkSigned.data);
 
       expect(wrapperSigned.signatures!.values()).toEqual(
         sdkSigned.signatures.values()
       );
+
+      const wrapperTxData = wrapperSigned.data;
+      const sdkTxData = sdkSigned.data;
+
+      expect(wrapperTxData.to).toEqual(sdkTxData.to);
+      expect(wrapperTxData.value).toEqual(sdkTxData.value);
+      expect(wrapperTxData.data).toEqual(sdkTxData.data);
+      expect(wrapperTxData.baseGas).toEqual(sdkTxData.baseGas.toString());
+      expect(wrapperTxData.gasPrice).toEqual(sdkTxData.gasPrice.toString());
+      expect(wrapperTxData.gasToken).toEqual(sdkTxData.gasToken);
+      expect(wrapperTxData.refundReceiver).toEqual(sdkTxData.refundReceiver);
+      expect(wrapperTxData.nonce).toEqual(sdkTxData.nonce.toString());
+      expect(wrapperTxData.safeTxGas).toEqual(sdkTxData.safeTxGas.toString());
     });
   });
 });

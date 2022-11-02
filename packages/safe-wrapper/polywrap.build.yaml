@@ -6,3 +6,5 @@ config:
   include:
     - ./package.json
     - ./src
+  exclude:
+    - ./src/__tests__

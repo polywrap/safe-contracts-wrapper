@@ -18,8 +18,6 @@ import {
   SafeTransaction,
   SignSignature,
 } from "./wrap";
-
-import { Box } from "@polywrap/wasm-as";
 import { Args_getTransactionHash } from "./wrap/Module";
 import {
   adjustVInSignature,
@@ -303,18 +301,20 @@ export function createTransaction(
   args: Args_createTransaction,
   env: Env
 ): SafeTransaction {
-  const transactionData = createTransactionFromPartial(args.tx);
+  /*   let nonce = <u32>0;
 
-  if (!transactionData.nonce) {
-    transactionData.nonce = Box.from(
-      Ethereum_Module.getSignerTransactionCount({
-        connection: env.connection,
-        blockTag: null,
-      })
-        .unwrap()
-        .toUInt32()
-    );
-  }
+  if (args.tx.nonce != null) {
+    nonce = args.tx.nonce!.unwrap();
+  } else {
+    nonce = Ethereum_Module.getSignerTransactionCount({
+      connection: env.connection,
+      blockTag: null,
+    })
+      .unwrap()
+      .toUInt32();
+  } */
+
+  const transactionData = createTransactionFromPartial(args.tx);
 
   return {
     data: transactionData,
@@ -353,22 +353,9 @@ export function getTransactionHash(
   args: Args_getTransactionHash,
   env: Env
 ): string {
-  let nonce = args.tx.nonce;
-
-  if (nonce == null) {
-    nonce = Box.from(
-      Ethereum_Module.getSignerTransactionCount({
-        connection: env.connection,
-        blockTag: null,
-      })
-        .unwrap()
-        .toUInt32()
-    );
-  }
-
   const recreatedTx = createTransactionFromPartial(args.tx);
 
-  const contractArgs = getTransactionHashArgs(recreatedTx, nonce!.unwrap());
+  const contractArgs = getTransactionHashArgs(recreatedTx);
 
   const res = Ethereum_Module.callContractView({
     address: env.safeAddress,
