@@ -34,99 +34,15 @@ import {
   Args_signTransactionHash,
 } from "./wrap/Module/serialization";
 import { BigInt, Box } from "@polywrap/wasm-as";
-
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
-
-function sameString(str1: string, str2: string): bool {
-  const s1 = str1.toLowerCase();
-  const s2 = str2.toLowerCase();
-  return s1 == s2;
-}
-
-function findIndex(item: string, items: string[]): i32 {
-  for (let i = 0, ln = items.length; i < ln; i++) {
-    if (sameString(item, items[i])) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-export function isZeroAddress(address: string): bool {
-  return sameString(address, ZERO_ADDRESS);
-}
-
-function isSentinelAddress(address: string): bool {
-  return sameString(address, SENTINEL_ADDRESS);
-}
-
-export function isRestrictedAddress(address: string): bool {
-  return isZeroAddress(address) || isSentinelAddress(address);
-}
-
-function validateOwnerAddress(ownerAddress: string): void {
-  const isValidAddress = Ethereum_Module.checkAddress({
-    address: ownerAddress,
-  });
-  if (!isValidAddress || isRestrictedAddress(ownerAddress)) {
-    throw new Error("Invalid owner address provided");
-  }
-}
-
-function validateAddressIsNotOwner(ownerAddress: string, owners: string[]): void {
-  const ownerIndex = findIndex(ownerAddress, owners);
-  if (ownerIndex >= 0) {
-    throw new Error("Address provided is already an owner");
-  }
-}
-
-function validateAddressIsOwnerAndGetPrev(ownerAddress: string, owners: string[]): string {
-  const ownerIndex = findIndex(ownerAddress, owners);
-  if (ownerIndex < 0) {
-    throw new Error("Address provided is not an owner");
-  }
-  if (ownerIndex == 0) {
-    return SENTINEL_ADDRESS;
-  }
-  return owners[ownerIndex - 1];
-}
-
-function validateThreshold(threshold: number, numOwners: number): void {
-  if (threshold <= 0) {
-    throw new Error("Threshold needs to be greater than 0");
-  }
-  if (threshold > numOwners) {
-    throw new Error("Threshold cannot exceed owner count");
-  }
-}
-
-function validateModuleAddress(moduleAddress: string): void {
-  const isValidAddress = Ethereum_Module.checkAddress({
-    address: moduleAddress,
-  });
-  if (!isValidAddress.unwrap() || isRestrictedAddress(moduleAddress)) {
-    throw new Error("Invalid module address provided");
-  }
-}
-
-function validateModuleIsNotEnabled(moduleAddress: string, modules: string[]): void {
-  const moduleIndex = findIndex(moduleAddress, modules);
-  if (moduleIndex >= 0) {
-    throw new Error("Module provided is already enabled");
-  }
-}
-
-function validateModuleIsEnabledAndGetPrev(moduleAddress: string, modules: string[]): string {
-  const moduleIndex = findIndex(moduleAddress, modules);
-  if (moduleIndex < 0) {
-    throw new Error("Module provided is not enabled yet");
-  }
-  if (moduleIndex == 0) {
-    return SENTINEL_ADDRESS;
-  }
-  return modules[moduleIndex - 1];
-}
+import {
+  validateOwnerAddress,
+  validateAddressIsNotOwner,
+  validateThreshold,
+  validateAddressIsOwnerAndGetPrev,
+  validateModuleAddress,
+  validateModuleIsNotEnabled,
+  validateModuleIsEnabledAndGetPrev,
+} from "./utils/validation";
 
 // Owner manager methods
 export function getOwners(args: Args_getOwners, env: Env): string[] {

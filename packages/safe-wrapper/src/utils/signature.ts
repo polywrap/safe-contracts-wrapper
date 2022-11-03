@@ -1,19 +1,14 @@
-
 export function arrayify(value: string): Uint8Array {
   let hex = value.substring(2);
-  
+
   let result = new Array<u8>();
-  
+
   for (let i = 0; i < hex.length; i += 2) {
     result.push(<u8>parseInt(hex.substring(i, i + 2), 16));
   }
   const uArray = new Uint8Array(result.length);
   uArray.set(result);
   return uArray;
-}
-
-export function sameString(str1: string, str2: string): boolean {
-  return str1.toLowerCase() === str2.toLowerCase();
 }
 
 export const adjustVInSignature = (

@@ -1,11 +1,6 @@
 import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
-import {
-  initTestEnvironment,
-  stopTestEnvironment,
-  providers,
-  ensAddresses,
-} from "@polywrap/test-env-js";
+import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
 import { getPlugins, setupContractNetworks } from "../utils";
 import { ethers } from "ethers";
@@ -24,17 +19,10 @@ describe("Safe Wrapper", () => {
   let safeAddress: string;
 
   let client: Client;
-  const wrapperPath: string = path.join(
-    path.resolve(__dirname),
-    "..",
-    "..",
-    ".."
-  );
+  const wrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..");
   const wrapperUri = `fs/${wrapperPath}/build`;
 
-  const ethersProvider = new ethers.providers.JsonRpcProvider(
-    providers.ethereum
-  );
+  const ethersProvider = new ethers.providers.JsonRpcProvider(providers.ethereum);
 
   beforeAll(async () => {
     await initTestEnvironment();
@@ -79,9 +67,7 @@ describe("Safe Wrapper", () => {
       const resp = await wrapper.getOwners({}, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
-      expect(resp.value!.map((a: any) => a.toLowerCase())).toEqual(
-        owners.map((a) => a.toLowerCase())
-      );
+      expect(resp.value!.map((a: any) => a.toLowerCase())).toEqual(owners.map((a) => a.toLowerCase()));
     });
 
     it("getThreshold", async () => {
@@ -92,33 +78,21 @@ describe("Safe Wrapper", () => {
     });
 
     it("isOwner", async () => {
-      const resp = await wrapper.isOwner(
-        { ownerAddress: owners[0] },
-        client,
-        wrapperUri
-      );
+      const resp = await wrapper.isOwner({ ownerAddress: owners[0] }, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).toEqual(true);
     });
 
     it("encodeAddOwnerWithThresholdData", async () => {
-      const resp = await wrapper.encodeAddOwnerWithThresholdData(
-        { ownerAddress: someAddr },
-        client,
-        wrapperUri
-      );
+      const resp = await wrapper.encodeAddOwnerWithThresholdData({ ownerAddress: someAddr }, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
     });
 
     it("encodeRemoveOwnerData", async () => {
-      const resp = await wrapper.encodeRemoveOwnerData(
-        { ownerAddress: owners[0] },
-        client,
-        wrapperUri
-      );
+      const resp = await wrapper.encodeRemoveOwnerData({ ownerAddress: owners[0] }, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
@@ -143,18 +117,12 @@ describe("Safe Wrapper", () => {
       );
 
       if (!resp.ok) {
-        expect(resp.error?.toString()).toMatch(
-          "Address provided is already an owner"
-        );
+        expect(resp.error?.toString()).toContain("Address provided is already an owner");
       }
     });
 
     it("encodeChangeThresholdData", async () => {
-      const resp = await wrapper.encodeChangeThresholdData(
-        { threshold: 2 },
-        client,
-        wrapperUri
-      );
+      const resp = await wrapper.encodeChangeThresholdData({ threshold: 2 }, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
@@ -171,11 +139,7 @@ describe("Safe Wrapper", () => {
     });
 
     it("isModuleEnabled", async () => {
-      const resp = await wrapper.isModuleEnabled(
-        { moduleAddress: someAddr },
-        client,
-        wrapperUri
-      );
+      const resp = await wrapper.isModuleEnabled({ moduleAddress: someAddr }, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
@@ -183,26 +147,16 @@ describe("Safe Wrapper", () => {
     });
 
     it("encodeEnableModuleData", async () => {
-      const resp = await wrapper.encodeEnableModuleData(
-        { moduleAddress: someAddr },
-        client,
-        wrapperUri
-      );
+      const resp = await wrapper.encodeEnableModuleData({ moduleAddress: someAddr }, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
     });
 
     it("encodeDisableModuleData", async () => {
-      const resp = await wrapper.encodeDisableModuleData(
-        { moduleAddress: someAddr },
-        client,
-        wrapperUri
-      );
+      const resp = await wrapper.encodeDisableModuleData({ moduleAddress: someAddr }, client, wrapperUri);
       if (!resp.ok) {
-        expect(resp.error?.toString()).toMatch(
-          "Module provided is not enabled yet"
-        );
+        expect(resp.error?.toString()).toMatch("Module provided is not enabled yet");
       }
     });
   });

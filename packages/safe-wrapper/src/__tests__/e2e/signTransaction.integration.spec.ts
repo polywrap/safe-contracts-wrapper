@@ -1,25 +1,15 @@
 import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
-import {
-  initTestEnvironment,
-  stopTestEnvironment,
-  providers,
-  ensAddresses,
-} from "@polywrap/test-env-js";
+import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import {
-  getEthAdapter,
-  getPlugins,
-  setupContractNetworks,
-  setupTests as setupTestsBase,
-} from "../utils";
+import { getEthAdapter, getPlugins, setupContractNetworks, setupTests as setupTestsBase } from "../utils";
 import Safe from "@gnosis.pm/safe-core-sdk";
 import { SafeTransactionDataPartial } from "@gnosis.pm/safe-core-sdk-types";
 //import { SafeWrapper_SafeTransaction } from "../types/wrap";
 import { Client } from "@polywrap/core-js";
 //@ts-ignore
 import { zeroAddress } from "ethereumjs-util";
-import { SafeTransaction, SafeTransactionData } from "../../wrap";
+import { SafeTransaction } from "../../wrap";
 
 jest.setTimeout(1200000);
 
@@ -27,12 +17,7 @@ describe("Safe Wrapper", () => {
   let safeAddress: string;
 
   let client: Client;
-  const wrapperPath: string = path.join(
-    path.resolve(__dirname),
-    "..",
-    "..",
-    ".."
-  );
+  const wrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..");
   const wrapperUri = `fs/${wrapperPath}/build`;
 
   const connection = { networkNameOrChainId: "testnet", chainId: 1337 };
@@ -55,11 +40,7 @@ describe("Safe Wrapper", () => {
     const setupContractsResult = await setupContractNetworks(client);
     safeAddress = setupContractsResult[0];
 
-    setupTests = setupTestsBase.bind(
-      {},
-      connection.chainId,
-      setupContractsResult[1]
-    );
+    setupTests = setupTestsBase.bind({}, connection.chainId, setupContractsResult[1]);
 
     client = new PolywrapClient({
       ...plugins,
@@ -84,10 +65,7 @@ describe("Safe Wrapper", () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
 
-      const ethAdapter = await getEthAdapter(
-        providers.ethereum,
-        account1.signer
-      );
+      const ethAdapter = await getEthAdapter(providers.ethereum, account1.signer);
 
       const safeSdk = await Safe.create({
         ethAdapter,
@@ -141,10 +119,7 @@ describe("Safe Wrapper", () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
 
-      const ethAdapter = await getEthAdapter(
-        providers.ethereum,
-        account1.signer
-      );
+      const ethAdapter = await getEthAdapter(providers.ethereum, account1.signer);
       const safeSdk = await Safe.create({
         ethAdapter,
         safeAddress: safeAddress,
@@ -166,12 +141,11 @@ describe("Safe Wrapper", () => {
       const txHash = await safeSdk.getTransactionHash(tx);
       //console.log("txHash: ", txHash);
 
-      const wrapperSignedResult =
-        await App.SafeWrapper_Module.signTransactionHash(
-          { hash: txHash },
-          client,
-          wrapperUri
-        );
+      const wrapperSignedResult = await App.SafeWrapper_Module.signTransactionHash(
+        { hash: txHash },
+        client,
+        wrapperUri
+      );
 
       !wrapperSignedResult.ok && console.log();
 
@@ -189,10 +163,7 @@ describe("Safe Wrapper", () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
 
-      const ethAdapter = await getEthAdapter(
-        providers.ethereum,
-        account1.signer
-      );
+      const ethAdapter = await getEthAdapter(providers.ethereum, account1.signer);
 
       const safeSdk = await Safe.create({
         ethAdapter,
@@ -238,11 +209,7 @@ describe("Safe Wrapper", () => {
 
       const sdkSigned = await safeSdk.signTransaction(sdkTx);
 
-      const wrapperSignedResult = await App.SafeWrapper_Module.addSignature(
-        { tx: wrapperTx },
-        client,
-        wrapperUri
-      );
+      const wrapperSignedResult = await App.SafeWrapper_Module.addSignature({ tx: wrapperTx }, client, wrapperUri);
 
       //@ts-ignore
       const wrapperSigned = wrapperSignedResult.value as SafeTransaction;
@@ -252,9 +219,7 @@ describe("Safe Wrapper", () => {
 
       //expect(wrapperSigned.data).toEqual(sdkSigned.data);
 
-      expect(wrapperSigned.signatures!.values()).toEqual(
-        sdkSigned.signatures.values()
-      );
+      expect(wrapperSigned.signatures!.values()).toEqual(sdkSigned.signatures.values());
 
       const wrapperTxData = wrapperSigned.data;
       const sdkTxData = sdkSigned.data;
