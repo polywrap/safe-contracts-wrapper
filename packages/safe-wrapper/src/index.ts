@@ -18,7 +18,6 @@ import {
   SafeTransaction,
   SignSignature,
   SafeTransactionData,
-  Logger_Module,
 } from "./wrap";
 import { Args_getTransactionHash } from "./wrap/Module";
 import {
@@ -30,7 +29,6 @@ import {
 } from "./utils";
 import { Args_createMultiSendTransaction, Args_signTransactionHash } from "./wrap/Module/serialization";
 import { BigInt } from "@polywrap/wasm-as";
-import { MetaTransactionData } from "./wrap/MetaTransactionData";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
@@ -261,20 +259,7 @@ export function encodeDisableModuleData(args: Args_encodeDisableModuleData, env:
 }
 
 export function createTransaction(args: Args_createTransaction, env: Env): SafeTransaction {
-  /*   let nonce = <u32>0;
-
-  if (args.tx.nonce != null) {
-    nonce = args.tx.nonce!.unwrap();
-  } else {
-    nonce = Ethereum_Module.getSignerTransactionCount({
-      connection: env.connection,
-      blockTag: null,
-    })
-      .unwrap()
-      .toUInt32();
-  } */
-
-  const transactionData = createTransactionFromPartial(args.tx);
+  const transactionData = createTransactionFromPartial(args.tx, args.options);
 
   return {
     data: transactionData,
@@ -283,14 +268,13 @@ export function createTransaction(args: Args_createTransaction, env: Env): SafeT
 }
 
 export function createMultiSendTransaction(args: Args_createMultiSendTransaction, env: Env): SafeTransaction {
-  if (args.txs.length === 0) {
+  if (args.txs.length == 0) {
     throw new Error("Invalid empty array of transactions");
   }
 
-  /*  const multiSendContract = onlyCalls
-    ? this.#contractManager.multiSendCallOnlyContract
-    : this.#contractManager.multiSendContract;
-   */
+  if (args.txs.length == 1) {
+    return createTransaction({ tx: args.txs[0], options: args.options }, env);
+  }
 
   const multiSendData = encodeMultiSendData(args.txs);
 
@@ -299,9 +283,7 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
     args: [multiSendData],
   }).unwrap();
 
-  Logger_Module.log({ level: 0, message: data }).unwrap();
-
-  const transactionData = createTransactionFromPartial({ data: "", to: "", value: "" } as SafeTransactionData);
+  const transactionData = createTransactionFromPartial({ data: "", to: "", value: "" } as SafeTransactionData, null);
 
   const multiSendAddress = args.multiSendContractAddress; // multiSendContract.getAddress(),
 
@@ -352,7 +334,7 @@ export function addSignature(args: Args_addSignature, env: Env): SafeTransaction
 }
 
 export function getTransactionHash(args: Args_getTransactionHash, env: Env): string {
-  const recreatedTx = createTransactionFromPartial(args.tx);
+  const recreatedTx = createTransactionFromPartial(args.tx, null);
 
   const contractArgs = getTransactionHashArgs(recreatedTx);
 

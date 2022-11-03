@@ -1,5 +1,5 @@
 import { BigInt } from "@polywrap/wasm-as";
-import { Ethereum_Module, SafeTransactionData } from "../wrap";
+import { Ethereum_Module, SafeTransactionData, SafeTransactionOptionalProps } from "../wrap";
 import { ZERO_ADDRESS } from "./constants";
 import { arrayify } from "./signature";
 
@@ -19,7 +19,8 @@ export function getTransactionHashArgs(tx: SafeTransactionData): string[] {
 }
 
 export function createTransactionFromPartial(
-  transactionData: SafeTransactionData
+  transactionData: SafeTransactionData,
+  options: SafeTransactionOptionalProps | null
 ): SafeTransactionData {
   let transaction: SafeTransactionData = {
     data: transactionData.data,
@@ -41,42 +42,54 @@ export function createTransactionFromPartial(
 
   if (transactionData.baseGas) {
     transaction.baseGas = transactionData.baseGas!;
+  } else if (options != null && options.baseGas) {
+    transaction.baseGas = options.baseGas;
   }
 
   if (transactionData.gasPrice) {
     transaction.gasPrice = transactionData.gasPrice!;
+  } else if (options != null && options.gasPrice) {
+    transaction.gasPrice = options.gasPrice;
   }
 
   if (transactionData.safeTxGas) {
     transaction.safeTxGas = transactionData.safeTxGas!;
+  } else if (options != null && options.safeTxGas) {
+    transaction.safeTxGas = options.safeTxGas;
   }
 
   if (transactionData.gasToken != null) {
     transaction.gasToken = transactionData.gasToken!;
+  } else if (options != null && options.gasToken) {
+    transaction.gasToken = options.gasToken;
   }
 
   if (transactionData.nonce) {
     transaction.nonce = transactionData.nonce!;
+  } else if (options != null && options.nonce) {
+    transaction.nonce = options.nonce;
   }
 
   if (transactionData.operation) {
     transaction.operation = transactionData.operation!; // 0 is Call, 1 is DelegateCall
+  } else if (options != null && options.operation) {
+    transaction.operation = options.operation;
   }
 
   if (transactionData.refundReceiver != null) {
     transaction.refundReceiver = transactionData.refundReceiver!;
+  } else if (options != null && options.refundReceiver != null) {
+    transaction.refundReceiver = options.refundReceiver;
   }
 
   return transaction;
 }
 
-export const encodeMultiSendData = (
-  transactionDataArr: SafeTransactionData[]
-): string => {
+export const encodeMultiSendData = (transactionDataArr: SafeTransactionData[]): string => {
   let dataStr = "";
 
   for (let i = 0; i < transactionDataArr.length; i++) {
-    const standardized = createTransactionFromPartial(transactionDataArr[i]);
+    const standardized = createTransactionFromPartial(transactionDataArr[i], null);
     dataStr = dataStr.concat(encodeMetaTransaction(standardized));
   }
 
@@ -88,13 +101,7 @@ export function encodeMetaTransaction(tx: SafeTransactionData): string {
 
   const encoded = Ethereum_Module.solidityPack({
     types: ["uint8", "address", "uint256", "uint256", "bytes"],
-    values: [
-      tx.operation!.toString(),
-      tx.to,
-      tx.value,
-      data.length.toString(),
-      "[" + data.toString() + "]",
-    ],
+    values: [tx.operation!.toString(), tx.to, tx.value, data.length.toString(), "[" + data.toString() + "]"],
   }).unwrap();
 
   return encoded.slice(2);

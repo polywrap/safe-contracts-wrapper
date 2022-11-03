@@ -13,7 +13,7 @@
     "build": "polywrap build",
     "codegen": "polywrap codegen",
     "test": "yarn test:e2e",
-    "test:create": "jest src/__tests__/e2e/createTransaction --passWithNoTests --runInBand --verbose",
+    "test:create": "jest src/__tests__/e2e/createTransaction.spec --passWithNoTests --runInBand --verbose",
     "test:integration:create": "jest src/__tests__/e2e/createTransaction.integration --passWithNoTests --runInBand --verbose",
     "test:integration:sign": "jest src/__tests__/e2e/signTransaction.integration --passWithNoTests --runInBand --verbose",
     "test:e2e": "yarn test:e2e:codegen && jest --passWithNoTests --runInBand --verbose",

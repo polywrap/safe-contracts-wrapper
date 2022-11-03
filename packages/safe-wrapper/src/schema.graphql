@@ -65,7 +65,7 @@ type Module {
     encodeDisableModuleData(moduleAddress: String!): String! @env(required: true)
 
     """Transaction manager methods"""
-    createTransaction(tx: SafeTransactionData!): SafeTransaction! @env(required: true)
+    createTransaction(tx: SafeTransactionData!, options: SafeTransactionOptionalProps): SafeTransaction! @env(required: true)
     createMultiSendTransaction(txs: [SafeTransactionData!]!, multiSendContractAddress: String!, options: SafeTransactionOptionalProps ): SafeTransaction! @env(required: true)
     addSignature(tx: SafeTransaction!): SafeTransaction! @env(required: true)
     getTransactionHash(tx: SafeTransactionData!): String @env(required: true)
