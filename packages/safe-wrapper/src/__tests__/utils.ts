@@ -1,11 +1,7 @@
 import path from "path";
 import { ClientConfig } from "@polywrap/client-js";
 import { ensResolverPlugin } from "@polywrap/ens-resolver-plugin-js";
-import {
-  Connection,
-  Connections,
-  ethereumPlugin,
-} from "@polywrap/ethereum-plugin-js";
+import { Connection, Connections, ethereumPlugin } from "@polywrap/ethereum-plugin-js";
 import { dateTimePlugin } from "polywrap-datetime-plugin";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
 import { ethers, Signer, Wallet } from "ethers";
@@ -40,7 +36,8 @@ export async function getPlugins(
   ethereum: string,
   ipfs: string,
   ensAddress: string,
-  networkName: string
+  networkName: string,
+  wallet = new Wallet("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
 ): Promise<Partial<ClientConfig>> {
   return {
     envs: [
@@ -82,15 +79,11 @@ export async function getPlugins(
             networks: {
               testnet: new Connection({
                 provider: ethereum,
-                signer: new Wallet(
-                  "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
-                ),
+                signer: wallet,
               }),
               [networkName]: new Connection({
                 provider: ethereum,
-                signer: new Wallet(
-                  "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
-                ),
+                signer: wallet,
               }),
               mainnet: new Connection({ provider: "http://localhost:8546" }),
             },
@@ -117,13 +110,7 @@ export const setupContractNetworks = async (
 > => {
   const ethereumUri = "ens/ethereum.polywrap.eth";
 
-  const safeWrapperPath: string = path.join(
-    path.resolve(__dirname),
-    "..",
-    "..",
-    "..",
-    "safe-factory-wrapper"
-  );
+  const safeWrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..", "safe-factory-wrapper");
   const safeWrapperUri = `fs/${safeWrapperPath}/build`;
 
   let safeAddress: string;
@@ -138,34 +125,30 @@ export const setupContractNetworks = async (
   const owner = "0xEc8E7Da193529bd8ddA13b1995F93F32989CF097";
   const owners = [signer, owner];
 
-  const proxyFactoryContractResponse_v130 =
-    await App.Ethereum_Module.deployContract(
-      {
-        abi: JSON.stringify(factoryAbi_1_3_0),
-        bytecode: factoryBytecode_1_3_0,
-        args: null,
-      },
-      client,
-      ethereumUri
-    );
+  const proxyFactoryContractResponse_v130 = await App.Ethereum_Module.deployContract(
+    {
+      abi: JSON.stringify(factoryAbi_1_3_0),
+      bytecode: factoryBytecode_1_3_0,
+      args: null,
+    },
+    client,
+    ethereumUri
+  );
 
-  if (!proxyFactoryContractResponse_v130.ok)
-    throw proxyFactoryContractResponse_v130.error;
+  if (!proxyFactoryContractResponse_v130.ok) throw proxyFactoryContractResponse_v130.error;
   proxyContractAddress = proxyFactoryContractResponse_v130.value as string;
 
-  const safeFactoryContractResponse_v130 =
-    await App.Ethereum_Module.deployContract(
-      {
-        abi: JSON.stringify(safeAbi_1_3_0),
-        bytecode: safeBytecode_1_3_0,
-        args: null,
-      },
-      client,
-      ethereumUri
-    );
+  const safeFactoryContractResponse_v130 = await App.Ethereum_Module.deployContract(
+    {
+      abi: JSON.stringify(safeAbi_1_3_0),
+      bytecode: safeBytecode_1_3_0,
+      args: null,
+    },
+    client,
+    ethereumUri
+  );
 
-  if (!safeFactoryContractResponse_v130.ok)
-    throw safeFactoryContractResponse_v130.error;
+  if (!safeFactoryContractResponse_v130.ok) throw safeFactoryContractResponse_v130.error;
   safeContractAddress = safeFactoryContractResponse_v130.value as string;
 
   const safeResponse = await App.SafeFactory_Module.deploySafe(
@@ -224,10 +207,7 @@ export const setupContractNetworks = async (
   ];
 };
 
-export const getEthAdapter = async (
-  providerUrl: string,
-  signer: Signer
-): Promise<EthAdapter> => {
+export const getEthAdapter = async (providerUrl: string, signer: Signer): Promise<EthAdapter> => {
   const ethersProvider = new ethers.providers.JsonRpcProvider(providerUrl);
 
   signer = signer.connect(ethersProvider);
@@ -239,9 +219,7 @@ export const getEthAdapter = async (
 export const setupAccounts = () => {
   return [
     {
-      signer: new Wallet(
-        "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
-      ),
+      signer: new Wallet("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"),
       address: "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
     },
   ];

@@ -310,24 +310,40 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
 }
 
 export function addSignature(args: Args_addSignature, env: Env): SafeTransaction {
-  const address = Ethereum_Module.getSignerAddress({
+  const signerAddress = Ethereum_Module.getSignerAddress({
     connection: {
       node: env.connection.node,
       networkNameOrChainId: env.connection.networkNameOrChainId,
     },
   }).unwrap();
 
+  const addressIsOwner = isOwner({ ownerAddress: signerAddress }, env);
+
+  if (addressIsOwner == false) {
+    throw new Error("Transactions can only be signed by Safe owners");
+  }
+
+  let signatures = args.tx.signatures;
+
+  //If signature of current signer is already present - return transaction
+  if (signatures != null) {
+    if (signatures.has(signerAddress)) {
+      return args.tx;
+    }
+  }
+
+  //If no signatures - create signatures map
+  if (signatures == null) {
+    signatures = new Map<string, SignSignature>();
+  }
+
+  //Add signature of current signer
   const transactionHash = getTransactionHash({ tx: args.tx.data }, env);
 
   const signature = signTransactionHash({ hash: transactionHash }, env);
 
-  let signatures = args.tx.signatures;
-  if (signatures == null) {
-    signatures = new Map<string, SignSignature>();
-  }
-  if (signatures != null) {
-    signatures.set(address, signature);
-  }
+  signatures.set(signerAddress, signature);
+
   args.tx.signatures = signatures;
 
   return args.tx;
