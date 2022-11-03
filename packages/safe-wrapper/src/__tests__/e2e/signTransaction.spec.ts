@@ -7,23 +7,14 @@ import {
   ensAddresses,
 } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getPlugins, setupContractNetworks } from "../utils";
-import Safe from "@gnosis.pm/safe-core-sdk";
 import {
-  SafeTransactionDataPartial,
-  EthAdapter,
-} from "@gnosis.pm/safe-core-sdk-types";
-import EthersAdapter, { EthersAdapterConfig } from "@gnosis.pm/safe-ethers-lib";
-import { ethers, Wallet } from "ethers";
-import { Signer } from "@ethersproject/abstract-signer";
-
-import { abi as factoryAbi_1_3_0 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
-
-import { abi as safeAbi_1_3_0 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
-
-import { abi as multisendAbi } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/libraries/MultiSend.sol/MultiSend.json";
-
-import { abi as multisendCallOnlyAbi } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/libraries/MultiSendCallOnly.sol/MultiSendCallOnly.json";
+  getEthAdapter,
+  getPlugins,
+  setupContractNetworks,
+  setupTests as setupTestsBase,
+} from "../utils";
+import Safe from "@gnosis.pm/safe-core-sdk";
+import { SafeTransactionDataPartial } from "@gnosis.pm/safe-core-sdk-types";
 //import { SafeWrapper_SafeTransaction } from "../types/wrap";
 import { Client } from "@polywrap/core-js";
 //@ts-ignore
@@ -33,13 +24,6 @@ import { SafeTransaction, SafeTransactionData } from "../../wrap";
 jest.setTimeout(1200000);
 
 describe("Safe Wrapper", () => {
-  const wallet = new Wallet(
-    "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
-  );
-
-  const signer = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
-
-  //const ethereumUri = "ens/ethereum.polywrap.eth";
   let safeAddress: string;
 
   let client: Client;
@@ -51,44 +35,31 @@ describe("Safe Wrapper", () => {
   );
   const wrapperUri = `fs/${wrapperPath}/build`;
 
-  let proxyContractAddress: string;
-  let safeContractAddress: string;
-  let multisendAddress: string;
-  let multisendCallOnlyAddress: string;
+  const connection = { networkNameOrChainId: "testnet", chainId: 1337 };
 
-  const ethersProvider = new ethers.providers.JsonRpcProvider(
-    providers.ethereum
-  );
-
-  const connection = { networkNameOrChainId: "testnet" };
-
+  let setupTests: () => ReturnType<typeof setupTestsBase>;
   beforeAll(async () => {
     await initTestEnvironment();
-
-    const network = await ethersProvider.getNetwork();
-
-    connection.networkNameOrChainId = network.chainId.toString();
 
     const plugins = await getPlugins(
       providers.ethereum,
       providers.ipfs,
       ensAddresses.ensAddress,
-      ethersProvider
+      connection.networkNameOrChainId
     );
 
     client = new PolywrapClient({
       ...plugins,
     }) as unknown as Client;
 
-    [
-      safeAddress,
-      {
-        proxyContractAddress,
-        safeContractAddress,
-        multisendAddress,
-        multisendCallOnlyAddress,
-      },
-    ] = await setupContractNetworks(client);
+    const setupContractsResult = await setupContractNetworks(client);
+    safeAddress = setupContractsResult[0];
+
+    setupTests = setupTestsBase.bind(
+      {},
+      connection.chainId,
+      setupContractsResult[1]
+    );
 
     client = new PolywrapClient({
       ...plugins,
@@ -109,41 +80,14 @@ describe("Safe Wrapper", () => {
   });
 
   describe("SignTransaction", () => {
-    const setupTests = async () => {
-      return {
-        accounts: [
-          {
-            signer: wallet,
-            address: signer,
-          },
-        ],
-        contractNetworks: {
-          [(await ethersProvider.getNetwork()).chainId]: {
-            multiSendAddress: multisendAddress,
-            multiSendAbi: multisendAbi,
-            multiSendCallOnlyAddress: multisendCallOnlyAddress,
-            multiSendCallOnlyAbi: multisendCallOnlyAbi,
-            safeMasterCopyAddress: safeContractAddress,
-            safeMasterCopyAbi: safeAbi_1_3_0,
-            safeProxyFactoryAddress: proxyContractAddress,
-            safeProxyFactoryAbi: factoryAbi_1_3_0,
-          },
-        },
-      };
-    };
-
-    const getEthAdapter = async (signer: Signer): Promise<EthAdapter> => {
-      let ethAdapter: EthAdapter;
-      signer = signer.connect(ethersProvider);
-      const ethersAdapterConfig: EthersAdapterConfig = { ethers, signer };
-      ethAdapter = new EthersAdapter(ethersAdapterConfig);
-      return ethAdapter;
-    };
-
     it("Should create SDK-like transaction based on full transaction data ", async () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
-      const ethAdapter = await getEthAdapter(account1.signer);
+
+      const ethAdapter = await getEthAdapter(
+        providers.ethereum,
+        account1.signer
+      );
 
       const safeSdk = await Safe.create({
         ethAdapter,
@@ -206,7 +150,11 @@ describe("Safe Wrapper", () => {
     it("Should create SDK-like transaction based on minimal transaction data ", async () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
-      const ethAdapter = await getEthAdapter(account1.signer);
+
+      const ethAdapter = await getEthAdapter(
+        providers.ethereum,
+        account1.signer
+      );
 
       const safeSdk = await Safe.create({
         ethAdapter,
@@ -255,7 +203,11 @@ describe("Safe Wrapper", () => {
     it("Should return transaction hash SDK-like", async () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
-      const ethAdapter = await getEthAdapter(account1.signer);
+
+      const ethAdapter = await getEthAdapter(
+        providers.ethereum,
+        account1.signer
+      );
 
       const safeSdk = await Safe.create({
         ethAdapter,
@@ -309,8 +261,10 @@ describe("Safe Wrapper", () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
 
-      const ethAdapter = await getEthAdapter(account1.signer);
-
+      const ethAdapter = await getEthAdapter(
+        providers.ethereum,
+        account1.signer
+      );
       const safeSdk = await Safe.create({
         ethAdapter,
         safeAddress: safeAddress,
@@ -354,7 +308,11 @@ describe("Safe Wrapper", () => {
     it("Should create and sign transaction SDK-like", async () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
-      const ethAdapter = await getEthAdapter(account1.signer);
+
+      const ethAdapter = await getEthAdapter(
+        providers.ethereum,
+        account1.signer
+      );
 
       const safeSdk = await Safe.create({
         ethAdapter,

@@ -47,7 +47,7 @@ describe("Safe Wrapper", () => {
       providers.ethereum,
       providers.ipfs,
       ensAddresses.ensAddress,
-      ethersProvider
+      connection.networkNameOrChainId
     );
 
     client = new PolywrapClient({

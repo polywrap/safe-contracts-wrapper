@@ -8,11 +8,11 @@ import {
 } from "@polywrap/ethereum-plugin-js";
 import { dateTimePlugin } from "polywrap-datetime-plugin";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
-import { ethers, Wallet } from "ethers";
+import { ethers, Signer, Wallet } from "ethers";
 import { ipfsPlugin } from "@polywrap/ipfs-plugin-js";
 import { defaultIpfsProviders } from "@polywrap/client-config-builder-js";
-import { PolywrapClient } from "@polywrap/client-js";
-
+import { EthAdapter } from "@gnosis.pm/safe-core-sdk-types";
+import EthersAdapter, { EthersAdapterConfig } from "@gnosis.pm/safe-ethers-lib";
 import {
   abi as factoryAbi_1_3_0,
   bytecode as factoryBytecode_1_3_0,
@@ -40,10 +40,8 @@ export async function getPlugins(
   ethereum: string,
   ipfs: string,
   ensAddress: string,
-  ethersProvider: ethers.providers.Provider
+  networkName: string
 ): Promise<Partial<ClientConfig>> {
-  const network = await ethersProvider.getNetwork();
-
   return {
     envs: [
       {
@@ -65,6 +63,7 @@ export async function getPlugins(
       },
       {
         uri: "wrap://ens/datetime.polywrap.eth",
+        //@ts-ignore
         plugin: dateTimePlugin({}),
       },
       {
@@ -87,15 +86,8 @@ export async function getPlugins(
                   "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
                 ),
               }),
-              1337: new Connection({
+              [networkName]: new Connection({
                 provider: ethereum,
-                signer: new Wallet(
-                  "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
-                ),
-              }),
-              //@ts-ignore
-              [network.chainId]: new Connection({
-                provider: ethersProvider,
                 signer: new Wallet(
                   "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
                 ),
@@ -230,4 +222,53 @@ export const setupContractNetworks = async (
       multisendCallOnlyAddress,
     },
   ];
+};
+
+export const getEthAdapter = async (
+  providerUrl: string,
+  signer: Signer
+): Promise<EthAdapter> => {
+  const ethersProvider = new ethers.providers.JsonRpcProvider(providerUrl);
+
+  signer = signer.connect(ethersProvider);
+  const ethersAdapterConfig: EthersAdapterConfig = { ethers, signer };
+  const ethAdapter = new EthersAdapter(ethersAdapterConfig);
+  return ethAdapter;
+};
+
+export const setupAccounts = () => {
+  return [
+    {
+      signer: new Wallet(
+        "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
+      ),
+      address: "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
+    },
+  ];
+};
+
+export const setupTests = async (
+  chainId: string,
+  contractNetworks: {
+    proxyContractAddress: string;
+    safeContractAddress: string;
+    multisendAddress: string;
+    multisendCallOnlyAddress: string;
+  }
+) => {
+  return {
+    accounts: setupAccounts(),
+    contractNetworks: {
+      [chainId]: {
+        multiSendAddress: contractNetworks.multisendAddress,
+        multiSendAbi: multisendAbi,
+        multiSendCallOnlyAddress: contractNetworks.multisendCallOnlyAddress,
+        multiSendCallOnlyAbi: multisendCallOnlyAbi,
+        safeMasterCopyAddress: contractNetworks.safeContractAddress,
+        safeMasterCopyAbi: safeAbi_1_3_0,
+        safeProxyFactoryAddress: contractNetworks.proxyContractAddress,
+        safeProxyFactoryAbi: factoryAbi_1_3_0,
+      },
+    },
+  };
 };
