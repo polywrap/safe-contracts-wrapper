@@ -17,15 +17,20 @@ import {
   SafeContracts_Module,
   SafeTransaction,
   SignSignature,
+  SafeTransactionData,
+  Logger_Module,
 } from "./wrap";
 import { Args_getTransactionHash } from "./wrap/Module";
 import {
   adjustVInSignature,
   arrayify,
   createTransactionFromPartial,
+  encodeMultiSendData,
   getTransactionHashArgs,
 } from "./utils";
-import { Args_signTransactionHash } from "./wrap/Module/serialization";
+import { Args_createMultiSendTransaction, Args_signTransactionHash } from "./wrap/Module/serialization";
+import { BigInt } from "@polywrap/wasm-as";
+import { MetaTransactionData } from "./wrap/MetaTransactionData";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
@@ -66,20 +71,14 @@ function validateOwnerAddress(ownerAddress: string): void {
   }
 }
 
-function validateAddressIsNotOwner(
-  ownerAddress: string,
-  owners: string[]
-): void {
+function validateAddressIsNotOwner(ownerAddress: string, owners: string[]): void {
   const ownerIndex = findIndex(ownerAddress, owners);
   if (ownerIndex >= 0) {
     throw new Error("Address provided is already an owner");
   }
 }
 
-function validateAddressIsOwnerAndGetPrev(
-  ownerAddress: string,
-  owners: string[]
-): string {
+function validateAddressIsOwnerAndGetPrev(ownerAddress: string, owners: string[]): string {
   const ownerIndex = findIndex(ownerAddress, owners);
   if (ownerIndex < 0) {
     throw new Error("Address provided is not an owner");
@@ -108,20 +107,14 @@ function validateModuleAddress(moduleAddress: string): void {
   }
 }
 
-function validateModuleIsNotEnabled(
-  moduleAddress: string,
-  modules: string[]
-): void {
+function validateModuleIsNotEnabled(moduleAddress: string, modules: string[]): void {
   const moduleIndex = findIndex(moduleAddress, modules);
   if (moduleIndex >= 0) {
     throw new Error("Module provided is already enabled");
   }
 }
 
-function validateModuleIsEnabledAndGetPrev(
-  moduleAddress: string,
-  modules: string[]
-): string {
+function validateModuleIsEnabledAndGetPrev(moduleAddress: string, modules: string[]): string {
   const moduleIndex = findIndex(moduleAddress, modules);
   if (moduleIndex < 0) {
     throw new Error("Module provided is not enabled yet");
@@ -166,10 +159,7 @@ export function isOwner(args: Args_isOwner, env: Env): bool {
   return result.unwrap();
 }
 
-export function encodeAddOwnerWithThresholdData(
-  args: Args_encodeAddOwnerWithThresholdData,
-  env: Env
-): string {
+export function encodeAddOwnerWithThresholdData(args: Args_encodeAddOwnerWithThresholdData, env: Env): string {
   validateOwnerAddress(args.ownerAddress);
   const owners = getOwners({}, env);
   validateAddressIsNotOwner(args.ownerAddress, owners);
@@ -181,23 +171,16 @@ export function encodeAddOwnerWithThresholdData(
   }
   validateThreshold(threshold, owners.length + 1);
   const result = Ethereum_Module.encodeFunction({
-    method:
-      "function addOwnerWithThreshold(address owner, uint256 _threshold) public",
+    method: "function addOwnerWithThreshold(address owner, uint256 _threshold) public",
     args: [args.ownerAddress, threshold.toString(16)],
   });
   return result.unwrap();
 }
 
-export function encodeRemoveOwnerData(
-  args: Args_encodeRemoveOwnerData,
-  env: Env
-): string {
+export function encodeRemoveOwnerData(args: Args_encodeRemoveOwnerData, env: Env): string {
   validateOwnerAddress(args.ownerAddress);
   const owners = getOwners({}, env);
-  const prevOwnerAddress = validateAddressIsOwnerAndGetPrev(
-    args.ownerAddress,
-    owners
-  );
+  const prevOwnerAddress = validateAddressIsOwnerAndGetPrev(args.ownerAddress, owners);
   let threshold: u32 = 0;
   if (args.threshold !== null) {
     threshold = args.threshold!.unwrap();
@@ -206,37 +189,26 @@ export function encodeRemoveOwnerData(
   }
   validateThreshold(threshold, owners.length - 1);
   const result = Ethereum_Module.encodeFunction({
-    method:
-      "function removeOwner(address prevOwner, address owner, uint256 _threshold) public",
+    method: "function removeOwner(address prevOwner, address owner, uint256 _threshold) public",
     args: [prevOwnerAddress, args.ownerAddress, threshold.toString(16)],
   });
   return result.unwrap();
 }
 
-export function encodeSwapOwnerData(
-  args: Args_encodeSwapOwnerData,
-  env: Env
-): string {
+export function encodeSwapOwnerData(args: Args_encodeSwapOwnerData, env: Env): string {
   validateOwnerAddress(args.oldOwnerAddress);
   validateOwnerAddress(args.newOwnerAddress);
   const owners = getOwners({}, env);
   validateAddressIsNotOwner(args.newOwnerAddress, owners);
-  const prevOwnerAddress = validateAddressIsOwnerAndGetPrev(
-    args.oldOwnerAddress,
-    owners
-  );
+  const prevOwnerAddress = validateAddressIsOwnerAndGetPrev(args.oldOwnerAddress, owners);
   const result = Ethereum_Module.encodeFunction({
-    method:
-      "function swapOwner(address prevOwner, address oldOwner, address newOwner) public",
+    method: "function swapOwner(address prevOwner, address oldOwner, address newOwner) public",
     args: [prevOwnerAddress, args.oldOwnerAddress, args.newOwnerAddress],
   });
   return result.unwrap();
 }
 
-export function encodeChangeThresholdData(
-  args: Args_encodeChangeThresholdData,
-  env: Env
-): string {
+export function encodeChangeThresholdData(args: Args_encodeChangeThresholdData, env: Env): string {
   validateThreshold(args.threshold, getOwners({}, env).length);
   const result = Ethereum_Module.encodeFunction({
     method: "function changeThreshold(uint256 _threshold) public",
@@ -268,10 +240,7 @@ export function isModuleEnabled(args: Args_isModuleEnabled, env: Env): bool {
   return result.unwrap();
 }
 
-export function encodeEnableModuleData(
-  args: Args_encodeEnableModuleData,
-  env: Env
-): string {
+export function encodeEnableModuleData(args: Args_encodeEnableModuleData, env: Env): string {
   validateModuleAddress(args.moduleAddress);
   validateModuleIsNotEnabled(args.moduleAddress, getModules({}, env));
   const result = Ethereum_Module.encodeFunction({
@@ -281,15 +250,9 @@ export function encodeEnableModuleData(
   return result.unwrap();
 }
 
-export function encodeDisableModuleData(
-  args: Args_encodeDisableModuleData,
-  env: Env
-): string {
+export function encodeDisableModuleData(args: Args_encodeDisableModuleData, env: Env): string {
   validateModuleAddress(args.moduleAddress);
-  const prevModuleAddress = validateModuleIsEnabledAndGetPrev(
-    args.moduleAddress,
-    getModules({}, env)
-  );
+  const prevModuleAddress = validateModuleIsEnabledAndGetPrev(args.moduleAddress, getModules({}, env));
   const result = Ethereum_Module.encodeFunction({
     method: "function disableModule(address prevModule, address module) public",
     args: [prevModuleAddress, args.moduleAddress],
@@ -297,10 +260,7 @@ export function encodeDisableModuleData(
   return result.unwrap();
 }
 
-export function createTransaction(
-  args: Args_createTransaction,
-  env: Env
-): SafeTransaction {
+export function createTransaction(args: Args_createTransaction, env: Env): SafeTransaction {
   /*   let nonce = <u32>0;
 
   if (args.tx.nonce != null) {
@@ -322,10 +282,52 @@ export function createTransaction(
   };
 }
 
-export function addSignature(
-  args: Args_addSignature,
-  env: Env
-): SafeTransaction {
+export function createMultiSendTransaction(args: Args_createMultiSendTransaction, env: Env): SafeTransaction {
+  if (args.txs.length === 0) {
+    throw new Error("Invalid empty array of transactions");
+  }
+
+  /*  const multiSendContract = onlyCalls
+    ? this.#contractManager.multiSendCallOnlyContract
+    : this.#contractManager.multiSendContract;
+   */
+
+  const multiSendData = encodeMultiSendData(args.txs);
+
+  const data = Ethereum_Module.encodeFunction({
+    method: "function multiSend(bytes transactions) public",
+    args: [multiSendData],
+  }).unwrap();
+
+  Logger_Module.log({ level: 0, message: data }).unwrap();
+
+  const transactionData = createTransactionFromPartial({ data: "", to: "", value: "" } as SafeTransactionData);
+
+  const multiSendAddress = args.multiSendContractAddress; // multiSendContract.getAddress(),
+
+  const multiSendTransaction: SafeTransactionData = {
+    to: multiSendAddress,
+    value: "0",
+    data: data,
+    operation: BigInt.from("1"), // OperationType.DelegateCall,
+    baseGas: args.options != null && args.options!.baseGas ? args.options!.baseGas : transactionData.baseGas,
+    gasPrice: args.options != null && args.options!.gasPrice ? args.options!.gasPrice : transactionData.gasPrice,
+    gasToken: args.options != null && args.options!.gasToken ? args.options!.gasToken : transactionData.gasToken,
+    nonce: args.options != null && args.options!.nonce ? args.options!.nonce : transactionData.nonce,
+    refundReceiver:
+      args.options != null && args.options!.refundReceiver
+        ? args.options!.refundReceiver
+        : transactionData.refundReceiver,
+    safeTxGas: args.options != null && args.options!.safeTxGas ? args.options!.safeTxGas : transactionData.safeTxGas,
+  };
+
+  return {
+    data: multiSendTransaction,
+    signatures: new Map<string, SignSignature>(),
+  };
+}
+
+export function addSignature(args: Args_addSignature, env: Env): SafeTransaction {
   const address = Ethereum_Module.getSignerAddress({
     connection: {
       node: env.connection.node,
@@ -349,10 +351,7 @@ export function addSignature(
   return args.tx;
 }
 
-export function getTransactionHash(
-  args: Args_getTransactionHash,
-  env: Env
-): string {
+export function getTransactionHash(args: Args_getTransactionHash, env: Env): string {
   const recreatedTx = createTransactionFromPartial(args.tx);
 
   const contractArgs = getTransactionHashArgs(recreatedTx);
@@ -368,10 +367,7 @@ export function getTransactionHash(
   return res;
 }
 
-export function signTransactionHash(
-  args: Args_signTransactionHash,
-  env: Env
-): SignSignature {
+export function signTransactionHash(args: Args_signTransactionHash, env: Env): SignSignature {
   const signer = Ethereum_Module.getSignerAddress({
     connection: env.connection,
   }).unwrap();
@@ -387,12 +383,7 @@ export function signTransactionHash(
     },
   }).unwrap();
 
-  const adjustedSignature = adjustVInSignature(
-    "eth_sign",
-    signature,
-    args.hash,
-    signer
-  );
+  const adjustedSignature = adjustVInSignature("eth_sign", signature, args.hash, signer);
 
   return { signer: signer, data: adjustedSignature };
 }

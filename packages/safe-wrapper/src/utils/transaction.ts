@@ -1,6 +1,7 @@
 import { BigInt } from "@polywrap/wasm-as";
-import { SafeTransactionData } from "../wrap";
+import { Ethereum_Module, SafeTransactionData } from "../wrap";
 import { ZERO_ADDRESS } from "./constants";
+import { arrayify } from "./signature";
 
 export function getTransactionHashArgs(tx: SafeTransactionData): string[] {
   return [
@@ -17,9 +18,9 @@ export function getTransactionHashArgs(tx: SafeTransactionData): string[] {
   ];
 }
 
-export const createTransactionFromPartial = (
+export function createTransactionFromPartial(
   transactionData: SafeTransactionData
-): SafeTransactionData => {
+): SafeTransactionData {
   let transaction: SafeTransactionData = {
     data: transactionData.data,
     to: transactionData.to,
@@ -67,4 +68,34 @@ export const createTransactionFromPartial = (
   }
 
   return transaction;
+}
+
+export const encodeMultiSendData = (
+  transactionDataArr: SafeTransactionData[]
+): string => {
+  let dataStr = "";
+
+  for (let i = 0; i < transactionDataArr.length; i++) {
+    const standardized = createTransactionFromPartial(transactionDataArr[i]);
+    dataStr = dataStr.concat(encodeMetaTransaction(standardized));
+  }
+
+  return "0x" + dataStr;
 };
+
+export function encodeMetaTransaction(tx: SafeTransactionData): string {
+  const data = arrayify(tx.data);
+
+  const encoded = Ethereum_Module.solidityPack({
+    types: ["uint8", "address", "uint256", "uint256", "bytes"],
+    values: [
+      tx.operation!.toString(),
+      tx.to,
+      tx.value,
+      data.length.toString(),
+      "[" + data.toString() + "]",
+    ],
+  }).unwrap();
+
+  return encoded.slice(2);
+}

@@ -715,10 +715,10 @@
     bech32 "1.1.4"
     ws "7.4.6"
 
-"@ethersproject/providers@5.7.2":
-  version "5.7.2"
-  resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.7.2.tgz#f8b1a4f275d7ce58cf0a2eec222269a08beb18cb"
-  integrity sha512-g34EWZ1WWAVgr4aptGlVBF8mhl3VWjv+8hoAnzStu8Ah22VHBsuGzP17eb6xDVRzw895G4W7vvx60lFFur/1Rg==
+"@ethersproject/providers@5.7.1", "@ethersproject/providers@^5.0.0":
+  version "5.7.1"
+  resolved "https://registry.npmjs.org/@ethersproject/providers/-/providers-5.7.1.tgz"
+  integrity sha512-vZveG/DLyo+wk4Ga1yx6jSEHrLPgmTt+dFv0dv8URpVCRf0jVhalps1jq/emN/oXnMRsC7cQgAF32DcXLL7BPQ==
   dependencies:
     "@ethersproject/abstract-provider" "^5.7.0"
     "@ethersproject/abstract-signer" "^5.7.0"
@@ -741,10 +741,10 @@
     bech32 "1.1.4"
     ws "7.4.6"
 
-"@ethersproject/providers@^5.0.0":
-  version "5.7.1"
-  resolved "https://registry.npmjs.org/@ethersproject/providers/-/providers-5.7.1.tgz"
-  integrity sha512-vZveG/DLyo+wk4Ga1yx6jSEHrLPgmTt+dFv0dv8URpVCRf0jVhalps1jq/emN/oXnMRsC7cQgAF32DcXLL7BPQ==
+"@ethersproject/providers@5.7.2":
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.7.2.tgz#f8b1a4f275d7ce58cf0a2eec222269a08beb18cb"
+  integrity sha512-g34EWZ1WWAVgr4aptGlVBF8mhl3VWjv+8hoAnzStu8Ah22VHBsuGzP17eb6xDVRzw895G4W7vvx60lFFur/1Rg==
   dependencies:
     "@ethersproject/abstract-provider" "^5.7.0"
     "@ethersproject/abstract-signer" "^5.7.0"
@@ -2550,7 +2550,7 @@
     graphql "15.5.0"
     yaml "2.1.3"
 
-"@polywrap/client-js@^0.9.2":
+"@polywrap/client-js@0.9.3", "@polywrap/client-js@^0.9.2":
   version "0.9.3"
   resolved "https://registry.yarnpkg.com/@polywrap/client-js/-/client-js-0.9.3.tgz#8ab4ea62e60799c602237bbde1d82b61bb3be42a"
   integrity sha512-UbX5iGjigHysB1qBVg0lLV8tuA9WlMFzJqI/VahoUv+yryHUwFkQh601kZ/UlKI1T+ZLMIksAMTJwuPQvZagJA==
@@ -2799,6 +2799,11 @@
   resolved "https://registry.yarnpkg.com/@polywrap/os-js/-/os-js-0.9.2.tgz#da7b14364f74fe83a4c85b3677ad0f7b4c10dade"
   integrity sha512-JGQjiUlX2oEl9U+Q+FlzpmbUN8fgBLKw2CSxJdeURj41J2zzul3hPANdvEu4zh+LFqTCn1iojPkTf8Vs02dWyA==
 
+"@polywrap/os-js@0.9.3":
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/@polywrap/os-js/-/os-js-0.9.3.tgz#f3ffed686ab716f8d51340aee5fa356934768a9c"
+  integrity sha512-ypuTTtUB4gTE6jGYWhjpD6DKbuVzOXpVLdbIqIHfGmyGf3ouoNVqPsnfJ5ropN4qlpq9vnGRR9UgOUWguUmmgQ==
+
 "@polywrap/polywrap-manifest-schemas@0.9.2":
   version "0.9.2"
   resolved "https://registry.yarnpkg.com/@polywrap/polywrap-manifest-schemas/-/polywrap-manifest-schemas-0.9.2.tgz#fd593a6ea613a2b5d09502ffa82e36d84075a0b1"
@@ -2849,6 +2854,16 @@
     "@polywrap/wrap-manifest-types-js" "0.9.2"
     mustache "4.0.1"
 
+"@polywrap/schema-bind@0.9.3":
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/@polywrap/schema-bind/-/schema-bind-0.9.3.tgz#01f3b60af504232ba48ef812a00c04ffeb52230d"
+  integrity sha512-gIGmx/p5NMxgHvyJPEBVbzuzV6FZIMIWHOBA+D7aArGx/ztBSyrjPUYVD2v/x1OG7IHxSeSwlOmoHSJblA763A==
+  dependencies:
+    "@polywrap/os-js" "0.9.3"
+    "@polywrap/schema-parse" "0.9.3"
+    "@polywrap/wrap-manifest-types-js" "0.9.3"
+    mustache "4.0.1"
+
 "@polywrap/schema-compose@0.9.2":
   version "0.9.2"
   resolved "https://registry.yarnpkg.com/@polywrap/schema-compose/-/schema-compose-0.9.2.tgz#70488059651873ea25bcae0aada44e2ad0d3884a"
@@ -2856,6 +2871,16 @@
   dependencies:
     "@polywrap/schema-parse" "0.9.2"
     "@polywrap/wrap-manifest-types-js" "0.9.2"
+    graphql "15.5.0"
+    mustache "4.0.1"
+
+"@polywrap/schema-compose@0.9.3":
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/@polywrap/schema-compose/-/schema-compose-0.9.3.tgz#f697b3bdc10c29094efb264e634bcfd5008c8f3d"
+  integrity sha512-jWbbh7PuT2x7tCuMzzWeTQXyajLPx8Ighxbfu2JHTSb1cDTUehIbSXgznFpQkCgTQMNQwF+mL2gC1biNm8+Tdg==
+  dependencies:
+    "@polywrap/schema-parse" "0.9.3"
+    "@polywrap/wrap-manifest-types-js" "0.9.3"
     graphql "15.5.0"
     mustache "4.0.1"
 
@@ -2888,7 +2913,7 @@
     spawn-command "0.0.2-1"
     yaml "2.1.3"
 
-"@polywrap/test-env-js@^0.9.2":
+"@polywrap/test-env-js@0.9.3", "@polywrap/test-env-js@^0.9.2":
   version "0.9.3"
   resolved "https://registry.yarnpkg.com/@polywrap/test-env-js/-/test-env-js-0.9.3.tgz#e127786fed63b15ac3e456880c6072d694f733b9"
   integrity sha512-N5IxbmKAbQPdgzPFd+gLZHLuWe3dGSRmbCAvdme5uIs36MofuE3aARVmenp6w907n1+y54zu6EwXkh0jGa+98g==
@@ -6919,7 +6944,58 @@ ethers@5.0.7:
     "@ethersproject/web" "^5.0.0"
     "@ethersproject/wordlists" "^5.0.0"
 
-ethers@5.7.2, ethers@^5.7.1:
+ethers@5.7.1:
+  version "5.7.1"
+  resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.7.1.tgz#48c83a44900b5f006eb2f65d3ba6277047fd4f33"
+  integrity sha512-5krze4dRLITX7FpU8J4WscXqADiKmyeNlylmmDLbS95DaZpBhDe2YSwRQwKXWNyXcox7a3gBgm/MkGXV1O1S/Q==
+  dependencies:
+    "@ethersproject/abi" "5.7.0"
+    "@ethersproject/abstract-provider" "5.7.0"
+    "@ethersproject/abstract-signer" "5.7.0"
+    "@ethersproject/address" "5.7.0"
+    "@ethersproject/base64" "5.7.0"
+    "@ethersproject/basex" "5.7.0"
+    "@ethersproject/bignumber" "5.7.0"
+    "@ethersproject/bytes" "5.7.0"
+    "@ethersproject/constants" "5.7.0"
+    "@ethersproject/contracts" "5.7.0"
+    "@ethersproject/hash" "5.7.0"
+    "@ethersproject/hdnode" "5.7.0"
+    "@ethersproject/json-wallets" "5.7.0"
+    "@ethersproject/keccak256" "5.7.0"
+    "@ethersproject/logger" "5.7.0"
+    "@ethersproject/networks" "5.7.1"
+    "@ethersproject/pbkdf2" "5.7.0"
+    "@ethersproject/properties" "5.7.0"
+    "@ethersproject/providers" "5.7.1"
+    "@ethersproject/random" "5.7.0"
+    "@ethersproject/rlp" "5.7.0"
+    "@ethersproject/sha2" "5.7.0"
+    "@ethersproject/signing-key" "5.7.0"
+    "@ethersproject/solidity" "5.7.0"
+    "@ethersproject/strings" "5.7.0"
+    "@ethersproject/transactions" "5.7.0"
+    "@ethersproject/units" "5.7.0"
+    "@ethersproject/wallet" "5.7.0"
+    "@ethersproject/web" "5.7.1"
+    "@ethersproject/wordlists" "5.7.0"
+
+ethers@^4.0.32:
+  version "4.0.49"
+  resolved "https://registry.npmjs.org/ethers/-/ethers-4.0.49.tgz"
+  integrity sha512-kPltTvWiyu+OktYy1IStSO16i2e7cS9D9OxZ81q2UUaiNPVrm/RTcbxamCXF9VUSKzJIdJV68EAIhTEVBalRWg==
+  dependencies:
+    aes-js "3.0.0"
+    bn.js "^4.11.9"
+    elliptic "6.5.4"
+    hash.js "1.1.3"
+    js-sha3 "0.5.7"
+    scrypt-js "2.0.4"
+    setimmediate "1.0.4"
+    uuid "2.0.1"
+    xmlhttprequest "1.8.0"
+
+ethers@^5.7.1:
   version "5.7.2"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.7.2.tgz#3a7deeabbb8c030d4126b24f84e525466145872e"
   integrity sha512-wswUsmWo1aOK8rR7DIKiWSw9DbLWe6x98Jrn8wcTflTVvaXhAMaB5zGAXy0GYQEQp9iO1iSHWVyARQm11zUtyg==
@@ -6954,21 +7030,6 @@ ethers@5.7.2, ethers@^5.7.1:
     "@ethersproject/wallet" "5.7.0"
     "@ethersproject/web" "5.7.1"
     "@ethersproject/wordlists" "5.7.0"
-
-ethers@^4.0.32:
-  version "4.0.49"
-  resolved "https://registry.npmjs.org/ethers/-/ethers-4.0.49.tgz"
-  integrity sha512-kPltTvWiyu+OktYy1IStSO16i2e7cS9D9OxZ81q2UUaiNPVrm/RTcbxamCXF9VUSKzJIdJV68EAIhTEVBalRWg==
-  dependencies:
-    aes-js "3.0.0"
-    bn.js "^4.11.9"
-    elliptic "6.5.4"
-    hash.js "1.1.3"
-    js-sha3 "0.5.7"
-    scrypt-js "2.0.4"
-    setimmediate "1.0.4"
-    uuid "2.0.1"
-    xmlhttprequest "1.8.0"
 
 ethjs-unit@0.1.6:
   version "0.1.6"
@@ -11978,6 +12039,53 @@ polywrap@0.9.2:
     "@polywrap/test-env-js" "0.9.2"
     "@polywrap/wasm-js" "0.9.2"
     "@polywrap/wrap-manifest-types-js" "0.9.2"
+    axios "0.21.2"
+    chalk "4.1.0"
+    chokidar "3.5.1"
+    commander "9.2.0"
+    content-hash "2.5.2"
+    copyfiles "2.4.1"
+    docker-compose "0.23.17"
+    extract-zip "2.0.1"
+    form-data "4.0.0"
+    fs-extra "9.0.1"
+    ipfs-http-client "48.1.3"
+    json-schema "0.4.0"
+    json-schema-ref-parser "9.0.9"
+    jsonschema "1.4.0"
+    mustache "4.0.1"
+    os-locale "5.0.0"
+    regex-parser "2.2.11"
+    rimraf "3.0.2"
+    toml "3.0.0"
+    typescript "4.1.6"
+    yaml "2.1.3"
+    yesno "0.4.0"
+
+polywrap@^0.9.3:
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/polywrap/-/polywrap-0.9.3.tgz#335d75d0b2c0350732649f004c5e67b252120e35"
+  integrity sha512-ALBN5d74tgf8FjEFS9yz9F7SJBkP7cOEnjix8KmtkUmT6NfnGuVlsF1jTVBLlbmc75uvJGfv0kGJTXaFyOYUxQ==
+  dependencies:
+    "@ethersproject/providers" "5.6.8"
+    "@ethersproject/wallet" "5.6.2"
+    "@formatjs/intl" "1.8.2"
+    "@polywrap/asyncify-js" "0.9.3"
+    "@polywrap/client-config-builder-js" "0.9.3"
+    "@polywrap/client-js" "0.9.3"
+    "@polywrap/core-js" "0.9.3"
+    "@polywrap/ens-resolver-plugin-js" "0.9.3"
+    "@polywrap/ethereum-plugin-js" "0.9.3"
+    "@polywrap/ipfs-plugin-js" "0.9.3"
+    "@polywrap/msgpack-js" "0.9.3"
+    "@polywrap/os-js" "0.9.3"
+    "@polywrap/polywrap-manifest-types-js" "0.9.3"
+    "@polywrap/schema-bind" "0.9.3"
+    "@polywrap/schema-compose" "0.9.3"
+    "@polywrap/schema-parse" "0.9.3"
+    "@polywrap/test-env-js" "0.9.3"
+    "@polywrap/wasm-js" "0.9.3"
+    "@polywrap/wrap-manifest-types-js" "0.9.3"
     axios "0.21.2"
     chalk "4.1.0"
     chokidar "3.5.1"

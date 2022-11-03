@@ -12,6 +12,23 @@ type SafeTransaction {
     data: SafeTransactionData!
 }
 
+type MetaTransactionData {
+    data: String!
+    to: String!
+    value: String!
+    operation: BigInt
+}
+
+type SafeTransactionOptionalProps {
+    operation: BigInt
+    safeTxGas: BigInt
+    baseGas: BigInt
+    gasPrice: BigInt
+    gasToken: String
+    refundReceiver: String
+    nonce: BigInt
+}
+
 type SafeTransactionData {
     data: String!
     to: String!
@@ -49,6 +66,7 @@ type Module {
 
     """Transaction manager methods"""
     createTransaction(tx: SafeTransactionData!): SafeTransaction! @env(required: true)
+    createMultiSendTransaction(txs: [SafeTransactionData!]!, multiSendContractAddress: String!, options: SafeTransactionOptionalProps ): SafeTransaction! @env(required: true)
     addSignature(tx: SafeTransaction!): SafeTransaction! @env(required: true)
     getTransactionHash(tx: SafeTransactionData!): String @env(required: true)
     signTransactionHash(hash: String!): SignSignature! @env(required: true)
