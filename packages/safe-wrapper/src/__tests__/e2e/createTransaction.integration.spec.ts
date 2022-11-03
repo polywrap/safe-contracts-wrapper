@@ -6,7 +6,7 @@ import { getEthAdapter, getPlugins, setupContractNetworks, setupTests as setupTe
 
 import { Client } from "@polywrap/core-js";
 import Safe from "@gnosis.pm/safe-core-sdk";
-import { SafeTransactionData, SafeTransactionOptionalProps } from "../../wrap";
+import { SafeTransactionData } from "../../wrap";
 
 jest.setTimeout(1200000);
 
@@ -200,7 +200,7 @@ describe("Transactions creation", () => {
       const wrapperMultisendResult = await App.SafeWrapper_Module.createMultiSendTransaction(
         {
           txs: [safeTransactionData, safeTransactionData],
-          multiSendContractAddress: contractNetworks[connection.chainId].multiSendAddress,
+          customMultiSendContractAddress: contractNetworks[connection.chainId].multiSendAddress,
         },
         client,
         wrapperUri
@@ -266,7 +266,7 @@ describe("Transactions creation", () => {
             nonce: String(options.nonce),
             safeTxGas: String(options.safeTxGas),
           },
-          multiSendContractAddress: contractNetworks[connection.chainId].multiSendAddress,
+          customMultiSendContractAddress: contractNetworks[connection.chainId].multiSendAddress,
         },
         client,
         wrapperUri

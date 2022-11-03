@@ -27,8 +27,13 @@ import {
   encodeMultiSendData,
   getTransactionHashArgs,
 } from "./utils";
-import { Args_createMultiSendTransaction, Args_signTransactionHash } from "./wrap/Module/serialization";
-import { BigInt } from "@polywrap/wasm-as";
+import {
+  Args_createMultiSendTransaction,
+  Args_getMultiSendContract,
+  Args_getSafeVersion,
+  Args_signTransactionHash,
+} from "./wrap/Module/serialization";
+import { BigInt, Box } from "@polywrap/wasm-as";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
@@ -123,6 +128,7 @@ function validateModuleIsEnabledAndGetPrev(moduleAddress: string, modules: strin
   return modules[moduleIndex - 1];
 }
 
+// Owner manager methods
 export function getOwners(args: Args_getOwners, env: Env): string[] {
   const result = SafeContracts_Module.getOwners({
     address: env.safeAddress,
@@ -215,6 +221,7 @@ export function encodeChangeThresholdData(args: Args_encodeChangeThresholdData, 
   return result.unwrap();
 }
 
+// Module manager methods
 export function getModules(args: Args_getModules, env: Env): string[] {
   const result = SafeContracts_Module.getModules({
     address: env.safeAddress,
@@ -258,6 +265,7 @@ export function encodeDisableModuleData(args: Args_encodeDisableModuleData, env:
   return result.unwrap();
 }
 
+// Transaction manager methods
 export function createTransaction(args: Args_createTransaction, env: Env): SafeTransaction {
   const transactionData = createTransactionFromPartial(args.tx, args.options);
 
@@ -285,7 +293,26 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
 
   const transactionData = createTransactionFromPartial({ data: "", to: "", value: "" } as SafeTransactionData, null);
 
-  const multiSendAddress = args.multiSendContractAddress; // multiSendContract.getAddress(),
+  let multiSendAddress: string = "";
+
+  if (args.customMultiSendContractAddress != null) {
+    multiSendAddress = args.customMultiSendContractAddress!;
+  } else {
+    const network = Ethereum_Module.getNetwork({ connection: env.connection }).unwrap();
+    const isL1Safe = true; // TODO figure out how get it from safe
+    const version = getSafeVersion({}, env);
+    const contractNetworks = SafeContracts_Module.getSafeContractNetworks({
+      chainId: network.chainId.toString(),
+      isL1Safe: Box.from(isL1Safe),
+      version: version,
+    }).unwrap();
+
+    if (args.onlyCalls) {
+      multiSendAddress = contractNetworks!.multiSendCallOnlyAddress!;
+    } else {
+      multiSendAddress = contractNetworks!.multiSendAddress!;
+    }
+  }
 
   const multiSendTransaction: SafeTransactionData = {
     to: multiSendAddress,
@@ -384,4 +411,29 @@ export function signTransactionHash(args: Args_signTransactionHash, env: Env): S
   const adjustedSignature = adjustVInSignature("eth_sign", signature, args.hash, signer);
 
   return { signer: signer, data: adjustedSignature };
+}
+
+// Contract manager methods
+
+export function getSafeVersion(args: Args_getSafeVersion, env: Env): string {
+  const version = Ethereum_Module.callContractView({
+    address: env.safeAddress,
+    method: "function VERSION() public view returns (string)",
+    args: [],
+    connection: env.connection,
+  }).unwrap();
+
+  return version;
+}
+
+export function getMultiSendContract(args: Args_getMultiSendContract, env: Env): string {
+  const version = getSafeVersion({}, env);
+
+  const contractNetworks = SafeContracts_Module.getSafeContractNetworks({
+    version: version,
+    chainId: env.connection.networkNameOrChainId!,
+    isL1Safe: Box.from(false),
+  }).unwrap()!;
+
+  return contractNetworks.multiSendAddress!;
 }

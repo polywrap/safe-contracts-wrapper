@@ -59,8 +59,6 @@ describe("Transactions creation", () => {
     await stopTestEnvironment();
   });
 
-  describe("standardizeSafeTransactionData", () => {});
-
   describe("createTransaction", () => {
     it("should create a single transaction with gasPrice=0", async () => {
       const [account1] = setupAccounts();
@@ -136,7 +134,7 @@ describe("Transactions creation", () => {
       const wrapperResult = await App.SafeWrapper_Module.createMultiSendTransaction(
         {
           txs: safeTxArray,
-          multiSendContractAddress: contractNetworksPart.multisendAddress,
+          customMultiSendContractAddress: contractNetworksPart.multisendAddress,
         },
         client,
         wrapperUri
@@ -174,7 +172,7 @@ describe("Transactions creation", () => {
         {
           txs: safeTxArray,
           options: options,
-          multiSendContractAddress: contractNetworksPart.multisendAddress,
+          customMultiSendContractAddress: contractNetworksPart.multisendAddress,
         },
         client,
         wrapperUri
@@ -196,7 +194,7 @@ describe("Transactions creation", () => {
 
     it("should fail when creating a MultiSend transaction passing a transaction array with length=0", async () => {
       const multiSendResult = await App.SafeWrapper_Module.createMultiSendTransaction(
-        { txs: [], multiSendContractAddress: contractNetworksPart.multisendAddress },
+        { txs: [], customMultiSendContractAddress: contractNetworksPart.multisendAddress },
         client,
         wrapperUri
       );
@@ -218,7 +216,7 @@ describe("Transactions creation", () => {
       const wrapperResult = await App.SafeWrapper_Module.createMultiSendTransaction(
         {
           txs: safeTxArray,
-          multiSendContractAddress: contractNetworksPart.multisendAddress,
+          customMultiSendContractAddress: contractNetworksPart.multisendAddress,
         },
         client,
         wrapperUri
@@ -255,7 +253,7 @@ describe("Transactions creation", () => {
         {
           txs: safeTxArray,
           options: options,
-          multiSendContractAddress: contractNetworksPart.multisendAddress,
+          customMultiSendContractAddress: contractNetworksPart.multisendAddress,
         },
         client,
         wrapperUri
