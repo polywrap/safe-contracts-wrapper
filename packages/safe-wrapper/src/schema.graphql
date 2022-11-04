@@ -1,5 +1,5 @@
 #import { Module } into SafeContracts from "wrap://ipfs/QmXuSErK5jEt9tm9jzz8fJdTKoHrjoTbr8h2b2SLnVe6qw"
-#import { Module, Connection, TxOverrides, TxReceipt } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
+#import { Module, Connection, TxOverrides, TxReceipt, TypedDataDomain, TypedDataType, TypedDataValue } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
 #import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
 
 type Env {
@@ -70,6 +70,7 @@ type Module {
     addSignature(tx: SafeTransaction!): SafeTransaction! @env(required: true)
     getTransactionHash(tx: SafeTransactionData!): String @env(required: true)
     signTransactionHash(hash: String!): SignSignature! @env(required: true)
+    signTypedData(domain: Ethereum_TypedDataDomain!, types: [Ethereum_TypedDataType!]!, value: [Ethereum_TypedDataValue!]!): String! @env(required: true)
 
     """Contract manager methods"""
     # contractNetworks()

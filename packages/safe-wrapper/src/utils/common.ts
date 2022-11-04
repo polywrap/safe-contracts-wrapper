@@ -1,5 +1,7 @@
 export function sameString(str1: string, str2: string): bool {
-  return str1.toLowerCase() === str2.toLowerCase();
+  const s1 = str1.toLowerCase();
+  const s2 = str2.toLowerCase();
+  return s1 == s2
 }
 
 export function findIndex(item: string, items: string[]): i32 {

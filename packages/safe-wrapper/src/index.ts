@@ -18,6 +18,7 @@ import {
   SafeTransaction,
   SignSignature,
   SafeTransactionData,
+  Logger_Module,
 } from "./wrap";
 import { Args_getTransactionHash } from "./wrap/Module";
 import {
@@ -32,6 +33,7 @@ import {
   Args_getMultiSendContract,
   Args_getSafeVersion,
   Args_signTransactionHash,
+  Args_signTypedData,
 } from "./wrap/Module/serialization";
 import { BigInt, Box } from "@polywrap/wasm-as";
 import {
@@ -327,6 +329,15 @@ export function signTransactionHash(args: Args_signTransactionHash, env: Env): S
   const adjustedSignature = adjustVInSignature("eth_sign", signature, args.hash, signer);
 
   return { signer: signer, data: adjustedSignature };
+}
+
+export function signTypedData(args: Args_signTypedData, env: Env): string {
+  return Ethereum_Module.signTypedData({
+    domain: args.domain,
+    types: args.types,
+    value: args.value,
+    connection: env.connection,
+  }).unwrap()!;
 }
 
 // Contract manager methods

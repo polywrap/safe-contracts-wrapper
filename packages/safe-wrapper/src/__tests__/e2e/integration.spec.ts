@@ -64,6 +64,7 @@ describe("Safe Wrapper", () => {
 
   describe("Owner Manager", () => {
     it("getOwners", async () => {
+      console.log("safeAddress", safeAddress);
       const resp = await wrapper.getOwners({}, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
