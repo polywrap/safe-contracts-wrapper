@@ -1,5 +1,5 @@
-#import { Module } into SafeContracts from "wrap://ipfs/QmUaomUYZp5b7rEuCtqB5Lbwozds8krvVZokqYpdTut8W7"
-#import { Module, Connection, TxOverrides } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
+#import { Module } into SafeContracts from "wrap://ipfs/QmXuSErK5jEt9tm9jzz8fJdTKoHrjoTbr8h2b2SLnVe6qw"
+#import { Module, Connection, TxOverrides, TxReceipt, TypedDataDomain, TypedDataType, TypedDataValue } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
 #import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
 
 type Env {
@@ -8,12 +8,44 @@ type Env {
 }
 
 type SafeTransaction {
+    signatures: Map @annotate(type: "Map<String!, SignSignature!>")
+    data: SafeTransactionData!
+}
+
+type MetaTransactionData {
     data: String!
     to: String!
     value: String!
-    operation: UInt8
-    signatures: Map @annotate(type: "Map<String!, String!>")
+    operation: BigInt
+}
+
+type SafeTransactionOptionalProps {
+    operation: BigInt
+    safeTxGas: BigInt
+    baseGas: BigInt
+    gasPrice: BigInt
+    gasToken: String
+    refundReceiver: String
+    nonce: BigInt
+}
+
+type SafeTransactionData {
+    data: String!
+    to: String!
+    value: String!
+    operation: BigInt
+    safeTxGas: BigInt
+    baseGas: BigInt
+    gasPrice: BigInt
+    gasToken: String
+    refundReceiver: String
+    nonce: BigInt
     # TODO: add txOverrides
+}
+
+type SignSignature {
+    signer: String!
+    data: String!
 }
 
 type Module {
@@ -33,6 +65,19 @@ type Module {
     encodeDisableModuleData(moduleAddress: String!): String! @env(required: true)
 
     """Transaction manager methods"""
-    createTransaction(tx: SafeTransaction!): SafeTransaction!
+    createTransaction(tx: SafeTransactionData!, options: SafeTransactionOptionalProps): SafeTransaction! @env(required: true)
+    createMultiSendTransaction(txs: [SafeTransactionData!]!, options: SafeTransactionOptionalProps, onlyCalls: Boolean, customMultiSendContractAddress: String ): SafeTransaction! @env(required: true)
     addSignature(tx: SafeTransaction!): SafeTransaction! @env(required: true)
+    getTransactionHash(tx: SafeTransactionData!): String @env(required: true)
+    signTransactionHash(hash: String!): SignSignature! @env(required: true)
+    signTypedData(domain: Ethereum_TypedDataDomain!, types: [Ethereum_TypedDataType!]!, value: [Ethereum_TypedDataValue!]!): String! @env(required: true)
+
+    """Contract manager methods"""
+    # contractNetworks()
+    # isL1SafeMasterCopy()
+    # safeContract()
+    # multiSendContract()
+    # multiSendCallOnlyContract()
+    getSafeVersion: String! @env(required: true)
+    getMultiSendContract: String! @env(required: true)
 }

@@ -22,7 +22,9 @@ type Module {
         safeDeploymentConfig: SafeDeploymentConfig,
         connection: Ethereum_Connection,
         customContractAdressess: CustomContract
-    ):String
+    ): String
+
+    getSafeContractNetworks: ContractNetworksConfig
 }
 
 enum OperationType {
