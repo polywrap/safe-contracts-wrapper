@@ -122,7 +122,7 @@ export const setupContractNetworks = async (
 
   const signer = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
 
-  const owner = "0xEc8E7Da193529bd8ddA13b1995F93F32989CF097";
+  const owner = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0" || "0xEc8E7Da193529bd8ddA13b1995F93F32989CF097";
   const owners = [signer, owner];
 
   const proxyFactoryContractResponse_v130 = await App.Ethereum_Module.deployContract(
