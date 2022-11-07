@@ -48,6 +48,15 @@ type SignSignature {
     data: String!
 }
 
+type TransactionOptions {
+  from: String
+  gasLimit: BigInt
+  gasPrice: BigInt
+  maxFeePerGas: BigInt
+  maxPriorityFeePerGas: String
+  nonce: BigInt
+}
+
 type Module {
     """Owner manager methods"""
     getOwners: [String!]! @env(required: true)
@@ -71,6 +80,7 @@ type Module {
     getTransactionHash(tx: SafeTransactionData!): String @env(required: true)
     signTransactionHash(hash: String!): SignSignature! @env(required: true)
     signTypedData(domain: Ethereum_TypedDataDomain!, types: [Ethereum_TypedDataType!]!, value: [Ethereum_TypedDataValue!]!): String! @env(required: true)
+    approveTransactionHash(hash: String!, options: TransactionOptions): Ethereum_TxReceipt! @env(required: true)
 
     """Contract manager methods"""
     # contractNetworks()
@@ -80,4 +90,6 @@ type Module {
     # multiSendCallOnlyContract()
     getSafeVersion: String! @env(required: true)
     getMultiSendContract: String! @env(required: true)
+    approvedHashes(hash: String!, owner: String): BigInt! @env(required: true)
+    getOwnersWhoApprovedTx(hash: String!): [String!]! @env(required: true)
 }

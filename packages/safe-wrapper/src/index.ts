@@ -19,6 +19,7 @@ import {
   SignSignature,
   SafeTransactionData,
   Logger_Module,
+  Ethereum_TxReceipt,
 } from "./wrap";
 import { Args_getTransactionHash } from "./wrap/Module";
 import {
@@ -29,8 +30,11 @@ import {
   getTransactionHashArgs,
 } from "./utils";
 import {
+  Args_approvedHashes,
+  Args_approveTransactionHash,
   Args_createMultiSendTransaction,
   Args_getMultiSendContract,
+  Args_getOwnersWhoApprovedTx,
   Args_getSafeVersion,
   Args_signTransactionHash,
   Args_signTypedData,
@@ -329,6 +333,74 @@ export function signTransactionHash(args: Args_signTransactionHash, env: Env): S
   const adjustedSignature = adjustVInSignature("eth_sign", signature, args.hash, signer);
 
   return { signer: signer, data: adjustedSignature };
+}
+
+export function approveTransactionHash(args: Args_approveTransactionHash, env: Env): Ethereum_TxReceipt {
+  const signerAddress = Ethereum_Module.getSignerAddress({ connection: env.connection }).unwrap();
+
+  const addressIsOwner = isOwner({ ownerAddress: signerAddress }, env);
+
+  if (!addressIsOwner) {
+    throw new Error("Transaction hashes can only be approved by Safe owners");
+  }
+
+  if (args.options != null && args.options!.gasPrice && args.options!.gasLimit) {
+    throw new Error("Cannot specify gas and gasLimit together in transaction options");
+  }
+
+  if (args.options != null && !args.options!.gasLimit) {
+    args.options!.gasLimit = SafeContracts_Module.estimateGas({
+      address: env.safeAddress,
+      method: "function approveHash(bytes32 hashToApprove) external",
+      args: [args.hash],
+      connection: {
+        networkNameOrChainId: env.connection.networkNameOrChainId,
+        node: env.connection.node,
+      },
+    }).unwrap();
+  }
+
+  const response = Ethereum_Module.callContractMethodAndWait({
+    method: "function approveHash(bytes32 hashToApprove) external",
+    address: env.safeAddress,
+    args: [args.hash],
+    connection: env.connection,
+    txOverrides: {
+      gasLimit: args.options ? args.options!.gasLimit : null,
+      gasPrice: args.options ? args.options!.gasPrice : null,
+      value: null,
+    },
+  }).unwrap();
+
+  return response;
+}
+
+export function approvedHashes(args: Args_approvedHashes, env: Env): BigInt {
+  const owner =
+    args.owner != null ? args.owner! : Ethereum_Module.getSignerAddress({ connection: env.connection }).unwrap();
+
+  const result = Ethereum_Module.callContractView({
+    address: env.safeAddress,
+    method: "function approvedHashes(address owner, bytes32 hash) public view returns (uint256)",
+    args: [owner, args.hash],
+    connection: env.connection,
+  }).unwrap();
+
+  return BigInt.from(result);
+}
+
+export function getOwnersWhoApprovedTx(args: Args_getOwnersWhoApprovedTx, env: Env): string[] {
+  const owners = getOwners({}, env);
+  const ownersWhoApproved: string[] = [];
+
+  for (let i = 0; i < owners.length; i++) {
+    const owner = owners[i];
+    const approved = approvedHashes({ owner, hash: args.hash }, env);
+    if (approved.gt(0)) {
+      ownersWhoApproved.push(owner);
+    }
+  }
+  return ownersWhoApproved;
 }
 
 export function signTypedData(args: Args_signTypedData, env: Env): string {
