@@ -7,7 +7,8 @@ import {
 } from "@polywrap/ethereum-plugin-js";
 import { dateTimePlugin } from "polywrap-datetime-plugin";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
-//import { ipfsPlugin } from "@polywrap/ipfs-plugin-js";
+import { ipfsPlugin } from "@polywrap/ipfs-plugin-js";
+import { defaultIpfsProviders } from "@polywrap/client-config-builder-js";
 
 export function getPlugins(
   ethereum: string,
@@ -15,17 +16,20 @@ export function getPlugins(
   ensAddress: string
 ): Partial<ClientConfig> {
   return {
-    redirects: [
+    envs: [
       {
-        from: "wrap://ens/safe-proxy-factory-wrapper.polywrap.eth",
-        to: `wrap://ipfs/QmXxeZpXvy9T2UYcXet4caAJy2QqKAEWTXNT82rJqGA5QV`,
+        uri: "wrap://ens/ipfs.polywrap.eth",
+        env: {
+          provider: ipfs,
+          fallbackProviders: defaultIpfsProviders,
+        },
       },
     ],
     plugins: [
-/*       {
+      {
         uri: "wrap://ens/ipfs.polywrap.eth",
-        plugin: ipfsPlugin({ provider: ipfs }),
-      }, */
+        plugin: ipfsPlugin({}),
+      },
       {
         uri: "wrap://ens/ens.polywrap.eth",
         plugin: ensResolverPlugin({ addresses: { testnet: ensAddress } }),
@@ -43,7 +47,6 @@ export function getPlugins(
       },
       {
         uri: "wrap://ens/datetime.polywrap.eth",
-        //@ts-ignore
         plugin: dateTimePlugin({}),
       },
       {

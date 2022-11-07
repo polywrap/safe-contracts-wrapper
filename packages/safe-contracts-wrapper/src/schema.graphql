@@ -60,4 +60,17 @@ type Module {
         moduleAddress: String!
         connection: Ethereum_Connection
     ): Boolean!
+
+    getSafeContractNetworks(
+        version: String!
+        chainId: String!
+        isL1Safe: Boolean
+    ): ContractNetworksConfig
+}
+
+type ContractNetworksConfig {
+      multiSendAddress: String
+      multiSendCallOnlyAddress: String
+      safeMasterCopyAddress: String
+      safeProxyFactoryAddress: String
 }

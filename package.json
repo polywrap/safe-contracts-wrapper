@@ -10,19 +10,25 @@
       "./packages/safe-factory-wrapper",
       "./packages/safe-wrapper"
     ],
-    "nohoist": [ "**/polywrap-datetime-plugin" ]
+    "nohoist": [
+      "**/polywrap-datetime-plugin"
+    ]
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/ConsiderItDone/safe-contracts-wrapper"
   },
   "scripts": {
-     "build": "lerna run build --concurrency 1",
-     "test:contracts": "lerna run test --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
-     "test:factory": "lerna run test --concurrency 1 --scope @consideritdone/safe-factory-wrapper",
-     "test:safe": "lerna run test --concurrency 1 --scope @consideritdone/safe-wrapper"
+    "build": "lerna run build --concurrency 1",
+    "test:contracts": "lerna run test --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
+    "test:factory": "lerna run test --concurrency 1 --scope @consideritdone/safe-factory-wrapper",
+    "test:safe": "lerna run test --concurrency 1 --scope @consideritdone/safe-wrapper"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.40.1",
+    "@typescript-eslint/parser": "^5.40.1",
+    "eslint": "^8.25.0",
+    "eslint-plugin-react": "^7.31.10",
     "lerna": "5.5.2"
   }
 }

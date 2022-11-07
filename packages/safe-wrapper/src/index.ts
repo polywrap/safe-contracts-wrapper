@@ -10,101 +10,43 @@ import {
   Args_getThreshold,
   Args_isModuleEnabled,
   Args_isOwner,
+  Args_createTransaction,
+  Args_addSignature,
   Env,
   Ethereum_Module,
   SafeContracts_Module,
+  SafeTransaction,
+  SignSignature,
+  SafeTransactionData,
   Logger_Module,
 } from "./wrap";
+import { Args_getTransactionHash } from "./wrap/Module";
+import {
+  adjustVInSignature,
+  arrayify,
+  createTransactionFromPartial,
+  encodeMultiSendData,
+  getTransactionHashArgs,
+} from "./utils";
+import {
+  Args_createMultiSendTransaction,
+  Args_getMultiSendContract,
+  Args_getSafeVersion,
+  Args_signTransactionHash,
+  Args_signTypedData,
+} from "./wrap/Module/serialization";
+import { BigInt, Box } from "@polywrap/wasm-as";
+import {
+  validateOwnerAddress,
+  validateAddressIsNotOwner,
+  validateThreshold,
+  validateAddressIsOwnerAndGetPrev,
+  validateModuleAddress,
+  validateModuleIsNotEnabled,
+  validateModuleIsEnabledAndGetPrev,
+} from "./utils/validation";
 
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
-
-function sameString(str1: string, str2: string): bool {
-  const s1 = str1.toLowerCase();
-  const s2 = str2.toLowerCase();
-  return s1 == s2
-}
-
-function findIndex(item: string, items: string[]): i32 {
-  for (let i = 0, ln = items.length; i < ln; i++) {
-    if (sameString(item, items[i])) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-export function isZeroAddress(address: string): bool {
-  return sameString(address, ZERO_ADDRESS)
-}
-
-function isSentinelAddress(address: string): bool {
-  return sameString(address, SENTINEL_ADDRESS)
-}
-
-export function isRestrictedAddress(address: string): bool {
-  return isZeroAddress(address) || isSentinelAddress(address)
-}
-
-function validateOwnerAddress(ownerAddress: string): void {
-  const isValidAddress = Ethereum_Module.checkAddress({address: ownerAddress});
-  if (!isValidAddress || isRestrictedAddress(ownerAddress)) {
-    throw new Error('Invalid owner address provided')
-  }
-}
-
-function validateAddressIsNotOwner(ownerAddress: string, owners: string[]): void {
-  const ownerIndex = findIndex(ownerAddress, owners);
-  if (ownerIndex >= 0) {
-    throw new Error('Address provided is already an owner')
-  }
-}
-
-function validateAddressIsOwnerAndGetPrev(ownerAddress: string, owners: string[]): string {
-  const ownerIndex = findIndex(ownerAddress, owners);
-  if (ownerIndex < 0) {
-    throw new Error('Address provided is not an owner');
-  }
-  if (ownerIndex == 0) {
-    return SENTINEL_ADDRESS;
-  }
-  return owners[ownerIndex - 1];
-}
-
-function validateThreshold(threshold: number, numOwners: number): void {
-  if (threshold <= 0) {
-    throw new Error('Threshold needs to be greater than 0')
-  }
-  if (threshold > numOwners) {
-    throw new Error('Threshold cannot exceed owner count')
-  }
-}
-
-function validateModuleAddress(moduleAddress: string): void {
-  const isValidAddress = Ethereum_Module.checkAddress({address: moduleAddress});
-  if (!isValidAddress.unwrap() || isRestrictedAddress(moduleAddress)){
-    throw new Error('Invalid module address provided')
-  }
-}
-
-function validateModuleIsNotEnabled(moduleAddress: string, modules: string[]): void {
-  const moduleIndex = findIndex(moduleAddress, modules);
-  if (moduleIndex >= 0) {
-    throw new Error('Module provided is already enabled')
-  }
-}
-
-function validateModuleIsEnabledAndGetPrev(moduleAddress: string, modules: string[]): string {
-  const moduleIndex = findIndex(moduleAddress, modules);
-  if (moduleIndex < 0) {
-    throw new Error('Module provided is not enabled yet')
-  }
-  if (moduleIndex == 0) {
-    return SENTINEL_ADDRESS;
-  }
-  return modules[moduleIndex - 1];
-}
-
+// Owner manager methods
 export function getOwners(args: Args_getOwners, env: Env): string[] {
   const result = SafeContracts_Module.getOwners({
     address: env.safeAddress,
@@ -179,7 +121,7 @@ export function encodeSwapOwnerData(args: Args_encodeSwapOwnerData, env: Env): s
   validateOwnerAddress(args.oldOwnerAddress);
   validateOwnerAddress(args.newOwnerAddress);
   const owners = getOwners({}, env);
-  validateAddressIsNotOwner(args.newOwnerAddress, owners)
+  validateAddressIsNotOwner(args.newOwnerAddress, owners);
   const prevOwnerAddress = validateAddressIsOwnerAndGetPrev(args.oldOwnerAddress, owners);
   const result = Ethereum_Module.encodeFunction({
     method: "function swapOwner(address prevOwner, address oldOwner, address newOwner) public",
@@ -189,7 +131,7 @@ export function encodeSwapOwnerData(args: Args_encodeSwapOwnerData, env: Env): s
 }
 
 export function encodeChangeThresholdData(args: Args_encodeChangeThresholdData, env: Env): string {
-  validateThreshold(args.threshold, getOwners({}, env).length)
+  validateThreshold(args.threshold, getOwners({}, env).length);
   const result = Ethereum_Module.encodeFunction({
     method: "function changeThreshold(uint256 _threshold) public",
     args: [args.threshold.toString(16)],
@@ -197,6 +139,7 @@ export function encodeChangeThresholdData(args: Args_encodeChangeThresholdData, 
   return result.unwrap();
 }
 
+// Module manager methods
 export function getModules(args: Args_getModules, env: Env): string[] {
   const result = SafeContracts_Module.getModules({
     address: env.safeAddress,
@@ -238,4 +181,186 @@ export function encodeDisableModuleData(args: Args_encodeDisableModuleData, env:
     args: [prevModuleAddress, args.moduleAddress],
   });
   return result.unwrap();
+}
+
+// Transaction manager methods
+export function createTransaction(args: Args_createTransaction, env: Env): SafeTransaction {
+  const transactionData = createTransactionFromPartial(args.tx, args.options);
+
+  return {
+    data: transactionData,
+    signatures: new Map<string, SignSignature>(),
+  };
+}
+
+export function createMultiSendTransaction(args: Args_createMultiSendTransaction, env: Env): SafeTransaction {
+  if (args.txs.length == 0) {
+    throw new Error("Invalid empty array of transactions");
+  }
+
+  if (args.txs.length == 1) {
+    return createTransaction({ tx: args.txs[0], options: args.options }, env);
+  }
+
+  const multiSendData = encodeMultiSendData(args.txs);
+
+  const data = Ethereum_Module.encodeFunction({
+    method: "function multiSend(bytes transactions) public",
+    args: [multiSendData],
+  }).unwrap();
+
+  const transactionData = createTransactionFromPartial({ data: "", to: "", value: "" } as SafeTransactionData, null);
+
+  let multiSendAddress: string = "";
+
+  if (args.customMultiSendContractAddress != null) {
+    multiSendAddress = args.customMultiSendContractAddress!;
+  } else {
+    const network = Ethereum_Module.getNetwork({ connection: env.connection }).unwrap();
+    const isL1Safe = true; // TODO figure out how get it from safe
+    const version = getSafeVersion({}, env);
+    const contractNetworks = SafeContracts_Module.getSafeContractNetworks({
+      chainId: network.chainId.toString(),
+      isL1Safe: Box.from(isL1Safe),
+      version: version,
+    }).unwrap();
+
+    if (args.onlyCalls) {
+      multiSendAddress = contractNetworks!.multiSendCallOnlyAddress!;
+    } else {
+      multiSendAddress = contractNetworks!.multiSendAddress!;
+    }
+  }
+
+  const multiSendTransaction: SafeTransactionData = {
+    to: multiSendAddress,
+    value: "0",
+    data: data,
+    operation: BigInt.from("1"), // OperationType.DelegateCall,
+    baseGas: args.options != null && args.options!.baseGas ? args.options!.baseGas : transactionData.baseGas,
+    gasPrice: args.options != null && args.options!.gasPrice ? args.options!.gasPrice : transactionData.gasPrice,
+    gasToken: args.options != null && args.options!.gasToken ? args.options!.gasToken : transactionData.gasToken,
+    nonce: args.options != null && args.options!.nonce ? args.options!.nonce : transactionData.nonce,
+    refundReceiver:
+      args.options != null && args.options!.refundReceiver
+        ? args.options!.refundReceiver
+        : transactionData.refundReceiver,
+    safeTxGas: args.options != null && args.options!.safeTxGas ? args.options!.safeTxGas : transactionData.safeTxGas,
+  };
+
+  return {
+    data: multiSendTransaction,
+    signatures: new Map<string, SignSignature>(),
+  };
+}
+
+export function addSignature(args: Args_addSignature, env: Env): SafeTransaction {
+  const signerAddress = Ethereum_Module.getSignerAddress({
+    connection: {
+      node: env.connection.node,
+      networkNameOrChainId: env.connection.networkNameOrChainId,
+    },
+  }).unwrap();
+
+  const addressIsOwner = isOwner({ ownerAddress: signerAddress }, env);
+
+  if (addressIsOwner == false) {
+    throw new Error("Transactions can only be signed by Safe owners");
+  }
+
+  let signatures = args.tx.signatures;
+
+  //If signature of current signer is already present - return transaction
+  if (signatures != null) {
+    if (signatures.has(signerAddress)) {
+      return args.tx;
+    }
+  }
+
+  //If no signatures - create signatures map
+  if (signatures == null) {
+    signatures = new Map<string, SignSignature>();
+  }
+
+  //Add signature of current signer
+  const transactionHash = getTransactionHash({ tx: args.tx.data }, env);
+
+  const signature = signTransactionHash({ hash: transactionHash }, env);
+
+  signatures.set(signerAddress, signature);
+
+  args.tx.signatures = signatures;
+
+  return args.tx;
+}
+
+export function getTransactionHash(args: Args_getTransactionHash, env: Env): string {
+  const recreatedTx = createTransactionFromPartial(args.tx, null);
+
+  const contractArgs = getTransactionHashArgs(recreatedTx);
+
+  const res = Ethereum_Module.callContractView({
+    address: env.safeAddress,
+    method:
+      "function getTransactionHash(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 _nonce) public view returns (bytes32)",
+    args: contractArgs,
+    connection: env.connection,
+  }).unwrap();
+
+  return res;
+}
+
+export function signTransactionHash(args: Args_signTransactionHash, env: Env): SignSignature {
+  const signer = Ethereum_Module.getSignerAddress({
+    connection: env.connection,
+  }).unwrap();
+
+  const byteArray = arrayify(args.hash).buffer;
+
+  // TODO polywrap ethereum-plugin implementation required
+  const signature = Ethereum_Module.signMessageBytes({
+    bytes: byteArray,
+    connection: {
+      node: env.connection.node,
+      networkNameOrChainId: env.connection.networkNameOrChainId,
+    },
+  }).unwrap();
+
+  const adjustedSignature = adjustVInSignature("eth_sign", signature, args.hash, signer);
+
+  return { signer: signer, data: adjustedSignature };
+}
+
+export function signTypedData(args: Args_signTypedData, env: Env): string {
+  return Ethereum_Module.signTypedData({
+    domain: args.domain,
+    types: args.types,
+    value: args.value,
+    connection: env.connection,
+  }).unwrap()!;
+}
+
+// Contract manager methods
+
+export function getSafeVersion(args: Args_getSafeVersion, env: Env): string {
+  const version = Ethereum_Module.callContractView({
+    address: env.safeAddress,
+    method: "function VERSION() public view returns (string)",
+    args: [],
+    connection: env.connection,
+  }).unwrap();
+
+  return version;
+}
+
+export function getMultiSendContract(args: Args_getMultiSendContract, env: Env): string {
+  const version = getSafeVersion({}, env);
+
+  const contractNetworks = SafeContracts_Module.getSafeContractNetworks({
+    version: version,
+    chainId: env.connection.networkNameOrChainId!,
+    isL1Safe: Box.from(false),
+  }).unwrap()!;
+
+  return contractNetworks.multiSendAddress!;
 }
