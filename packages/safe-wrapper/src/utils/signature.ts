@@ -1,3 +1,5 @@
+import { SignSignature } from "../wrap";
+
 export function arrayify(value: string): Uint8Array {
   let hex = value.substring(2);
 
@@ -11,12 +13,12 @@ export function arrayify(value: string): Uint8Array {
   return uArray;
 }
 
-export const adjustVInSignature = (
+export function adjustVInSignature(
   signingMethod: string, //"eth_sign" | "eth_signTypedData",
   signature: string,
   safeTxHash: string | null,
   signerAddress: string | null
-): string => {
+): string {
   const ETHEREUM_V_VALUES: Array<u8> = [0, 1, 27, 28];
   const MIN_VALID_V_VALUE_FOR_SAFE_ECDSA: u8 = 27;
   let signatureV: u8 = U8.parseInt(signature.slice(-2), 16);
@@ -58,8 +60,36 @@ export const adjustVInSignature = (
   }
   signature = signature.slice(0, -2) + signatureV.toString(16);
   return signature;
-};
+}
 
+export function generatePreValidatedSignature(owner: string): SignSignature {
+  const signature =
+    "0x000000000000000000000000" +
+    owner.slice(2) +
+    "0000000000000000000000000000000000000000000000000000000000000000" +
+    "01";
+
+  return {
+    signer: owner,
+    data: signature,
+  };
+}
+
+export function encodeSignatures(signatures: Map<string, SignSignature>): string {
+  const signers = (<Array<string>>signatures.keys()).sort();
+  const baseOffset = signers.length * 65;
+  let staticParts = "";
+  let dynamicParts = "";
+
+  for (let i = 0; i < signers.length; i++) {
+    const signerAddress = signers[i];
+    const signature = signatures.get(signerAddress);
+    staticParts += signature.data.slice(2); // https://github.com/safe-global/safe-core-sdk/blob/b0a6c4b518c449fd50c9d901a5a8dd171f4b064b/packages/safe-core-sdk/src/utils/transactions/SafeTransaction.ts#L22
+    dynamicParts += ""; // https://github.com/safe-global/safe-core-sdk/blob/b0a6c4b518c449fd50c9d901a5a8dd171f4b064b/packages/safe-core-sdk/src/utils/signatures/SafeSignature.ts#L33
+  }
+
+  return "0x" + staticParts + dynamicParts;
+}
 /*
 function calculateSigRecovery(v: BNLike, chainId?: BNLike): BN {
   const vBN = toType(v, TypeOutput.BN);

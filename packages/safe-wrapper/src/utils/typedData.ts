@@ -126,7 +126,7 @@ export function toJsonTypedData(typedData: TypedData): JSON.Value {
   encoder.pushObject("message");
   encoder.setString("to", message.to);
   encoder.setString("data", message.data);
-  encoder.setString("value", message.value);
+  encoder.setString("value", message.value.toString());
   encoder.setInteger("baseGas", message.baseGas!.toUInt64());
   encoder.setInteger("gasPrice", message.gasPrice!.toUInt64());
   encoder.setString("gasToken", message.gasToken!);
