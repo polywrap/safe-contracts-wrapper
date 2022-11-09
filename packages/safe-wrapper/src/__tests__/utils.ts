@@ -87,7 +87,7 @@ export async function getPlugins(
               }),
               mainnet: new Connection({ provider: "http://localhost:8546" }),
             },
-            defaultNetwork: "testnet",
+            defaultNetwork: networkName,
           }),
         }),
       },

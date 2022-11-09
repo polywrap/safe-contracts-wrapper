@@ -39,7 +39,7 @@ import {
   Args_signTransactionHash,
   Args_signTypedData,
 } from "./wrap/Module/serialization";
-import { BigInt, Box } from "@polywrap/wasm-as";
+import { BigInt, Box, JSON, JSONEncoder } from "@polywrap/wasm-as";
 import {
   validateOwnerAddress,
   validateAddressIsNotOwner,
@@ -49,6 +49,7 @@ import {
   validateModuleIsNotEnabled,
   validateModuleIsEnabledAndGetPrev,
 } from "./utils/validation";
+import { generateTypedData, toJsonTypedData } from "./utils/typedData";
 
 // Owner manager methods
 export function getOwners(args: Args_getOwners, env: Env): string[] {
@@ -286,13 +287,15 @@ export function addSignature(args: Args_addSignature, env: Env): SafeTransaction
     signatures = new Map<string, SignSignature>();
   }
 
+  if (args.signingMethod != null && args.signingMethod! == "eth_signTypedData") {
+    const signature = signTypedData({ tx: args.tx.data }, env);
+    signatures.set(signerAddress, signature);
+  } else {
+    const transactionHash = getTransactionHash({ tx: args.tx.data }, env);
+    const signature = signTransactionHash({ hash: transactionHash }, env);
+    signatures.set(signerAddress, signature);
+  }
   //Add signature of current signer
-  const transactionHash = getTransactionHash({ tx: args.tx.data }, env);
-
-  const signature = signTransactionHash({ hash: transactionHash }, env);
-
-  signatures.set(signerAddress, signature);
-
   args.tx.signatures = signatures;
 
   return args.tx;
@@ -403,13 +406,22 @@ export function getOwnersWhoApprovedTx(args: Args_getOwnersWhoApprovedTx, env: E
   return ownersWhoApproved;
 }
 
-export function signTypedData(args: Args_signTypedData, env: Env): string {
-  return Ethereum_Module.signTypedData({
-    domain: args.domain,
-    types: args.types,
-    value: args.value,
-    connection: env.connection,
-  }).unwrap()!;
+export function signTypedData(args: Args_signTypedData, env: Env): SignSignature {
+  const recreatedTx = createTransactionFromPartial(args.tx, null);
+
+  const safeVersion = getSafeVersion({}, env);
+
+  const chainId = Ethereum_Module.getNetwork({ connection: env.connection }).unwrap().chainId;
+
+  const typedData = generateTypedData(env.safeAddress, safeVersion, chainId, recreatedTx);
+  const jsonTypedData = toJsonTypedData(typedData);
+
+  const signature = Ethereum_Module.signTypedData({ payload: jsonTypedData, connection: env.connection }).unwrap()!;
+
+  return {
+    signer: Ethereum_Module.getSignerAddress({ connection: env.connection }).unwrap(),
+    data: adjustVInSignature("eth_signTypedData", signature, null, null),
+  };
 }
 
 // Contract manager methods

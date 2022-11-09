@@ -30,9 +30,11 @@
     "@types/jest": "26.0.8",
     "assemblyscript": "0.19.1",
     "ethereumjs-util": "^7.1.5",
+    "ganache": "^7.5.0",
     "jest": "26.6.3",
     "polywrap": "^0.9.3",
     "semver": "^7.3.8",
+    "truffle": "^5.6.4",
     "ts-jest": "26.5.4"
   },
   "dependencies": {

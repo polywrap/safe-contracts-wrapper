@@ -14,8 +14,8 @@ export function arrayify(value: string): Uint8Array {
 export const adjustVInSignature = (
   signingMethod: string, //"eth_sign" | "eth_signTypedData",
   signature: string,
-  safeTxHash: string,
-  signerAddress: string
+  safeTxHash: string | null,
+  signerAddress: string | null
 ): string => {
   const ETHEREUM_V_VALUES: Array<u8> = [0, 1, 27, 28];
   const MIN_VALID_V_VALUE_FOR_SAFE_ECDSA: u8 = 27;
