@@ -14,10 +14,7 @@ import {
   bytecode as factoryBytecode_1_3_0,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
 
-import {
-  abi as safeAbi_1_3_0,
-  bytecode as safeBytecode_1_3_0,
-} from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
+import { abi as safeAbi_1_3_0, bytecode as safeBytecode_1_3_0 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
 
 import {
   abi as multisendAbi,
@@ -94,9 +91,10 @@ export async function getPlugins(
     ],
   };
 }
-
+const defaults = { owners: ["0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1", "0xEc8E7Da193529bd8ddA13b1995F93F32989CF097"], threshold: 1 };
 export const setupContractNetworks = async (
-  client: Client
+  client: Client,
+  options?: Partial<typeof defaults>
 ): Promise<
   [
     string,
@@ -108,6 +106,7 @@ export const setupContractNetworks = async (
     }
   ]
 > => {
+  options = { ...defaults, ...options };
   const ethereumUri = "ens/ethereum.polywrap.eth";
 
   const safeWrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..", "safe-factory-wrapper");
@@ -119,11 +118,6 @@ export const setupContractNetworks = async (
   let safeContractAddress: string;
   let multisendAddress: string;
   let multisendCallOnlyAddress: string;
-
-  const signer = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
-
-  const owner = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0" || "0xEc8E7Da193529bd8ddA13b1995F93F32989CF097";
-  const owners = [signer, owner];
 
   const proxyFactoryContractResponse_v130 = await App.Ethereum_Module.deployContract(
     {
@@ -154,8 +148,8 @@ export const setupContractNetworks = async (
   const safeResponse = await App.SafeFactory_Module.deploySafe(
     {
       safeAccountConfig: {
-        owners: owners,
-        threshold: 1,
+        owners: options.owners!,
+        threshold: options.threshold!,
       },
       txOverrides: { gasLimit: "1000000", gasPrice: "20" },
       customContractAdressess: {
@@ -221,6 +215,10 @@ export const setupAccounts = () => {
     {
       signer: new Wallet("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"),
       address: "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
+    },
+    {
+      signer: new Wallet("0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"),
+      address: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0",
     },
   ];
 };
