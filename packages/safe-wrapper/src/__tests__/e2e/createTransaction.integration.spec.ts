@@ -6,7 +6,6 @@ import { getEthAdapter, getPlugins, setupContractNetworks, setupTests as setupTe
 
 import { Client } from "@polywrap/core-js";
 import Safe from "@gnosis.pm/safe-core-sdk";
-import { SafeTransactionData } from "../../wrap";
 
 jest.setTimeout(1200000);
 
@@ -23,12 +22,7 @@ describe("Transactions creation", () => {
   beforeAll(async () => {
     await initTestEnvironment();
 
-    const plugins = await getPlugins(
-      providers.ethereum,
-      providers.ipfs,
-      ensAddresses.ensAddress,
-      connection.networkNameOrChainId
-    );
+    const plugins = await getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress, connection.networkNameOrChainId);
 
     client = new PolywrapClient({
       ...plugins,
@@ -107,10 +101,9 @@ describe("Transactions creation", () => {
         wrapperUri
       );
 
-      !wrapperTxResult.ok && console.log("wrapperTx", wrapperTxResult);
+      if (!wrapperTxResult.ok) fail(wrapperTxResult.error);
 
-      //@ts-ignore
-      const wrapperTxData = wrapperTxResult.value.data as SafeTransactionData;
+      const wrapperTxData = wrapperTxResult.value.data;
       const sdkTxData = sdkTx.data;
 
       expect(wrapperTxData.to).toEqual(sdkTxData.to);
@@ -137,8 +130,6 @@ describe("Transactions creation", () => {
         contractNetworks,
       });
 
-      /*       const nonce = (await ethAdapter.getNonce(account1.address)) + 1;
-       */
       const safeTransactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
@@ -146,7 +137,7 @@ describe("Transactions creation", () => {
       };
 
       const sdkTx = await safeSdk.createTransaction({
-        safeTransactionData: { ...safeTransactionData /* nonce: nonce */ },
+        safeTransactionData: { ...safeTransactionData },
       });
 
       const wrapperTxResult = await App.SafeWrapper_Module.createTransaction(
@@ -157,9 +148,8 @@ describe("Transactions creation", () => {
         wrapperUri
       );
 
-      !wrapperTxResult.ok && console.log("wrapperTx", wrapperTxResult);
+      if (!wrapperTxResult.ok) fail(wrapperTxResult.error);
 
-      //@ts-ignore
       const wrapperTxData = wrapperTxResult.value.data;
       const sdkTxData = sdkTx.data;
 
@@ -206,8 +196,8 @@ describe("Transactions creation", () => {
         wrapperUri
       );
 
-      //@ts-ignore
-      const wrapperMultisendData = wrapperMultisendResult.value.data as SafeTransactionData;
+      if (!wrapperMultisendResult.ok) fail(wrapperMultisendResult.error);
+      const wrapperMultisendData = wrapperMultisendResult.value.data;
       const sdkMultisendData = sdkMultisend.data;
 
       expect(wrapperMultisendData.to).toEqual(sdkMultisendData.to);
@@ -272,8 +262,8 @@ describe("Transactions creation", () => {
         wrapperUri
       );
 
-      //@ts-ignore
-      const wrapperMultisendData = wrapperMultisendResult.value.data as SafeTransactionData;
+      if (!wrapperMultisendResult.ok) fail(wrapperMultisendResult.error);
+      const wrapperMultisendData = wrapperMultisendResult.value.data;
       const sdkMultisendData = sdkMultisend.data;
 
       expect(wrapperMultisendData.to).toEqual(sdkMultisendData.to);

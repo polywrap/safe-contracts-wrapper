@@ -111,8 +111,8 @@ describe("Off-chain signatures", () => {
 
         const signedTxRes = await App.SafeWrapper_Module.addSignature({ tx: transaction }, client, wrapperUri);
 
-        //@ts-ignore
-        const signedTx = signedTxRes.value as SafeWrapper_SafeTransaction;
+        if (!signedTxRes.ok) fail(signedTxRes.error);
+        const signedTx = signedTxRes.value;
 
         const executionResult = await App.SafeWrapper_Module.executeTransaction({ tx: signedTx }, client, wrapperUri);
 
@@ -128,7 +128,7 @@ describe("Off-chain signatures", () => {
 
         const signedTxRes = await App.SafeWrapper_Module.addSignature({ tx: transaction }, client, wrapperUri);
 
-        //@ts-ignore
+        if (!signedTxRes.ok) fail(signedTxRes.error);
         const signedTx = signedTxRes.value as SafeWrapper_SafeTransaction;
 
         const executionResult = await client.invoke({
@@ -279,6 +279,7 @@ describe("Off-chain signatures", () => {
         await fundSafeBalance(newSafeAddress);
 
         const balanceBefore = await App.Ethereum_Module.getBalance({ address: newSafeAddress, blockTag: null, connection: connection }, client, ethereumUri);
+        if (!balanceBefore.ok) fail(balanceBefore.error);
 
         const transferAmount = "500000000000000000";
         const transaction = await createTransaction({ value: transferAmount });
@@ -298,8 +299,8 @@ describe("Off-chain signatures", () => {
         expect(executionResult.ok).toBeTruthy();
 
         const balanceAfter = await App.Ethereum_Module.getBalance({ address: newSafeAddress, blockTag: null, connection: connection }, client, ethereumUri);
+        if (!balanceAfter.ok) fail(balanceAfter.error);
 
-        //@ts-ignore
         expect(BigNumber.from(balanceAfter.value).toString()).toEqual(BigNumber.from(balanceBefore.value).sub(transferAmount).toString());
       });
 
@@ -363,6 +364,7 @@ describe("Off-chain signatures", () => {
         await fundSafeBalance(newSafeAddress, "20000000000000000000");
 
         const balanceBefore = await App.Ethereum_Module.getBalance({ address: newSafeAddress, blockTag: null, connection: connection }, client, ethereumUri);
+        if (!balanceBefore.ok) fail(balanceBefore.error);
 
         const multisendTxData = [
           { to: account2.address, value: "1100000000000000000", data: "0x" },
@@ -397,10 +399,9 @@ describe("Off-chain signatures", () => {
         if (!executionResult.ok) fail(executionResult.error);
 
         const balanceAfter = await App.Ethereum_Module.getBalance({ address: newSafeAddress, blockTag: null, connection: connection }, client, ethereumUri);
+        if (!balanceAfter.ok) fail(balanceAfter.error);
 
-        //@ts-ignore
         expect(BigNumber.from(balanceAfter.value).toString()).toEqual(
-          //@ts-ignore
           BigNumber.from(balanceBefore.value).sub(multisendTxData[0].value).sub(multisendTxData[1].value).toString()
         );
       });

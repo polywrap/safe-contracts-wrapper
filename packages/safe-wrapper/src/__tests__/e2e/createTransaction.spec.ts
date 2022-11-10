@@ -5,7 +5,6 @@ import * as App from "../types/wrap";
 import { getPlugins, setupAccounts, setupContractNetworks } from "../utils";
 import { Client } from "@polywrap/core-js";
 import { SafeWrapper_SafeTransactionData } from "../types/wrap";
-import { SafeTransactionData } from "../../wrap";
 
 jest.setTimeout(1200000);
 
@@ -28,12 +27,7 @@ describe("Transactions creation", () => {
   beforeAll(async () => {
     await initTestEnvironment();
 
-    const plugins = await getPlugins(
-      providers.ethereum,
-      providers.ipfs,
-      ensAddresses.ensAddress,
-      connection.networkNameOrChainId
-    );
+    const plugins = await getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress, connection.networkNameOrChainId);
 
     client = new PolywrapClient({
       ...plugins,
@@ -83,8 +77,7 @@ describe("Transactions creation", () => {
         wrapperUri
       );
 
-      expect(transactionResult.ok).toEqual(true);
-      //@ts-ignore
+      if (!transactionResult.ok) fail(transactionResult.error);
       const transaction = transactionResult.value.data;
 
       expect(transaction).toMatchObject(transactionData);
@@ -113,8 +106,7 @@ describe("Transactions creation", () => {
         wrapperUri
       );
 
-      expect(transactionResult.ok).toEqual(true);
-      //@ts-ignore
+      if (!transactionResult.ok) fail(transactionResult.error);
       const transaction = transactionResult.value.data;
 
       expect(transaction).toMatchObject(transactionData);
@@ -140,8 +132,8 @@ describe("Transactions creation", () => {
         wrapperUri
       );
 
-      //@ts-ignore
-      const wrapperResultData = wrapperResult.value.data as SafeTransactionData;
+      if (!wrapperResult.ok) fail(wrapperResult.error);
+      const wrapperResultData = wrapperResult.value.data;
 
       expect(wrapperResultData.to).toEqual(safeTransactionData.to);
       expect(wrapperResultData.value).toEqual(safeTransactionData.value);
@@ -178,8 +170,8 @@ describe("Transactions creation", () => {
         wrapperUri
       );
 
-      //@ts-ignore
-      const wrapperResultData = wrapperResult.value.data as SafeTransactionData;
+      if (!wrapperResult.ok) fail(wrapperResult.error);
+      const wrapperResultData = wrapperResult.value.data;
 
       expect(wrapperResultData.to).toEqual(safeTransactionData.to);
       expect(wrapperResultData.value).toEqual(safeTransactionData.value);
@@ -222,8 +214,8 @@ describe("Transactions creation", () => {
         wrapperUri
       );
 
-      //@ts-ignore
-      const wrapperResultData = wrapperResult.value.data as SafeTransactionData;
+      if (!wrapperResult.ok) fail(wrapperResult.error);
+      const wrapperResultData = wrapperResult.value.data;
 
       expect(wrapperResultData.to).toEqual(contractNetworksPart.multisendAddress);
       expect(wrapperResultData.data).not.toEqual(safeTransactionData.data);
@@ -259,8 +251,8 @@ describe("Transactions creation", () => {
         wrapperUri
       );
 
-      //@ts-ignore
-      const wrapperResultData = wrapperResult.value.data as SafeTransactionData;
+      if (!wrapperResult.ok) fail(wrapperResult.error);
+      const wrapperResultData = wrapperResult.value.data;
 
       expect(wrapperResultData.to).toEqual(contractNetworksPart.multisendAddress);
       expect(wrapperResultData.data).not.toEqual(safeTransactionData.data);

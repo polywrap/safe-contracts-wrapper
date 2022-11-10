@@ -6,7 +6,6 @@ import { getPlugins, setupAccounts, setupContractNetworks } from "../utils";
 import { Client } from "@polywrap/core-js";
 import { SafeWrapper_SafeTransaction, SafeWrapper_SafeTransactionData } from "../types/wrap";
 import { SignSignature } from "../../wrap";
-import { Wallet } from "ethers";
 
 jest.setTimeout(1200000);
 
@@ -22,12 +21,7 @@ describe("Off-chain signatures", () => {
   beforeAll(async () => {
     await initTestEnvironment();
 
-    const plugins = await getPlugins(
-      providers.ethereum,
-      providers.ipfs,
-      ensAddresses.ensAddress,
-      connection.networkNameOrChainId
-    );
+    const plugins = await getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress, connection.networkNameOrChainId);
 
     client = new PolywrapClient({
       ...plugins,
@@ -70,27 +64,21 @@ describe("Off-chain signatures", () => {
         client,
         wrapperUri
       );
-
-      //@ts-ignore
+      if (!transactionResult.ok) fail(transactionResult.error);
       const tx = transactionResult.value as SafeWrapper_SafeTransaction;
 
       expect(tx).toBeTruthy();
 
-      const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash(
-        { tx: tx.data },
-        client,
-        wrapperUri
-      );
+      const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash({ tx: tx.data }, client, wrapperUri);
+      if (!transactionHashResult.ok) fail(transactionHashResult.error);
 
-      //@ts-ignore
       const hash = transactionHashResult.value as string;
 
       expect(hash).toBeTruthy();
 
       const signatureResult = await App.SafeWrapper_Module.signTransactionHash({ hash: hash }, client, wrapperUri);
-
-      //@ts-ignore
-      const signature = signatureResult.value as SignSignature;
+      if (!signatureResult.ok) fail(signatureResult.error);
+      const signature = signatureResult.value;
 
       expect(signature).toBeTruthy();
       expect(signature.data.length).toEqual(132);
@@ -114,25 +102,22 @@ describe("Off-chain signatures", () => {
         client,
         wrapperUri
       );
-
-      //@ts-ignore
-      const tx = transactionResult.value as SafeWrapper_SafeTransaction;
+      if (!transactionResult.ok) fail(transactionResult.error);
+      const tx = transactionResult.value;
 
       expect(tx).toBeTruthy();
       expect(tx.signatures?.size).toEqual(0);
 
       const signedTransactionResult = await App.SafeWrapper_Module.addSignature({ tx: tx }, client, wrapperUri);
 
-      //@ts-ignore
-      const signedTransaction = signedTransactionResult.value as SafeWrapper_SafeTransaction;
+      if (!signedTransactionResult.ok) fail(signedTransactionResult.error);
+      const signedTransaction = signedTransactionResult.value;
 
-      expect(signedTransaction).toBeTruthy();
-
-      //@ts-ignore
       const signatures = signedTransaction.signatures as Map<string, SignSignature>;
 
       expect(signatures.size).toEqual(1);
     });
+
     it("should ignore duplicated signatures", async () => {
       const [account1] = setupAccounts();
 
@@ -150,15 +135,15 @@ describe("Off-chain signatures", () => {
         wrapperUri
       );
 
-      //@ts-ignore
-      const tx = transactionResult.value as SafeWrapper_SafeTransaction;
+      if (!transactionResult.ok) fail(transactionResult.error);
+      const tx = transactionResult.value;
 
       expect(tx).toBeTruthy();
       expect(tx.signatures?.size).toEqual(0);
 
       const signedTransactionResult = await App.SafeWrapper_Module.addSignature({ tx: tx }, client, wrapperUri);
 
-      //@ts-ignore
+      if (!signedTransactionResult.ok) fail(signedTransactionResult.error);
       const signedTx = signedTransactionResult.value as SafeWrapper_SafeTransaction;
 
       expect(signedTx).toBeTruthy();
@@ -168,22 +153,17 @@ describe("Off-chain signatures", () => {
       //Try to sign second time
       const signedTransactionResult2 = await App.SafeWrapper_Module.addSignature({ tx: signedTx }, client, wrapperUri);
 
-      //@ts-ignore
-      const signedTx2 = signedTransactionResult2.value as SafeWrapper_SafeTransaction;
+      if (!signedTransactionResult2.ok) fail(signedTransactionResult2.error);
+      const signedTx2 = signedTransactionResult2.value;
 
       expect(signedTx2.signatures?.size).toEqual(1);
     });
 
     it("should fail if signature is added by an account that is not an owner", async () => {
+      const [, , account3] = setupAccounts();
       //recreating client with new signer
       client = new PolywrapClient({
-        ...(await getPlugins(
-          providers.ethereum,
-          providers.ipfs,
-          ensAddresses.ensAddress,
-          connection.networkNameOrChainId,
-          new Wallet("0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1")
-        )),
+        ...(await getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress, connection.networkNameOrChainId, account3.signer)),
         envs: [
           {
             uri: wrapperUri,
@@ -211,16 +191,15 @@ describe("Off-chain signatures", () => {
         wrapperUri
       );
 
-      //@ts-ignore
-      const tx = transactionResult.value as SafeWrapper_SafeTransaction;
+      if (!transactionResult.ok) fail(transactionResult.error);
+      const tx = transactionResult.value;
 
       expect(tx).toBeTruthy();
 
       const addSignatureResult = await App.SafeWrapper_Module.addSignature({ tx: tx }, client, wrapperUri);
 
-      expect(addSignatureResult.ok).toBeFalsy();
-      //@ts-ignore
-      expect(addSignatureResult.error?.message).toContain("Transactions can only be signed by Safe owners");
+      if (addSignatureResult.ok) fail();
+      expect(addSignatureResult.error!.message).toContain("Transactions can only be signed by Safe owners");
     });
   });
 });

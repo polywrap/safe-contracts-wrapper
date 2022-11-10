@@ -92,7 +92,7 @@ export async function getPlugins(
     ],
   };
 }
-const defaults = { owners: ["0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1", "0xEc8E7Da193529bd8ddA13b1995F93F32989CF097"], threshold: 1 };
+const defaults = { owners: ["0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1", "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"], threshold: 1 };
 export const setupContractNetworks = async (
   client: Client,
   options?: Partial<typeof defaults>

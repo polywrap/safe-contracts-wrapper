@@ -21,12 +21,7 @@ describe("On-chain signatures", () => {
   beforeAll(async () => {
     await initTestEnvironment();
 
-    const plugins = await getPlugins(
-      providers.ethereum,
-      providers.ipfs,
-      ensAddresses.ensAddress,
-      connection.networkNameOrChainId
-    );
+    const plugins = await getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress, connection.networkNameOrChainId);
 
     client = new PolywrapClient({
       ...plugins,
@@ -83,14 +78,10 @@ describe("On-chain signatures", () => {
         data: "0x",
       };
 
-      const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash(
-        { tx: transactionData },
-        client,
-        wrapperUri
-      );
+      const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash({ tx: transactionData }, client, wrapperUri);
 
-      //@ts-ignore
-      const txHash = transactionHashResult.value;
+      if (!transactionHashResult.ok) fail(transactionHashResult.error);
+      const txHash = transactionHashResult.value!;
 
       const response = await App.SafeWrapper_Module.approveTransactionHash(
         {
@@ -100,10 +91,8 @@ describe("On-chain signatures", () => {
         wrapperUri
       );
 
-      expect(response.ok).toBeFalsy();
-
-      //@ts-ignore
-      const error = response.error.toString();
+      if (response.ok) fail();
+      const error = response.error!.toString();
       expect(error).toContain("Transaction hashes can only be approved by Safe owners");
     });
 
@@ -116,14 +105,9 @@ describe("On-chain signatures", () => {
         data: "0x",
       };
 
-      const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash(
-        { tx: transactionData },
-        client,
-        wrapperUri
-      );
-
-      //@ts-ignore
-      const txHash = transactionHashResult.value;
+      const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash({ tx: transactionData }, client, wrapperUri);
+      if (!transactionHashResult.ok) fail(transactionHashResult.error);
+      const txHash = transactionHashResult.value!;
 
       const response = await App.SafeWrapper_Module.approveTransactionHash(
         {
@@ -133,8 +117,7 @@ describe("On-chain signatures", () => {
         wrapperUri
       );
       expect(response).toBeTruthy();
-
-      //@ts-ignore
+      if (!response.ok) fail(response.error);
       const txReceipt = response.value as Ethereum_TxReceipt;
 
       expect(txReceipt.transactionHash).toBeTruthy();
@@ -142,8 +125,7 @@ describe("On-chain signatures", () => {
       expect(txReceipt.to.toLowerCase()).toEqual(safeAddress.toLowerCase());
 
       const approvedHashesResponse = await App.SafeWrapper_Module.approvedHashes({ hash: txHash }, client, wrapperUri);
-
-      //@ts-ignore
+      if (!approvedHashesResponse.ok) fail(approvedHashesResponse.error);
       const approvedHashes = approvedHashesResponse.value;
 
       expect(approvedHashes).toEqual("1");
@@ -158,14 +140,9 @@ describe("On-chain signatures", () => {
         data: "0x",
       };
 
-      const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash(
-        { tx: transactionData },
-        client,
-        wrapperUri
-      );
-
-      //@ts-ignore
-      const txHash = transactionHashResult.value;
+      const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash({ tx: transactionData }, client, wrapperUri);
+      if (!transactionHashResult.ok) fail(transactionHashResult.error);
+      const txHash = transactionHashResult.value!;
 
       await App.SafeWrapper_Module.approveTransactionHash(
         {
@@ -176,8 +153,7 @@ describe("On-chain signatures", () => {
       );
 
       const approvedHashesResponse = await App.SafeWrapper_Module.approvedHashes({ hash: txHash }, client, wrapperUri);
-
-      //@ts-ignore
+      if (!approvedHashesResponse.ok) fail(approvedHashesResponse.error);
       const approvedHashes = approvedHashesResponse.value;
 
       expect(approvedHashes).toEqual("1");
@@ -191,8 +167,7 @@ describe("On-chain signatures", () => {
       );
 
       const approvedHashesResponse2 = await App.SafeWrapper_Module.approvedHashes({ hash: txHash }, client, wrapperUri);
-
-      //@ts-ignore
+      if (!approvedHashesResponse2.ok) fail(approvedHashesResponse2.error);
       const approvedHashes2 = approvedHashesResponse2.value;
 
       expect(approvedHashes2).toEqual("1");
@@ -209,14 +184,9 @@ describe("On-chain signatures", () => {
         data: "0x",
       };
 
-      const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash(
-        { tx: transactionData },
-        client,
-        wrapperUri
-      );
-
-      //@ts-ignore
-      const txHash = transactionHashResult.value;
+      const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash({ tx: transactionData }, client, wrapperUri);
+      if (!transactionHashResult.ok) fail(transactionHashResult.error);
+      const txHash = transactionHashResult.value!;
 
       const response = await App.SafeWrapper_Module.approveTransactionHash(
         {
@@ -228,13 +198,9 @@ describe("On-chain signatures", () => {
 
       expect(response).toBeTruthy();
 
-      const approvedHashesResponse = await App.SafeWrapper_Module.getOwnersWhoApprovedTx(
-        { hash: txHash },
-        client,
-        wrapperUri
-      );
+      const approvedHashesResponse = await App.SafeWrapper_Module.getOwnersWhoApprovedTx({ hash: txHash }, client, wrapperUri);
 
-      //@ts-ignore
+      if (!approvedHashesResponse.ok) fail(approvedHashesResponse.error);
       const approvedHashes = approvedHashesResponse.value;
 
       expect(approvedHashes.length).toEqual(1);
@@ -269,13 +235,8 @@ describe("On-chain signatures", () => {
         wrapperUri
       );
 
-      const approvedHashesResponse2 = await App.SafeWrapper_Module.getOwnersWhoApprovedTx(
-        { hash: txHash },
-        client,
-        wrapperUri
-      );
-
-      //@ts-ignore
+      const approvedHashesResponse2 = await App.SafeWrapper_Module.getOwnersWhoApprovedTx({ hash: txHash }, client, wrapperUri);
+      if (!approvedHashesResponse2.ok) fail(approvedHashesResponse2.error);
       const approvedHashes2 = approvedHashesResponse2.value;
 
       expect(approvedHashes2.length).toEqual(2);
