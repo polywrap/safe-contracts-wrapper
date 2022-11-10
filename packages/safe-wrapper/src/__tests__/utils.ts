@@ -15,7 +15,6 @@ import {
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
 
 import { abi as safeAbi_1_3_0, bytecode as safeBytecode_1_3_0 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
-
 import {
   abi as multisendAbi,
   bytecode as multisendBytecode,
@@ -25,6 +24,8 @@ import {
   abi as multisendCallOnlyAbi,
   bytecode as multisendCallOnlyBytecode,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/libraries/MultiSendCallOnly.sol/MultiSendCallOnly.json";
+
+import { abi as ERC20MintableAbi, bytecode as ERC20MintableBytecode } from "openzeppelin-solidity/build/contracts/ERC20.json";
 
 import * as App from "./types/wrap";
 import { Client } from "@polywrap/core-js";
@@ -106,7 +107,7 @@ export const setupContractNetworks = async (
     }
   ]
 > => {
-  options = { ...defaults, ...options };
+  const safeOptions = { ...defaults, ...options };
   const ethereumUri = "ens/ethereum.polywrap.eth";
 
   const safeWrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..", "safe-factory-wrapper");
@@ -148,8 +149,8 @@ export const setupContractNetworks = async (
   const safeResponse = await App.SafeFactory_Module.deploySafe(
     {
       safeAccountConfig: {
-        owners: options.owners!,
-        threshold: options.threshold!,
+        owners: safeOptions.owners!,
+        threshold: safeOptions.threshold!,
       },
       txOverrides: { gasLimit: "1000000", gasPrice: "20" },
       customContractAdressess: {
@@ -201,6 +202,24 @@ export const setupContractNetworks = async (
   ];
 };
 
+export const getERC20MintableAddress = async (client: Client, signer: Wallet) => {
+  const ethereumUri = "ens/ethereum.polywrap.eth";
+  const erc20Response = await App.Ethereum_Module.deployContract(
+    {
+      abi: JSON.stringify(ERC20MintableAbi),
+      bytecode: ERC20MintableBytecode,
+      args: null,
+    },
+    client,
+    ethereumUri
+  );
+
+  if (!erc20Response.ok) throw erc20Response.error;
+  const erc20Address = erc20Response.value;
+
+  return erc20Address;
+};
+
 export const getEthAdapter = async (providerUrl: string, signer: Signer): Promise<EthAdapter> => {
   const ethersProvider = new ethers.providers.JsonRpcProvider(providerUrl);
 
@@ -220,6 +239,7 @@ export const setupAccounts = () => {
       signer: new Wallet("0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"),
       address: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0",
     },
+    { signer: new Wallet("0x6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"), address: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b" },
   ];
 };
 
