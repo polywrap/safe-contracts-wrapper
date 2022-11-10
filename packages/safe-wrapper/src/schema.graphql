@@ -32,7 +32,7 @@ type SafeTransactionOptionalProps {
 type SafeTransactionData {
     data: String!
     to: String!
-    value: String!
+    value: BigInt!
     operation: BigInt
     safeTxGas: BigInt
     baseGas: BigInt
@@ -50,6 +50,7 @@ type SignSignature {
 
 type TransactionOptions {
   from: String
+  gas: BigInt
   gasLimit: BigInt
   gasPrice: BigInt
   maxFeePerGas: BigInt
@@ -81,6 +82,7 @@ type Module {
     signTransactionHash(hash: String!): SignSignature! @env(required: true)
     signTypedData(tx: SafeTransactionData!): SignSignature! @env(required: true)
     approveTransactionHash(hash: String!, options: TransactionOptions): Ethereum_TxReceipt! @env(required: true)
+    executeTransaction(tx: SafeTransaction!, options: TransactionOptions): Ethereum_TxReceipt! @env(required: true)
 
     """Contract manager methods"""
     # contractNetworks()

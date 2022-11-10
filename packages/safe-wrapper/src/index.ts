@@ -18,8 +18,10 @@ import {
   SafeTransaction,
   SignSignature,
   SafeTransactionData,
-  Logger_Module,
   Ethereum_TxReceipt,
+  Ethereum_TxOverrides,
+  Logger_Module,
+  Logger_Logger_LogLevel,
 } from "./wrap";
 import { Args_getTransactionHash } from "./wrap/Module";
 import {
@@ -27,19 +29,22 @@ import {
   arrayify,
   createTransactionFromPartial,
   encodeMultiSendData,
+  encodeSignatures,
+  generatePreValidatedSignature,
   getTransactionHashArgs,
 } from "./utils";
 import {
   Args_approvedHashes,
   Args_approveTransactionHash,
   Args_createMultiSendTransaction,
+  Args_executeTransaction,
   Args_getMultiSendContract,
   Args_getOwnersWhoApprovedTx,
   Args_getSafeVersion,
   Args_signTransactionHash,
   Args_signTypedData,
 } from "./wrap/Module/serialization";
-import { BigInt, Box, JSON, JSONEncoder } from "@polywrap/wasm-as";
+import { BigInt, Box } from "@polywrap/wasm-as";
 import {
   validateOwnerAddress,
   validateAddressIsNotOwner,
@@ -214,7 +219,10 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
     args: [multiSendData],
   }).unwrap();
 
-  const transactionData = createTransactionFromPartial({ data: "", to: "", value: "" } as SafeTransactionData, null);
+  const transactionData = createTransactionFromPartial(
+    { data: "", to: "", value: BigInt.from("") } as SafeTransactionData,
+    null
+  );
 
   let multiSendAddress: string = "";
 
@@ -239,7 +247,7 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
 
   const multiSendTransaction: SafeTransactionData = {
     to: multiSendAddress,
-    value: "0",
+    value: BigInt.from("0"),
     data: data,
     operation: BigInt.from("1"), // OperationType.DelegateCall,
     baseGas: args.options != null && args.options!.baseGas ? args.options!.baseGas : transactionData.baseGas,
@@ -422,6 +430,123 @@ export function signTypedData(args: Args_signTypedData, env: Env): SignSignature
     signer: Ethereum_Module.getSignerAddress({ connection: env.connection }).unwrap(),
     data: adjustVInSignature("eth_signTypedData", signature, null, null),
   };
+}
+
+export function executeTransaction(args: Args_executeTransaction, env: Env): Ethereum_TxReceipt {
+  const transaction = args.tx;
+
+  const signedSafeTransaction = createTransaction({ tx: args.tx.data, options: null }, env);
+
+  for (let i = 0; i < transaction.signatures!.keys().length; i++) {
+    const key = transaction.signatures!.keys()[i];
+
+    const signature = transaction.signatures!.get(key);
+
+    signedSafeTransaction.signatures!.set(signature.signer.toLowerCase(), signature);
+  }
+
+  const txHash = getTransactionHash({ tx: signedSafeTransaction.data }, env);
+
+  const ownersWhoApprovedTx = getOwnersWhoApprovedTx({ hash: txHash }, env);
+  for (let i = 0; i < ownersWhoApprovedTx.length; i++) {
+    const owner = ownersWhoApprovedTx[i];
+    signedSafeTransaction.signatures!.set(owner.toLowerCase(), generatePreValidatedSignature(owner));
+  }
+
+  const owners = getOwners({}, env);
+
+  const signerAddress = Ethereum_Module.getSignerAddress({ connection: env.connection }).unwrap();
+
+  if (owners.includes(signerAddress)) {
+    signedSafeTransaction.signatures!.set(signerAddress.toLowerCase(), generatePreValidatedSignature(signerAddress));
+  }
+
+  const threshold = getThreshold({}, env);
+
+  if (threshold > <u32>signedSafeTransaction.signatures!.size) {
+    const signaturesMissing = threshold - signedSafeTransaction.signatures!.size;
+    throw new Error(
+      `There ${signaturesMissing > 1 ? "are" : "is"} ${signaturesMissing} signature${
+        signaturesMissing > 1 ? "s" : ""
+      } missing`
+    );
+  }
+
+  const value = BigInt.from(signedSafeTransaction.data.value);
+
+  if (!value.isZero()) {
+    const balance = Ethereum_Module.getBalance({
+      address: env.safeAddress,
+      blockTag: null,
+      connection: env.connection,
+    }).unwrap();
+    if (value.gt(BigInt.from(balance))) {
+      throw new Error("Not enough Ether funds");
+    }
+  }
+
+  const txOverrides: Ethereum_TxOverrides = { gasLimit: null, gasPrice: null, value: null };
+
+  if (args.options != null) {
+    if (args.options!.gas && args.options!.gasLimit) {
+      throw new Error("Cannot specify gas and gasLimit together in transaction options");
+    }
+    if (args.options!.gasLimit) {
+      txOverrides.gasLimit = args.options!.gasLimit;
+    }
+    if (args.options!.gasPrice) {
+      txOverrides.gasPrice = args.options!.gasPrice;
+    }
+  }
+
+  const txResponse = execTransaction(signedSafeTransaction, txOverrides, env);
+
+  return txResponse;
+}
+
+function execTransaction(tx: SafeTransaction, options: Ethereum_TxOverrides, env: Env): Ethereum_TxReceipt {
+  const args = tx.data;
+
+  const method =
+    "function execTransaction(address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address payable refundReceiver, bytes memory signatures) external payable returns (bool success)";
+
+  if (!options.gasLimit) {
+    const encodedSignatures = encodeSignatures(tx.signatures!);
+
+    const estimationArgs = getTransactionHashArgs(tx.data);
+    estimationArgs.pop()
+    estimationArgs.push(encodedSignatures);
+
+    options.gasLimit = SafeContracts_Module.estimateGas({
+      address: env.safeAddress,
+      method: 'function execTransaction(address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address payable refundReceiver, bytes memory signatures)',
+      args: estimationArgs,
+      connection: {
+        networkNameOrChainId: env.connection.networkNameOrChainId,
+        node: env.connection.node,
+      },
+    }).unwrap();
+  }
+
+  const encodedSignatures = encodeSignatures(tx.signatures!);
+  return Ethereum_Module.callContractMethodAndWait({
+    address: env.safeAddress,
+    method: method,
+    args: [
+      args.to,
+      args.value.toString(),
+      args.data,
+      args.operation!.toString(),
+      args.safeTxGas!.toString(),
+      args.baseGas!.toString(),
+      args.gasPrice!.toString(),
+      args.gasToken!,
+      args.refundReceiver!,
+      encodedSignatures,
+    ],
+    txOverrides: options,
+    connection: env.connection,
+  }).unwrap();
 }
 
 // Contract manager methods

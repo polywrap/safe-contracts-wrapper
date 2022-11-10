@@ -14,11 +14,7 @@ import {
   bytecode as factoryBytecode_1_3_0,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
 
-import {
-  abi as safeAbi_1_3_0,
-  bytecode as safeBytecode_1_3_0,
-} from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
-
+import { abi as safeAbi_1_3_0, bytecode as safeBytecode_1_3_0 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
 import {
   abi as multisendAbi,
   bytecode as multisendBytecode,
@@ -28,6 +24,8 @@ import {
   abi as multisendCallOnlyAbi,
   bytecode as multisendCallOnlyBytecode,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/libraries/MultiSendCallOnly.sol/MultiSendCallOnly.json";
+
+import { abi as ERC20MintableAbi, bytecode as ERC20MintableBytecode } from "openzeppelin-solidity/build/contracts/ERC20.json";
 
 import * as App from "./types/wrap";
 import { Client } from "@polywrap/core-js";
@@ -94,9 +92,10 @@ export async function getPlugins(
     ],
   };
 }
-
+const defaults = { owners: ["0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1", "0xEc8E7Da193529bd8ddA13b1995F93F32989CF097"], threshold: 1 };
 export const setupContractNetworks = async (
-  client: Client
+  client: Client,
+  options?: Partial<typeof defaults>
 ): Promise<
   [
     string,
@@ -108,6 +107,7 @@ export const setupContractNetworks = async (
     }
   ]
 > => {
+  const safeOptions = { ...defaults, ...options };
   const ethereumUri = "ens/ethereum.polywrap.eth";
 
   const safeWrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..", "safe-factory-wrapper");
@@ -119,11 +119,6 @@ export const setupContractNetworks = async (
   let safeContractAddress: string;
   let multisendAddress: string;
   let multisendCallOnlyAddress: string;
-
-  const signer = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
-
-  const owner = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0" || "0xEc8E7Da193529bd8ddA13b1995F93F32989CF097";
-  const owners = [signer, owner];
 
   const proxyFactoryContractResponse_v130 = await App.Ethereum_Module.deployContract(
     {
@@ -154,8 +149,8 @@ export const setupContractNetworks = async (
   const safeResponse = await App.SafeFactory_Module.deploySafe(
     {
       safeAccountConfig: {
-        owners: owners,
-        threshold: 1,
+        owners: safeOptions.owners!,
+        threshold: safeOptions.threshold!,
       },
       txOverrides: { gasLimit: "1000000", gasPrice: "20" },
       customContractAdressess: {
@@ -207,6 +202,24 @@ export const setupContractNetworks = async (
   ];
 };
 
+export const getERC20MintableAddress = async (client: Client, signer: Wallet) => {
+  const ethereumUri = "ens/ethereum.polywrap.eth";
+  const erc20Response = await App.Ethereum_Module.deployContract(
+    {
+      abi: JSON.stringify(ERC20MintableAbi),
+      bytecode: ERC20MintableBytecode,
+      args: null,
+    },
+    client,
+    ethereumUri
+  );
+
+  if (!erc20Response.ok) throw erc20Response.error;
+  const erc20Address = erc20Response.value;
+
+  return erc20Address;
+};
+
 export const getEthAdapter = async (providerUrl: string, signer: Signer): Promise<EthAdapter> => {
   const ethersProvider = new ethers.providers.JsonRpcProvider(providerUrl);
 
@@ -222,6 +235,11 @@ export const setupAccounts = () => {
       signer: new Wallet("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"),
       address: "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
     },
+    {
+      signer: new Wallet("0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"),
+      address: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0",
+    },
+    { signer: new Wallet("0x6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"), address: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b" },
   ];
 };
 

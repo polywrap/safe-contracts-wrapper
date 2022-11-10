@@ -6,7 +6,7 @@ import { arrayify } from "./signature";
 export function getTransactionHashArgs(tx: SafeTransactionData): string[] {
   return [
     tx.to,
-    tx.value,
+    tx.value.toString(),
     tx.data,
     tx.operation!.toString(),
     tx.safeTxGas!.toString(),
@@ -101,7 +101,7 @@ export function encodeMetaTransaction(tx: SafeTransactionData): string {
 
   const encoded = Ethereum_Module.solidityPack({
     types: ["uint8", "address", "uint256", "uint256", "bytes"],
-    values: [tx.operation!.toString(), tx.to, tx.value, data.length.toString(), "[" + data.toString() + "]"],
+    values: [tx.operation!.toString(), tx.to, tx.value.toString(), data.length.toString(), "[" + data.toString() + "]"],
   }).unwrap();
 
   return encoded.slice(2);
