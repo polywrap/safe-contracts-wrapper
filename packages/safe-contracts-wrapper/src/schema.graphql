@@ -5,67 +5,29 @@ type Module {
     """
     Module to deploy and interact with the proxy factory smart-contract
     """
-    createProxy(
-        address: String!
-        safeMasterCopyAddress: String!
-        initializer: String!
-        saltNonce: UInt32!
-        connection: Ethereum_Connection
-        txOverrides: Ethereum_TxOverrides
-    ): String
-
-    proxyCreationCode(
-        address: String!
-        connection: Ethereum_Connection
-    ): String!
-
-    estimateGas(
-        address: String!
-        method: String!
-        args: [String!]!
-        connection: Ethereum_Connection
-    ): BigInt!
-
-    encode(
-        method: String!
-        args: [String!]!
-    ): String!
+    createProxy(address: String!, safeMasterCopyAddress: String!, initializer: String!, saltNonce: UInt32!, connection: Ethereum_Connection, txOverrides: Ethereum_TxOverrides): String
+    proxyCreationCode(address: String!, connection: Ethereum_Connection): String!
 
     """
     GnosisSafeContractEthers methods
     """
-    getOwners(
-        address: String!
-        connection: Ethereum_Connection
-    ): [String!]!
+    getVersion(address: String!, connection: Ethereum_Connection): String!
+    getAddress(address: String!, connection: Ethereum_Connection): String!
+    getNonce(address: String!, connection: Ethereum_Connection): BigInt!
+    getThreshold(address: String!, connection: Ethereum_Connection): UInt32!
+    getOwners(address: String!, connection: Ethereum_Connection): [String!]!
+    isOwner(address: String!, ownerAddress: String!, connection: Ethereum_Connection): Boolean!
+  #getTransactionHash(safeTransactionData: SafeTransactionData): Promise<string>
+    approvedHashes(address: String!, ownerAddress: String!, hash: String!, connection: Ethereum_Connection): BigInt!
+  #approveHash(hash: string, options?: TransactionOptions): Promise<TransactionResult>
+    getModules(address: String!, connection: Ethereum_Connection): [String!]!
+    isModuleEnabled(address: String!, moduleAddress: String!, connection: Ethereum_Connection): Boolean!
+  #execTransaction( safeTransaction: SafeTransaction, options?: TransactionOptions): Promise<TransactionResult>
+    encode(method: String!, args: [String!]!): String!
+    estimateGas(address: String!, method: String!, args: [String!]!, connection: Ethereum_Connection): BigInt!
 
-    getThreshold(
-        address: String!
-        connection: Ethereum_Connection
-    ): UInt32!
+    getSafeContractNetworks(version: String!, chainId: String!, isL1Safe: Boolean): ContractNetworksConfig
 
-    isOwner(
-        address: String!
-        ownerAddress: String!
-        connection: Ethereum_Connection
-    ): Boolean!
-
-    getModules(
-        address: String!
-        connection: Ethereum_Connection
-    ): [String!]!
-
-    isModuleEnabled(
-        address: String!
-        moduleAddress: String!
-        connection: Ethereum_Connection
-    ): Boolean!
-
-    getSafeContractNetworks(
-        version: String!
-        chainId: String!
-        isL1Safe: Boolean
-    ): ContractNetworksConfig
 }
 
 type ContractNetworksConfig {
