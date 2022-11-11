@@ -7,6 +7,7 @@ import {
   Ethereum_TxReceipt,
   Ethereum_TxOverrides,
   Interface_SignSignature,
+  Logger_Module,
 } from "./wrap";
 import { Args_getTransactionHash } from "./wrap/Module";
 import {
@@ -32,7 +33,7 @@ import { Interface_SafeTransactionData } from "./wrap/imported/Interface_SafeTra
 
 import * as ownerManager from "./managers/ownerManager";
 import * as contractManager from "./managers/contractManager";
-import { toTransaction, toTxReceipt } from "./utils/typeMap";
+import { toTransaction, toTransactionData, toTxReceipt } from "./utils/typeMap";
 
 export * from "./managers";
 
@@ -146,19 +147,15 @@ export function addSignature(args: Args_addSignature, env: Env): Interface_SafeT
 }
 
 export function getTransactionHash(args: Args_getTransactionHash, env: Env): string {
-  const recreatedTx = createTransactionFromPartial(args.tx, null);
 
-  const contractArgs = getTransactionHashArgs(recreatedTx);
-
-  const res = Ethereum_Module.callContractView({
-    address: env.safeAddress,
-    method:
-      "function getTransactionHash(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 _nonce) public view returns (bytes32)",
-    args: contractArgs,
-    connection: env.connection,
+  return SafeContracts_Module.getTransactionHash({
+    safeAddress: env.safeAddress,
+    safeTransactionData: toTransactionData(args.tx),
+    connection: {
+      networkNameOrChainId: env.connection.networkNameOrChainId,
+      node: env.connection.node,
+    },
   }).unwrap();
-
-  return res;
 }
 
 export function signTransactionHash(args: Args_signTransactionHash, env: Env): Interface_SignSignature {

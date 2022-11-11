@@ -30,6 +30,8 @@ import { abi as ERC20MintableAbi, bytecode as ERC20MintableBytecode } from "open
 import * as App from "./types/wrap";
 import { Client } from "@polywrap/core-js";
 
+export const safeContractsPath = path.resolve(path.join(__dirname, "../../../safe-contracts-wrapper"));
+
 export async function getPlugins(
   ethereum: string,
   ipfs: string,
@@ -90,6 +92,7 @@ export async function getPlugins(
         }),
       },
     ],
+    redirects: [{ from: "wrap://ens/safe.contracts.polywrap.eth", to: `wrap://fs/${safeContractsPath}/build` }],
   };
 }
 const defaults = { owners: ["0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1", "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"], threshold: 1 };

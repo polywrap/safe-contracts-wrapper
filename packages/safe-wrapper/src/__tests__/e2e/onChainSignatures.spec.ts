@@ -2,9 +2,9 @@ import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
 import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getPlugins, setupAccounts, setupContractNetworks } from "../utils";
+import { getPlugins, safeContractsPath, setupAccounts, setupContractNetworks } from "../utils";
 import { Client } from "@polywrap/core-js";
-import { Ethereum_TxReceipt, SafeWrapper_SafeTransactionData } from "../types/wrap";
+import { Ethereum_TxReceipt } from "../types/wrap";
 import { Wallet } from "ethers";
 
 jest.setTimeout(1200000);
@@ -15,6 +15,7 @@ describe("On-chain signatures", () => {
   let client: Client;
   const wrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..");
   const wrapperUri = `fs/${wrapperPath}/build`;
+  const contractWrapperUri = `fs/${safeContractsPath}/build`;
 
   const connection = { networkNameOrChainId: "testnet", chainId: 1337 };
 
@@ -72,7 +73,7 @@ describe("On-chain signatures", () => {
         ],
       });
 
-      const transactionData: SafeWrapper_SafeTransactionData = {
+      const transactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
         data: "0x",
@@ -99,7 +100,7 @@ describe("On-chain signatures", () => {
     it("should approve the transaction hash", async () => {
       const [account1] = setupAccounts();
 
-      const transactionData: SafeWrapper_SafeTransactionData = {
+      const transactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
         data: "0x",
@@ -124,7 +125,11 @@ describe("On-chain signatures", () => {
       expect(txReceipt.logs.length).toBeGreaterThan(0);
       expect(txReceipt.to.toLowerCase()).toEqual(safeAddress.toLowerCase());
 
-      const approvedHashesResponse = await App.SafeWrapper_Module.approvedHashes({ hash: txHash }, client, wrapperUri);
+      const approvedHashesResponse = await App.SafeContracts_Module.approvedHashes(
+        { address: safeAddress, hash: txHash, ownerAddress: account1.address, connection: connection },
+        client,
+        contractWrapperUri
+      );
       if (!approvedHashesResponse.ok) fail(approvedHashesResponse.error);
       const approvedHashes = approvedHashesResponse.value;
 
@@ -134,13 +139,14 @@ describe("On-chain signatures", () => {
     it("should ignore a duplicated signatures", async () => {
       const [account1] = setupAccounts();
 
-      const transactionData: SafeWrapper_SafeTransactionData = {
+      const transactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
         data: "0x",
       };
 
       const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash({ tx: transactionData }, client, wrapperUri);
+
       if (!transactionHashResult.ok) fail(transactionHashResult.error);
       const txHash = transactionHashResult.value!;
 
@@ -151,8 +157,11 @@ describe("On-chain signatures", () => {
         client,
         wrapperUri
       );
-
-      const approvedHashesResponse = await App.SafeWrapper_Module.approvedHashes({ hash: txHash }, client, wrapperUri);
+      const approvedHashesResponse = await App.SafeContracts_Module.approvedHashes(
+        { address: safeAddress, hash: txHash, ownerAddress: account1.address, connection: connection },
+        client,
+        contractWrapperUri
+      );
       if (!approvedHashesResponse.ok) fail(approvedHashesResponse.error);
       const approvedHashes = approvedHashesResponse.value;
 
@@ -165,8 +174,11 @@ describe("On-chain signatures", () => {
         client,
         wrapperUri
       );
-
-      const approvedHashesResponse2 = await App.SafeWrapper_Module.approvedHashes({ hash: txHash }, client, wrapperUri);
+      const approvedHashesResponse2 = await App.SafeContracts_Module.approvedHashes(
+        { address: safeAddress, hash: txHash, ownerAddress: account1.address, connection: connection },
+        client,
+        contractWrapperUri
+      );
       if (!approvedHashesResponse2.ok) fail(approvedHashesResponse2.error);
       const approvedHashes2 = approvedHashesResponse2.value;
 
@@ -178,7 +190,7 @@ describe("On-chain signatures", () => {
     it("should return the list of owners who approved a transaction hash", async () => {
       const [account1] = setupAccounts();
 
-      const transactionData: SafeWrapper_SafeTransactionData = {
+      const transactionData = {
         to: account1.address,
         value: "700000000000000000", // 0.7 ETH
         data: "0x",

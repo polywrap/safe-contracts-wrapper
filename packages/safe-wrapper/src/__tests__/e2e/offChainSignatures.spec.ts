@@ -4,8 +4,6 @@ import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } fro
 import * as App from "../types/wrap";
 import { getPlugins, setupAccounts, setupContractNetworks } from "../utils";
 import { Client } from "@polywrap/core-js";
-import { SafeWrapper_SafeTransaction, SafeWrapper_SafeTransactionData } from "../types/wrap";
-import { SignSignature } from "../../wrap";
 
 jest.setTimeout(1200000);
 
@@ -51,7 +49,7 @@ describe("Off-chain signatures", () => {
     it("should sign a transaction hash with the current signer", async () => {
       const [account1] = setupAccounts();
 
-      const transactionData: SafeWrapper_SafeTransactionData = {
+      const transactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
         data: "0x",
@@ -65,7 +63,7 @@ describe("Off-chain signatures", () => {
         wrapperUri
       );
       if (!transactionResult.ok) fail(transactionResult.error);
-      const tx = transactionResult.value as SafeWrapper_SafeTransaction;
+      const tx = transactionResult.value;
 
       expect(tx).toBeTruthy();
 
@@ -89,7 +87,7 @@ describe("Off-chain signatures", () => {
     it("should add the signature of the current signer", async () => {
       const [account1] = setupAccounts();
 
-      const transactionData: SafeWrapper_SafeTransactionData = {
+      const transactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
         data: "0x",
@@ -113,7 +111,7 @@ describe("Off-chain signatures", () => {
       if (!signedTransactionResult.ok) fail(signedTransactionResult.error);
       const signedTransaction = signedTransactionResult.value;
 
-      const signatures = signedTransaction.signatures as Map<string, SignSignature>;
+      const signatures = signedTransaction.signatures!;
 
       expect(signatures.size).toEqual(1);
     });
@@ -121,7 +119,7 @@ describe("Off-chain signatures", () => {
     it("should ignore duplicated signatures", async () => {
       const [account1] = setupAccounts();
 
-      const transactionData: SafeWrapper_SafeTransactionData = {
+      const transactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
         data: "0x",
@@ -144,7 +142,7 @@ describe("Off-chain signatures", () => {
       const signedTransactionResult = await App.SafeWrapper_Module.addSignature({ tx: tx }, client, wrapperUri);
 
       if (!signedTransactionResult.ok) fail(signedTransactionResult.error);
-      const signedTx = signedTransactionResult.value as SafeWrapper_SafeTransaction;
+      const signedTx = signedTransactionResult.value;
 
       expect(signedTx).toBeTruthy();
 
@@ -177,7 +175,7 @@ describe("Off-chain signatures", () => {
 
       const [account1] = setupAccounts();
 
-      const transactionData: SafeWrapper_SafeTransactionData = {
+      const transactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
         data: "0x",
