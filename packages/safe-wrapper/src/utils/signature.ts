@@ -1,4 +1,4 @@
-import { SignSignature } from "../wrap";
+import { Interface_SignSignature } from "../wrap";
 
 export function arrayify(value: string): Uint8Array {
   let hex = value.substring(2);
@@ -62,12 +62,8 @@ export function adjustVInSignature(
   return signature;
 }
 
-export function generatePreValidatedSignature(owner: string): SignSignature {
-  const signature =
-    "0x000000000000000000000000" +
-    owner.slice(2) +
-    "0000000000000000000000000000000000000000000000000000000000000000" +
-    "01";
+export function generatePreValidatedSignature(owner: string): Interface_SignSignature {
+  const signature = "0x000000000000000000000000" + owner.slice(2) + "0000000000000000000000000000000000000000000000000000000000000000" + "01";
 
   return {
     signer: owner,
@@ -75,7 +71,7 @@ export function generatePreValidatedSignature(owner: string): SignSignature {
   };
 }
 
-export function encodeSignatures(signatures: Map<string, SignSignature>): string {
+/* export function encodeSignatures(signatures: Map<string, Interface_SignSignature>): string {
   const signers = (<Array<string>>signatures.keys()).sort();
   const baseOffset = signers.length * 65;
   let staticParts = "";
@@ -89,7 +85,7 @@ export function encodeSignatures(signatures: Map<string, SignSignature>): string
   }
 
   return "0x" + staticParts + dynamicParts;
-}
+} */
 /*
 function calculateSigRecovery(v: BNLike, chainId?: BNLike): BN {
   const vBN = toType(v, TypeOutput.BN);

@@ -1,9 +1,11 @@
 import { BigInt } from "@polywrap/wasm-as";
-import { Ethereum_Module, SafeTransactionData, SafeTransactionOptionalProps } from "../wrap";
+import { Ethereum_Module } from "../wrap";
+import { Interface_SafeTransactionData } from "../wrap/imported/Interface_SafeTransactionData";
+import { Interface_SafeTransactionOptionalProps } from "../wrap/imported/Interface_SafeTransactionOptionalProps";
 import { ZERO_ADDRESS } from "./constants";
 import { arrayify } from "./signature";
 
-export function getTransactionHashArgs(tx: SafeTransactionData): string[] {
+export function getTransactionHashArgs(tx: Interface_SafeTransactionData): string[] {
   return [
     tx.to,
     tx.value.toString(),
@@ -19,10 +21,10 @@ export function getTransactionHashArgs(tx: SafeTransactionData): string[] {
 }
 
 export function createTransactionFromPartial(
-  transactionData: SafeTransactionData,
-  options: SafeTransactionOptionalProps | null
-): SafeTransactionData {
-  let transaction: SafeTransactionData = {
+  transactionData: Interface_SafeTransactionData,
+  options: Interface_SafeTransactionOptionalProps | null
+): Interface_SafeTransactionData {
+  let transaction: Interface_SafeTransactionData = {
     data: transactionData.data,
     to: transactionData.to,
     value: transactionData.value,
@@ -85,7 +87,7 @@ export function createTransactionFromPartial(
   return transaction;
 }
 
-export const encodeMultiSendData = (transactionDataArr: SafeTransactionData[]): string => {
+export const encodeMultiSendData = (transactionDataArr: Interface_SafeTransactionData[]): string => {
   let dataStr = "";
 
   for (let i = 0; i < transactionDataArr.length; i++) {
@@ -96,7 +98,7 @@ export const encodeMultiSendData = (transactionDataArr: SafeTransactionData[]): 
   return "0x" + dataStr;
 };
 
-export function encodeMetaTransaction(tx: SafeTransactionData): string {
+export function encodeMetaTransaction(tx: Interface_SafeTransactionData): string {
   const data = arrayify(tx.data);
 
   const encoded = Ethereum_Module.solidityPack({

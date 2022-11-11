@@ -1,15 +1,11 @@
-#import { Module } into SafeContracts from "wrap://ipfs/QmXuSErK5jEt9tm9jzz8fJdTKoHrjoTbr8h2b2SLnVe6qw"
+#import { Module } into SafeContracts from "wrap://ens/safe.contracts.polywrap.eth"
 #import { Module, Connection, TxOverrides, TxReceipt } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
 #import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
+#import { SignSignature, SafeTransaction, SafeTransactionData, SafeTransactionOptionalProps, TransactionOptions } into Interface from "wrap://ens/safe.interface.polywrap.eth"
 
 type Env {
     safeAddress: String!
     connection: Ethereum_Connection!
-}
-
-type SafeTransaction {
-    signatures: Map @annotate(type: "Map<String!, SignSignature!>")
-    data: SafeTransactionData!
 }
 
 type MetaTransactionData {
@@ -19,46 +15,18 @@ type MetaTransactionData {
     operation: BigInt
 }
 
-type SafeTransactionOptionalProps {
-    operation: BigInt
-    safeTxGas: BigInt
-    baseGas: BigInt
-    gasPrice: BigInt
-    gasToken: String
-    refundReceiver: String
-    nonce: BigInt
-}
-
-type SafeTransactionData {
-    data: String!
-    to: String!
-    value: BigInt!
-    operation: BigInt
-    safeTxGas: BigInt
-    baseGas: BigInt
-    gasPrice: BigInt
-    gasToken: String
-    refundReceiver: String
-    nonce: BigInt
-    # TODO: add txOverrides
-}
-
-type SignSignature {
-    signer: String!
-    data: String!
-}
-
-type TransactionOptions {
-  from: String
-  gas: BigInt
-  gasLimit: BigInt
-  gasPrice: BigInt
-  maxFeePerGas: BigInt
-  maxPriorityFeePerGas: String
-  nonce: BigInt
-}
-
 type Module {
+    """Safe methods"""
+    createTransaction(tx: Interface_SafeTransactionData!, options: Interface_SafeTransactionOptionalProps): Interface_SafeTransaction! @env(required: true)
+    createMultiSendTransaction(txs: [Interface_SafeTransactionData!]!, options: Interface_SafeTransactionOptionalProps, onlyCalls: Boolean, customMultiSendContractAddress: String ): Interface_SafeTransaction! @env(required: true)
+    addSignature(tx: Interface_SafeTransaction!, signingMethod: String): Interface_SafeTransaction! @env(required: true)
+    getTransactionHash(tx: Interface_SafeTransactionData!): String @env(required: true)
+    signTransactionHash(hash: String!): Interface_SignSignature! @env(required: true)
+    signTypedData(tx: Interface_SafeTransactionData!): Interface_SignSignature! @env(required: true)
+    approveTransactionHash(hash: String!, options: Interface_TransactionOptions): Ethereum_TxReceipt! @env(required: true)
+    executeTransaction(tx: Interface_SafeTransaction!, options: Interface_TransactionOptions): Ethereum_TxReceipt! @env(required: true)
+    getOwnersWhoApprovedTx(hash: String!): [String!]! @env(required: true)
+
     """Owner manager methods"""
     getOwners: [String!]! @env(required: true)
     getThreshold: UInt32! @env(required: true)
@@ -74,24 +42,10 @@ type Module {
     encodeEnableModuleData(moduleAddress: String!): String! @env(required: true)
     encodeDisableModuleData(moduleAddress: String!): String! @env(required: true)
 
-    """Transaction manager methods"""
-    createTransaction(tx: SafeTransactionData!, options: SafeTransactionOptionalProps): SafeTransaction! @env(required: true)
-    createMultiSendTransaction(txs: [SafeTransactionData!]!, options: SafeTransactionOptionalProps, onlyCalls: Boolean, customMultiSendContractAddress: String ): SafeTransaction! @env(required: true)
-    addSignature(tx: SafeTransaction!, signingMethod: String): SafeTransaction! @env(required: true)
-    getTransactionHash(tx: SafeTransactionData!): String @env(required: true)
-    signTransactionHash(hash: String!): SignSignature! @env(required: true)
-    signTypedData(tx: SafeTransactionData!): SignSignature! @env(required: true)
-    approveTransactionHash(hash: String!, options: TransactionOptions): Ethereum_TxReceipt! @env(required: true)
-    executeTransaction(tx: SafeTransaction!, options: TransactionOptions): Ethereum_TxReceipt! @env(required: true)
-
     """Contract manager methods"""
-    # contractNetworks()
-    # isL1SafeMasterCopy()
-    # safeContract()
-    # multiSendContract()
-    # multiSendCallOnlyContract()
-    getSafeVersion: String! @env(required: true)
-    getMultiSendContract: String! @env(required: true)
-    approvedHashes(hash: String!, owner: String): BigInt! @env(required: true)
-    getOwnersWhoApprovedTx(hash: String!): [String!]! @env(required: true)
+    getAddress: String! @env(required: true)
+    getContractVersion: String! @env(required: true)
+    getNonce: BigInt! @env(required: true)
+    getMultiSendAddress: String! @env(required: true)
+    getMultiSendCallOnlyAddress: String! @env(required: true)
 }

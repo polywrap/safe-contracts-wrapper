@@ -11,12 +11,32 @@ import {
   Args_isOwner,
   Args_getModules,
   Args_isModuleEnabled,
+  Ethereum_TxReceipt,
+  Interface_SafeTransaction,
+  Ethereum_TxOverrides,
 } from "./wrap";
 import { BigInt } from "@polywrap/wasm-as";
 import { JSON } from "assemblyscript-json";
-import { Args_approvedHashes, Args_getAddress, Args_getNonce, Args_getSafeContractNetworks, Args_getVersion } from "./wrap/Module/serialization";
+import {
+  Args_approvedHashes,
+  Args_approveHash,
+  Args_execTransaction,
+  Args_getAddress,
+  Args_getNonce,
+  Args_getSafeContractNetworks,
+  Args_getTransactionHash,
+  Args_getVersion,
+} from "./wrap/Module/serialization";
 import { ContractNetworksConfig } from "./wrap/ContractNetworksConfig";
-import { getMultiSendCallOnlyContractAddress, getMultiSendContractAddress, getSafeContractAddress, getSafeFactoryContractAddress } from "./utils";
+import {
+  createTransactionFromPartial,
+  encodeSignatures,
+  getMultiSendCallOnlyContractAddress,
+  getMultiSendContractAddress,
+  getSafeContractAddress,
+  getSafeFactoryContractAddress,
+  getTransactionHashArgs,
+} from "./utils";
 
 export function encode(args: Args_encode): string {
   return Ethereum_Module.encodeFunction({
@@ -145,6 +165,22 @@ export function isOwner(args: Args_isOwner): bool {
   }
 }
 
+export function getTransactionHash(args: Args_getTransactionHash): string {
+  const recreatedTx = createTransactionFromPartial(args.safeTransactionData, null);
+
+  const contractArgs = getTransactionHashArgs(recreatedTx);
+
+  const res = Ethereum_Module.callContractView({
+    address: args.safeAddress,
+    method:
+      "function getTransactionHash(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 _nonce) public view returns (bytes32)",
+    args: contractArgs,
+    connection: args.connection,
+  }).unwrap();
+
+  return res;
+}
+
 export function approvedHashes(args: Args_approvedHashes): BigInt {
   const result = Ethereum_Module.callContractView({
     address: args.address,
@@ -153,6 +189,43 @@ export function approvedHashes(args: Args_approvedHashes): BigInt {
     connection: args.connection,
   }).unwrap();
   return BigInt.from(result);
+}
+
+export function approveHash(args: Args_approveHash): Ethereum_TxReceipt {
+  const signerAddress = Ethereum_Module.getSignerAddress({ connection: args.connection }).unwrap();
+
+  const addressIsOwner = isOwner({ address: args.safeAddress, ownerAddress: signerAddress, connection: args.connection });
+
+  if (!addressIsOwner) {
+    throw new Error("Transaction hashes can only be approved by Safe owners");
+  }
+
+  if (args.options != null && args.options!.gasPrice && args.options!.gasLimit) {
+    throw new Error("Cannot specify gas and gasLimit together in transaction options");
+  }
+
+  if (args.options != null && !args.options!.gasLimit) {
+    args.options!.gasLimit = estimateGas({
+      address: args.safeAddress,
+      method: "function approveHash(bytes32 hashToApprove) external",
+      args: [args.hash],
+      connection: args.connection,
+    });
+  }
+
+  const response = Ethereum_Module.callContractMethodAndWait({
+    method: "function approveHash(bytes32 hashToApprove) external",
+    address: args.safeAddress,
+    args: [args.hash],
+    connection: args.connection,
+    txOverrides: {
+      gasLimit: args.options ? args.options!.gasLimit : null,
+      gasPrice: args.options ? args.options!.gasPrice : null,
+      value: null,
+    },
+  }).unwrap();
+
+  return response;
 }
 
 export function getModules(args: Args_getModules): string[] {
@@ -184,6 +257,54 @@ export function isModuleEnabled(args: Args_isModuleEnabled): bool {
   } else {
     return false;
   }
+}
+
+export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt {
+  const txData = args.safeTransaction.data;
+  const txSignatures = args.safeTransaction.signatures!;
+
+  const txOverrides: Ethereum_TxOverrides = {
+    gasLimit: args.txOverrides != null ? args.txOverrides!.gasLimit : null,
+    gasPrice: args.txOverrides != null ? args.txOverrides!.gasPrice : null,
+    value: args.txOverrides != null ? args.txOverrides!.value : null,
+  };
+
+  const method =
+    "function execTransaction(address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address payable refundReceiver, bytes memory signatures) external payable returns (bool success)";
+
+  const encodedSignatures = encodeSignatures(txSignatures);
+  if (!txOverrides.gasLimit) {
+    const estimationArgs = getTransactionHashArgs(txData);
+    estimationArgs.pop();
+    estimationArgs.push(encodedSignatures);
+
+    txOverrides.gasLimit = estimateGas({
+      address: args.safeAddress,
+      method:
+        "function execTransaction(address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address payable refundReceiver, bytes memory signatures)",
+      args: estimationArgs,
+      connection: args.connection,
+    });
+  }
+
+  return Ethereum_Module.callContractMethodAndWait({
+    address: args.safeAddress,
+    method: method,
+    args: [
+      txData.to,
+      txData.value.toString(),
+      txData.data,
+      txData.operation!.toString(),
+      txData.safeTxGas!.toString(),
+      txData.baseGas!.toString(),
+      txData.gasPrice!.toString(),
+      txData.gasToken!,
+      txData.refundReceiver!,
+      encodedSignatures,
+    ],
+    txOverrides: txOverrides,
+    connection: args.connection,
+  }).unwrap();
 }
 
 export function getSafeContractNetworks(args: Args_getSafeContractNetworks): ContractNetworksConfig {
