@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "build": "polywrap build",
+    "deploy": "polywrap deploy",
     "codegen": "polywrap codegen",
     "test": "yarn test:e2e",
     "test:e2e": "yarn test:e2e:codegen && jest --passWithNoTests --runInBand --verbose",

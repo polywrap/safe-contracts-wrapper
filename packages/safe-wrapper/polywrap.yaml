@@ -12,3 +12,4 @@ source:
       abi: ../safe-contracts-wrapper/build/wrap.info
 extensions:
   build: ./polywrap.build.yaml
+  deploy: ./polywrap.deploy.yaml
