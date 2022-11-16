@@ -220,6 +220,7 @@ export const getEthAdapter = async (providerUrl: string, signer: Signer): Promis
   const ethersProvider = new ethers.providers.JsonRpcProvider(providerUrl);
 
   signer = signer.connect(ethersProvider);
+  //@ts-ignore
   const ethersAdapterConfig: EthersAdapterConfig = { ethers, signer };
   const ethAdapter = new EthersAdapter(ethersAdapterConfig);
   return ethAdapter;

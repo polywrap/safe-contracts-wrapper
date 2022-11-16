@@ -4,7 +4,6 @@ import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } fro
 import * as App from "../types/wrap";
 import { getPlugins, setupAccounts, setupContractNetworks } from "../utils";
 import { Client } from "@polywrap/core-js";
-import { SafeWrapper_SafeTransactionData } from "../types/wrap";
 
 jest.setTimeout(1200000);
 
@@ -57,7 +56,7 @@ describe("Transactions creation", () => {
     it("should create a single transaction with gasPrice=0", async () => {
       const [account1] = setupAccounts();
 
-      const transactionData: SafeWrapper_SafeTransactionData = {
+      const transactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
         data: "0x",
@@ -86,7 +85,7 @@ describe("Transactions creation", () => {
     it("should create a single transaction with gasPrice>0", async () => {
       const [account1] = setupAccounts();
 
-      const transactionData: SafeWrapper_SafeTransactionData = {
+      const transactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
         data: "0x",
