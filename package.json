@@ -19,7 +19,10 @@
     "url": "https://github.com/ConsiderItDone/safe-contracts-wrapper"
   },
   "scripts": {
-    "build": "lerna run build --concurrency 1",
+    "build:interface": "yarn --cwd ./packages/safe-interface build",
+    "patch": "yarn --cwd ./packages/safe-wrapper patch",
+    "build": "yarn build:interface && lerna run build --concurrency 1",
+    "build:order": "lerna run build --scope @consideritdone/safe-interface && lerna run build --scope @consideritdone/safe-contracts-wrapper && lerna run build --scope @consideritdone/safe-factory-wrapper && lerna run build --scope @consideritdone/safe-safe-wrapper",
     "test:contracts": "lerna run test --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
     "test:factory": "lerna run test --concurrency 1 --scope @consideritdone/safe-factory-wrapper",
     "test:safe": "lerna run test --concurrency 1 --scope @consideritdone/safe-wrapper"
@@ -29,6 +32,7 @@
     "@typescript-eslint/parser": "^5.40.1",
     "eslint": "^8.25.0",
     "eslint-plugin-react": "^7.31.10",
-    "lerna": "5.5.2"
+    "lerna": "5.5.2",
+    "patch-package": "^6.5.0"
   }
 }

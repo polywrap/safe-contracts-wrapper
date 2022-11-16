@@ -347,7 +347,7 @@ describe("Off-chain signatures", () => {
       });
     });
 
-    describe.only("executeTransaction (MultiSend)", () => {
+    describe("executeTransaction (MultiSend)", () => {
       it("should execute a batch transaction with threshold >1", async () => {
         const [account1, account2, account3] = setupAccounts();
 

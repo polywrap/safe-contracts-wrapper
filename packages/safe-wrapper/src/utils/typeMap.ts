@@ -38,7 +38,7 @@ export function toTransactionSignatures(signatures: Map<string, Interface_SignSi
   const keys = signatures.keys();
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    const value = signatures.get(key)!;
+    const value = signatures.get(key);
     newMap.set(key, { data: value.data, signer: value.signer });
   }
 

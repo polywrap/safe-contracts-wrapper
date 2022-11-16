@@ -7,17 +7,9 @@ import {
   Ethereum_TxReceipt,
   Ethereum_TxOverrides,
   Interface_SignSignature,
-  Logger_Module,
 } from "./wrap";
 import { Args_getTransactionHash } from "./wrap/Module";
-import {
-  adjustVInSignature,
-  arrayify,
-  createTransactionFromPartial,
-  encodeMultiSendData,
-  generatePreValidatedSignature,
-  getTransactionHashArgs,
-} from "./utils";
+import { adjustVInSignature, arrayify, createTransactionFromPartial, encodeMultiSendData, generatePreValidatedSignature } from "./utils";
 import {
   Args_approveTransactionHash,
   Args_createMultiSendTransaction,
@@ -147,7 +139,6 @@ export function addSignature(args: Args_addSignature, env: Env): Interface_SafeT
 }
 
 export function getTransactionHash(args: Args_getTransactionHash, env: Env): string {
-
   return SafeContracts_Module.getTransactionHash({
     safeAddress: env.safeAddress,
     safeTransactionData: toTransactionData(args.tx),

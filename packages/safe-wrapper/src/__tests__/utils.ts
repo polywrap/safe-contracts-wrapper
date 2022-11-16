@@ -26,7 +26,7 @@ import {
   bytecode as multisendCallOnlyBytecode,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/libraries/MultiSendCallOnly.sol/MultiSendCallOnly.json";
 
-import { abi as ERC20MintableAbi, bytecode as ERC20MintableBytecode } from "openzeppelin-solidity/build/contracts/ERC20Mock.json";
+import { abi as ERC20MintableAbi, bytecode as ERC20MintableBytecode } from "./ERC20Mock.json";
 import * as App from "./types/wrap";
 import { Client } from "@polywrap/core-js";
 
@@ -211,7 +211,7 @@ export const getERC20Mintable = async (signer: Wallet) => {
 
   const factory = new ethers.ContractFactory(ERC20MintableAbi, ERC20MintableBytecode, wallet);
 
-  const contract = await factory.deploy(signer.address, "10000000000000000000000000");
+  const contract = await factory.deploy('TOKEN', 'TOK', signer.address, "10000000000000000000000000");
 
   return await contract.deployed();
 };

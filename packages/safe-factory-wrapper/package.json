@@ -10,7 +10,7 @@
     "build"
   ],
   "scripts": {
-    "build": "polywrap build",
+    "build": "yarn polywrap codegen && yarn polywrap build",
     "codegen": "polywrap codegen",
     "deploy": "polywrap deploy",
     "test": "yarn test:e2e",

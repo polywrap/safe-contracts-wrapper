@@ -1,8 +1,10 @@
 {
-  "name": "templates-wrapper-interface",
-  "description": "Safe Interface",
-  "private": true,
-  "version": "0.9.4",
+  "name": "@consideritdone/safe-interface",
+  "version": "1.0.0",
+  "description": "Gnosis safe interface",
+  "files": [
+    "build"
+  ],
   "scripts": {
     "build": "npx polywrap build",
     "test:env:up": "npx polywrap infra up --modules=eth-ens-ipfs",

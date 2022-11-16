@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "build": "polywrap build",
+    "patch": "yarn patch-package",
     "deploy": "polywrap deploy",
     "codegen": "polywrap codegen",
     "test": "yarn test:e2e",
@@ -36,6 +37,7 @@
     "ganache": "^7.5.0",
     "jest": "26.6.3",
     "openzeppelin-solidity": "^4.6.0",
+    "patch-package": "^6.5.0",
     "polywrap": "^0.9.3",
     "semver": "^7.3.8",
     "truffle": "^5.6.4",
