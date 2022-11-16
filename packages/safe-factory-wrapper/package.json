@@ -14,7 +14,7 @@
     "codegen": "polywrap codegen",
     "deploy": "polywrap deploy",
     "test": "yarn test:e2e",
-    "test:e2e": "yarn test:e2e:codegen && jest --passWithNoTests --runInBand --verbose",
+    "test:e2e": "yarn test:e2e:codegen && jest src/__tests__/e2e/integration.spec --passWithNoTests --passWithNoTests --runInBand --verbose",
     "test:e2e:codegen": "polywrap codegen -m ./src/__tests__/types/polywrap.app.yaml -g ./src/__tests__/types/wrap"
   },
   "devDependencies": {

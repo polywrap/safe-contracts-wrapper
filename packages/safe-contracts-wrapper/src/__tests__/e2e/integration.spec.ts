@@ -23,13 +23,14 @@ import {
   abi as safeAbi_1_3_0,
   bytecode as safeBytecode_1_3_0,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
+import { Client } from "@polywrap/core-js";
 
 jest.setTimeout(500000);
 
 describe("ProxyFactory", () => {
   const CONNECTION = { networkNameOrChainId: "testnet" };
 
-  let client: PolywrapClient;
+  let client: Client;
   const signer = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
 
   const wrapperPath: string = path.join(
@@ -50,7 +51,7 @@ describe("ProxyFactory", () => {
         providers.ipfs,
         ensAddresses.ensAddress
       );
-      client = new PolywrapClient(config);
+      client = new PolywrapClient(config) as unknown as Client;
     });
 
     afterEach(async () => {
@@ -234,7 +235,7 @@ describe("ProxyFactory", () => {
         providers.ipfs,
         ensAddresses.ensAddress
       );
-      client = new PolywrapClient(config);
+      client = new PolywrapClient(config) as unknown as Client;
 
       const singletonResponse = await App.Ethereum_Module.deployContract(
         {

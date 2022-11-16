@@ -29,6 +29,7 @@ import {
   abi as safeAbi_1_3_0,
   bytecode as safeBytecode_1_3_0,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
+import { Client } from "@polywrap/core-js";
 
 jest.setTimeout(500000);
 
@@ -37,7 +38,7 @@ const owners = ["0xd405aebF7b60eD2cb2Ac4497Bddd292DEe534E82"];
 describe("SafeFactory", () => {
   const CONNECTION = { networkNameOrChainId: "testnet" };
 
-  let client: PolywrapClient;
+  let client: Client;
 
   const wrapperPath: string = path.join(
     path.resolve(__dirname),
@@ -62,7 +63,7 @@ describe("SafeFactory", () => {
       ensAddresses.ensAddress
     );
 
-    client = new PolywrapClient(config);
+    client = new PolywrapClient(config) as unknown as Client;
 
     /******* Contracts initialization *********/
 
