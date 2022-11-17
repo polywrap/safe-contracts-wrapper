@@ -4,6 +4,7 @@ import {
   getSafeContractMap,
   getSafeFactoryContractMap,
 } from "./contractAddresses";
+export * from './transaction'
 
 export const ZERO_ADDRESS = `0x${"0".repeat(40)}`;
 export const EMPTY_DATA = "0x";
@@ -32,6 +33,7 @@ export function getSafeFactoryContractAddress(safeVersion: string, chainId: stri
     throw new Error("No factory contract for provided chainId");
   }
 }
+
 export function getMultiSendContractAddress(safeVersion: string, chainId: string): string | null {
   const multiSendContractMap = getMultisendContractMap(safeVersion);
 
@@ -42,6 +44,7 @@ export function getMultiSendContractAddress(safeVersion: string, chainId: string
     return null;
   }
 }
+
 export function getMultiSendCallOnlyContractAddress(safeVersion: string, chainId: string): string | null {
   const multiSendContractMap = getMultisendCallOnlyContractMap(safeVersion);
 

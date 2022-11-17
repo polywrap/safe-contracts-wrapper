@@ -1,9 +1,9 @@
 import { BigInt } from "@polywrap/wasm-as";
-import { Ethereum_Module } from "../wrap";
-import { Interface_SafeTransactionData } from "../wrap/imported/Interface_SafeTransactionData";
+import { Interface_SignSignature, Interface_SafeTransactionData } from "../wrap";
 import { Interface_SafeTransactionOptionalProps } from "../wrap/imported/Interface_SafeTransactionOptionalProps";
-import { ZERO_ADDRESS } from "./constants";
-import { arrayify } from "./signature";
+
+export const ZERO_ADDRESS = `0x${"0".repeat(40)}`;
+export const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
 
 export function getTransactionHashArgs(tx: Interface_SafeTransactionData): string[] {
   return [
@@ -87,24 +87,18 @@ export function createTransactionFromPartial(
   return transaction;
 }
 
-export const encodeMultiSendData = (transactionDataArr: Interface_SafeTransactionData[]): string => {
-  let dataStr = "";
+export function encodeSignatures(signatures: Map<string, Interface_SignSignature>): string {
+  const signers = (<Array<string>>signatures.keys()).sort();
+  const baseOffset = signers.length * 65;
+  let staticParts = "";
+  let dynamicParts = "";
 
-  for (let i = 0; i < transactionDataArr.length; i++) {
-    const standardized = createTransactionFromPartial(transactionDataArr[i], null);
-    dataStr = dataStr.concat(encodeMetaTransaction(standardized));
+  for (let i = 0; i < signers.length; i++) {
+    const signerAddress = signers[i];
+    const signature = signatures.get(signerAddress);
+    staticParts += signature.data.slice(2); // https://github.com/safe-global/safe-core-sdk/blob/b0a6c4b518c449fd50c9d901a5a8dd171f4b064b/packages/safe-core-sdk/src/utils/transactions/SafeTransaction.ts#L22
+    dynamicParts += ""; // https://github.com/safe-global/safe-core-sdk/blob/b0a6c4b518c449fd50c9d901a5a8dd171f4b064b/packages/safe-core-sdk/src/utils/signatures/SafeSignature.ts#L33
   }
 
-  return "0x" + dataStr;
-};
-
-export function encodeMetaTransaction(tx: Interface_SafeTransactionData): string {
-  const data = arrayify(tx.data);
-
-  const encoded = Ethereum_Module.solidityPack({
-    types: ["uint8", "address", "uint256", "uint256", "bytes"],
-    values: [tx.operation!.toString(), tx.to, tx.value.toString(), data.length.toString(), "[" + data.toString() + "]"],
-  }).unwrap();
-
-  return encoded.slice(2);
+  return "0x" + staticParts + dynamicParts;
 }

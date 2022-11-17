@@ -1,20 +1,15 @@
+import path from "path";
 import { ClientConfig } from "@polywrap/client-js";
 import { ensResolverPlugin } from "@polywrap/ens-resolver-plugin-js";
-import {
-  Connection,
-  Connections,
-  ethereumPlugin,
-} from "@polywrap/ethereum-plugin-js";
+import { Connection, Connections, ethereumPlugin } from "@polywrap/ethereum-plugin-js";
 import { dateTimePlugin } from "polywrap-datetime-plugin";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
 import { ipfsPlugin } from "@polywrap/ipfs-plugin-js";
 import { defaultIpfsProviders } from "@polywrap/client-config-builder-js";
 
-export function getPlugins(
-  ethereum: string,
-  ipfs: string,
-  ensAddress: string
-): Partial<ClientConfig> {
+export const safeContractsPath = path.resolve(path.join(__dirname, "../../../safe-contracts-wrapper"));
+
+export function getPlugins(ethereum: string, ipfs: string, ensAddress: string): Partial<ClientConfig> {
   return {
     envs: [
       {
@@ -25,6 +20,7 @@ export function getPlugins(
         },
       },
     ],
+    redirects: [{ from: "wrap://ens/safe.contracts.polywrap.eth", to: `wrap://fs/${safeContractsPath}/build` }],
     plugins: [
       {
         uri: "wrap://ens/ipfs.polywrap.eth",

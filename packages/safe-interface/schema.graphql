@@ -1,0 +1,50 @@
+type SafeTransaction {
+    signatures: Map @annotate(type: "Map<String!, SignSignature!>")
+    data: SafeTransactionData!
+}
+
+type MetaTransactionData {
+    data: String!
+    to: String!
+    value: String!
+    operation: BigInt
+}
+
+type SafeTransactionOptionalProps {
+    operation: BigInt
+    safeTxGas: BigInt
+    baseGas: BigInt
+    gasPrice: BigInt
+    gasToken: String
+    refundReceiver: String
+    nonce: BigInt
+}
+
+type SafeTransactionData {
+    data: String!
+    to: String!
+    value: BigInt!
+    operation: BigInt
+    safeTxGas: BigInt
+    baseGas: BigInt
+    gasPrice: BigInt
+    gasToken: String
+    refundReceiver: String
+    nonce: BigInt
+    # TODO: add txOverrides
+}
+
+type SignSignature {
+    signer: String!
+    data: String!
+}
+
+type TransactionOptions {
+  from: String
+  gas: BigInt
+  gasLimit: BigInt
+  gasPrice: BigInt
+  maxFeePerGas: BigInt
+  maxPriorityFeePerGas: String
+  nonce: BigInt
+}

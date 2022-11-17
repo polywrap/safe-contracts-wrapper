@@ -2,10 +2,10 @@ import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
 import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getEthAdapter, getPlugins, setupAccounts, setupContractNetworks } from "../utils";
+import { getERC20Mintable, getEthAdapter, getPlugins, setupAccounts, setupContractNetworks } from "../utils";
 import { Client } from "@polywrap/core-js";
-import { SafeWrapper_SafeTransaction, SafeWrapper_SafeTransactionData } from "../types/wrap";
 import { BigNumber, Wallet } from "ethers";
+import { SafeWrapper_Interface_SafeTransactionData } from "../types/wrap";
 
 jest.setTimeout(1200000);
 
@@ -48,7 +48,7 @@ describe("Off-chain signatures", () => {
     await stopTestEnvironment();
   });
 
-  const createTransaction = async (txData?: Partial<SafeWrapper_SafeTransactionData>) => {
+  const createTransaction = async (txData?: Partial<SafeWrapper_Interface_SafeTransactionData>) => {
     const defaults = {
       data: "0x",
       to: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0",
@@ -111,8 +111,8 @@ describe("Off-chain signatures", () => {
 
         const signedTxRes = await App.SafeWrapper_Module.addSignature({ tx: transaction }, client, wrapperUri);
 
-        //@ts-ignore
-        const signedTx = signedTxRes.value as SafeWrapper_SafeTransaction;
+        if (!signedTxRes.ok) fail(signedTxRes.error);
+        const signedTx = signedTxRes.value;
 
         const executionResult = await App.SafeWrapper_Module.executeTransaction({ tx: signedTx }, client, wrapperUri);
 
@@ -128,8 +128,8 @@ describe("Off-chain signatures", () => {
 
         const signedTxRes = await App.SafeWrapper_Module.addSignature({ tx: transaction }, client, wrapperUri);
 
-        //@ts-ignore
-        const signedTx = signedTxRes.value as SafeWrapper_SafeTransaction;
+        if (!signedTxRes.ok) fail(signedTxRes.error);
+        const signedTx = signedTxRes.value;
 
         const executionResult = await client.invoke({
           uri: wrapperUri,
@@ -183,7 +183,7 @@ describe("Off-chain signatures", () => {
         const signedTxRes = await App.SafeWrapper_Module.addSignature({ tx: transaction }, client, wrapperUri);
         if (!signedTxRes.ok) fail(signedTxRes.error);
 
-        const signedTx = signedTxRes.value as SafeWrapper_SafeTransaction;
+        const signedTx = signedTxRes.value;
 
         const executionResult = await App.SafeWrapper_Module.executeTransaction(
           { tx: signedTx, options: { gas: "1000", gasLimit: "1000" } },
@@ -211,7 +211,7 @@ describe("Off-chain signatures", () => {
         const signedTxRes = await App.SafeWrapper_Module.addSignature({ tx: transaction }, client, wrapperUri);
         if (!signedTxRes.ok) fail(signedTxRes.error);
 
-        const signedTx = signedTxRes.value as SafeWrapper_SafeTransaction;
+        const signedTx = signedTxRes.value;
 
         const executionResult = await App.SafeWrapper_Module.executeTransaction({ tx: signedTx }, client, wrapperUri);
 
@@ -246,8 +246,7 @@ describe("Off-chain signatures", () => {
 
         const signedTxRes = await App.SafeWrapper_Module.addSignature({ tx: transaction }, client1, wrapperUri);
         if (!signedTxRes.ok) fail(signedTxRes.error);
-
-        const signedTx = signedTxRes.value as SafeWrapper_SafeTransaction;
+        const signedTx = signedTxRes.value;
 
         const txHashRes = await App.SafeWrapper_Module.getTransactionHash({ tx: signedTx.data }, client2, wrapperUri);
         if (!txHashRes.ok) fail(txHashRes.error);
@@ -279,6 +278,7 @@ describe("Off-chain signatures", () => {
         await fundSafeBalance(newSafeAddress);
 
         const balanceBefore = await App.Ethereum_Module.getBalance({ address: newSafeAddress, blockTag: null, connection: connection }, client, ethereumUri);
+        if (!balanceBefore.ok) fail(balanceBefore.error);
 
         const transferAmount = "500000000000000000";
         const transaction = await createTransaction({ value: transferAmount });
@@ -298,8 +298,8 @@ describe("Off-chain signatures", () => {
         expect(executionResult.ok).toBeTruthy();
 
         const balanceAfter = await App.Ethereum_Module.getBalance({ address: newSafeAddress, blockTag: null, connection: connection }, client, ethereumUri);
+        if (!balanceAfter.ok) fail(balanceAfter.error);
 
-        //@ts-ignore
         expect(BigNumber.from(balanceAfter.value).toString()).toEqual(BigNumber.from(balanceBefore.value).sub(transferAmount).toString());
       });
 
@@ -363,6 +363,7 @@ describe("Off-chain signatures", () => {
         await fundSafeBalance(newSafeAddress, "20000000000000000000");
 
         const balanceBefore = await App.Ethereum_Module.getBalance({ address: newSafeAddress, blockTag: null, connection: connection }, client, ethereumUri);
+        if (!balanceBefore.ok) fail(balanceBefore.error);
 
         const multisendTxData = [
           { to: account2.address, value: "1100000000000000000", data: "0x" },
@@ -379,11 +380,11 @@ describe("Off-chain signatures", () => {
         );
 
         if (!multisendTxRes.ok) fail(multisendTxRes.error);
-        const multisendTx = multisendTxRes.value as SafeWrapper_SafeTransaction;
+        const multisendTx = multisendTxRes.value;
 
         const signedTxRes = await App.SafeWrapper_Module.addSignature({ tx: multisendTx }, client1, wrapperUri);
         if (!signedTxRes.ok) fail(signedTxRes.error);
-        const signedMultisendTx = signedTxRes.value as SafeWrapper_SafeTransaction;
+        const signedMultisendTx = signedTxRes.value;
 
         const txHashRes = await App.SafeWrapper_Module.getTransactionHash({ tx: signedMultisendTx.data }, client2, wrapperUri);
 
@@ -397,15 +398,80 @@ describe("Off-chain signatures", () => {
         if (!executionResult.ok) fail(executionResult.error);
 
         const balanceAfter = await App.Ethereum_Module.getBalance({ address: newSafeAddress, blockTag: null, connection: connection }, client, ethereumUri);
+        if (!balanceAfter.ok) fail(balanceAfter.error);
 
-        //@ts-ignore
         expect(BigNumber.from(balanceAfter.value).toString()).toEqual(
-          //@ts-ignore
           BigNumber.from(balanceBefore.value).sub(multisendTxData[0].value).sub(multisendTxData[1].value).toString()
         );
       });
 
-      it.skip("should execute a batch transaction with contract calls and threshold >1", async () => {});
+      it("should execute a batch transaction with contract calls and threshold >1", async () => {
+        const [account1, account2, account3] = setupAccounts();
+
+        const [newSafeAddress, contractNetworks] = await setupContractNetworks(client, {
+          threshold: 3,
+          owners: [account1.address, account2.address, account3.address],
+        });
+
+        const client1 = await initClientWithSigner(account1.signer, newSafeAddress);
+        const client2 = await initClientWithSigner(account2.signer, newSafeAddress);
+        const client3 = await initClientWithSigner(account3.signer, newSafeAddress);
+
+        const erc20Mintable = await getERC20Mintable(account1.signer);
+
+        await erc20Mintable.mint(newSafeAddress, "1200000000000000000");
+        const safeInitialERC20Balance = await erc20Mintable.balanceOf(newSafeAddress);
+
+        expect(safeInitialERC20Balance.toString()).toEqual("1200000000000000000"); // 1.2 ERC20
+
+        const accountInitialERC20Balance = await erc20Mintable.balanceOf(account2.address);
+        expect(accountInitialERC20Balance.toString()).toEqual("0"); // 0 ERC20
+
+        const safeTransactionData = [
+          {
+            to: erc20Mintable.address,
+            value: "0",
+            data: erc20Mintable.interface.encodeFunctionData("transfer", [
+              account2.address,
+              "1100000000000000000", // 1.1 ERC20
+            ]),
+          },
+          {
+            to: erc20Mintable.address,
+            value: "0",
+            data: erc20Mintable.interface.encodeFunctionData("transfer", [
+              account2.address,
+              "100000000000000000", // 0.1 ERC20
+            ]),
+          },
+        ];
+
+        const multiSendTxResult = await App.SafeWrapper_Module.createMultiSendTransaction(
+          { txs: safeTransactionData, customMultiSendContractAddress: contractNetworks.multisendAddress },
+          client1,
+          wrapperUri
+        );
+        if (!multiSendTxResult.ok) fail(multiSendTxResult.error);
+
+        const signedMultiSendTxResult = await App.SafeWrapper_Module.addSignature({ tx: multiSendTxResult.value }, client1, wrapperUri);
+        if (!signedMultiSendTxResult.ok) fail(signedMultiSendTxResult.error);
+        const signedMultiSendTx = signedMultiSendTxResult.value;
+
+        const txHashResult = await App.SafeWrapper_Module.getTransactionHash({ tx: signedMultiSendTx.data }, client2, wrapperUri);
+        if (!txHashResult.ok) fail(txHashResult.error);
+
+        const txResponse1 = await App.SafeWrapper_Module.approveTransactionHash({ hash: txHashResult.value! }, client2, wrapperUri);
+        if (!txResponse1.ok) fail(txResponse1.error);
+
+        const txResponse2 = await App.SafeWrapper_Module.executeTransaction({ tx: signedMultiSendTx }, client3, wrapperUri);
+        if (!txResponse2.ok) fail(txResponse2.error);
+
+        const safeFinalERC20Balance = await erc20Mintable.balanceOf(newSafeAddress);
+
+        expect(safeFinalERC20Balance.toString()).toEqual("0"); // 0 ERC20
+        const accountFinalERC20Balance = await erc20Mintable.balanceOf(account2.address);
+        expect(accountFinalERC20Balance.toString()).toEqual("1200000000000000000"); // 1.2 ERC20
+      });
     });
   });
 });

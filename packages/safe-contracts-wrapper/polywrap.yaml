@@ -5,6 +5,9 @@ project:
 source:
   module: ./src/index.ts
   schema: ./src/schema.graphql
+  import_abis:
+    - uri: wrap://ens/safe.interface.polywrap.eth
+      abi: ../safe-interface/build/wrap.info
 extensions:
   build: ./polywrap.build.yaml
   deploy: ./polywrap.deploy.yaml

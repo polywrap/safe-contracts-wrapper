@@ -2,7 +2,7 @@ import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
 import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getPlugins, setupContractNetworks } from "../utils";
+import { getPlugins, setupAccounts, setupContractNetworks } from "../utils";
 import { ethers } from "ethers";
 
 import { Client } from "@polywrap/core-js";
@@ -11,9 +11,6 @@ jest.setTimeout(1200000);
 describe("Safe Wrapper", () => {
   const wrapper = App.SafeWrapper_Module;
   const connection = { networkNameOrChainId: "testnet" };
-  const signer = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
-  const owner = "0xEc8E7Da193529bd8ddA13b1995F93F32989CF097";
-  const owners = [signer, owner];
   const someAddr = "0x8dc847af872947ac18d5d63fa646eb65d4d99560";
 
   let safeAddress: string;
@@ -24,6 +21,8 @@ describe("Safe Wrapper", () => {
 
   const ethersProvider = new ethers.providers.JsonRpcProvider(providers.ethereum);
 
+  const [account1, account2] = setupAccounts();
+
   beforeAll(async () => {
     await initTestEnvironment();
 
@@ -31,12 +30,7 @@ describe("Safe Wrapper", () => {
 
     connection.networkNameOrChainId = network.chainId.toString();
 
-    const plugins = await getPlugins(
-      providers.ethereum,
-      providers.ipfs,
-      ensAddresses.ensAddress,
-      connection.networkNameOrChainId
-    );
+    const plugins = await getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress, connection.networkNameOrChainId);
 
     client = new PolywrapClient({
       ...plugins,
@@ -64,11 +58,10 @@ describe("Safe Wrapper", () => {
 
   describe("Owner Manager", () => {
     it("getOwners", async () => {
-      console.log("safeAddress", safeAddress);
       const resp = await wrapper.getOwners({}, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
-      expect(resp.value!.map((a: any) => a.toLowerCase())).toEqual(owners.map((a) => a.toLowerCase()));
+      expect(resp.value!.map((a: any) => a.toLowerCase())).toEqual([account1, account2].map((a) => a.address.toLowerCase()));
     });
 
     it("getThreshold", async () => {
@@ -79,7 +72,7 @@ describe("Safe Wrapper", () => {
     });
 
     it("isOwner", async () => {
-      const resp = await wrapper.isOwner({ ownerAddress: owners[0] }, client, wrapperUri);
+      const resp = await wrapper.isOwner({ ownerAddress: account1.address }, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).toEqual(true);
@@ -93,29 +86,21 @@ describe("Safe Wrapper", () => {
     });
 
     it("encodeRemoveOwnerData", async () => {
-      const resp = await wrapper.encodeRemoveOwnerData({ ownerAddress: owners[0] }, client, wrapperUri);
+      const resp = await wrapper.encodeRemoveOwnerData({ ownerAddress: account1.address }, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
     });
 
     it("encodeSwapOwnerData", async () => {
-      const resp = await wrapper.encodeSwapOwnerData(
-        { oldOwnerAddress: owners[0], newOwnerAddress: someAddr },
-        client,
-        wrapperUri
-      );
+      const resp = await wrapper.encodeSwapOwnerData({ oldOwnerAddress: account1.address, newOwnerAddress: someAddr }, client, wrapperUri);
 
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
     });
 
     it("encodeSwapOwnerData fails", async () => {
-      const resp = await wrapper.encodeSwapOwnerData(
-        { oldOwnerAddress: owners[0], newOwnerAddress: owners[1] },
-        client,
-        wrapperUri
-      );
+      const resp = await wrapper.encodeSwapOwnerData({ oldOwnerAddress: account1.address, newOwnerAddress: account1.address }, client, wrapperUri);
 
       if (!resp.ok) {
         expect(resp.error?.toString()).toContain("Address provided is already an owner");

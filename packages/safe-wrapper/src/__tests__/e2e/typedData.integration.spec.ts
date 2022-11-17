@@ -72,6 +72,7 @@ describe("Safe Wrapper", () => {
       const transactionData = { data: "0x", to: account1.address, value: "50000000" };
 
       const wrapperSigned = await App.SafeWrapper_Module.signTypedData({ tx: transactionData }, client, wrapperUri);
+      if(!wrapperSigned.ok) fail(wrapperSigned.error)
 
       const tx = await safeSdk.createTransaction({
         safeTransactionData: transactionData,
@@ -79,7 +80,6 @@ describe("Safe Wrapper", () => {
 
       const sdkSigned = await safeSdk.signTypedData(tx);
 
-      //@ts-ignore
       expect(wrapperSigned.value.data).toEqual(sdkSigned.data);
     });
   });

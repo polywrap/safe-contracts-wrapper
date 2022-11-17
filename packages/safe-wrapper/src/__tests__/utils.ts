@@ -9,6 +9,7 @@ import { ipfsPlugin } from "@polywrap/ipfs-plugin-js";
 import { defaultIpfsProviders } from "@polywrap/client-config-builder-js";
 import { EthAdapter } from "@gnosis.pm/safe-core-sdk-types";
 import EthersAdapter, { EthersAdapterConfig } from "@gnosis.pm/safe-ethers-lib";
+import { providers } from "@polywrap/test-env-js";
 import {
   abi as factoryAbi_1_3_0,
   bytecode as factoryBytecode_1_3_0,
@@ -25,10 +26,11 @@ import {
   bytecode as multisendCallOnlyBytecode,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/libraries/MultiSendCallOnly.sol/MultiSendCallOnly.json";
 
-import { abi as ERC20MintableAbi, bytecode as ERC20MintableBytecode } from "openzeppelin-solidity/build/contracts/ERC20.json";
-
+import { abi as ERC20MintableAbi, bytecode as ERC20MintableBytecode } from "./ERC20Mock.json";
 import * as App from "./types/wrap";
 import { Client } from "@polywrap/core-js";
+
+export const safeContractsPath = path.resolve(path.join(__dirname, "../../../safe-contracts-wrapper"));
 
 export async function getPlugins(
   ethereum: string,
@@ -90,9 +92,10 @@ export async function getPlugins(
         }),
       },
     ],
+    redirects: [{ from: "wrap://ens/safe.contracts.polywrap.eth", to: `wrap://fs/${safeContractsPath}/build` }],
   };
 }
-const defaults = { owners: ["0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1", "0xEc8E7Da193529bd8ddA13b1995F93F32989CF097"], threshold: 1 };
+const defaults = { owners: ["0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1", "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"], threshold: 1 };
 export const setupContractNetworks = async (
   client: Client,
   options?: Partial<typeof defaults>
@@ -202,28 +205,22 @@ export const setupContractNetworks = async (
   ];
 };
 
-export const getERC20MintableAddress = async (client: Client, signer: Wallet) => {
-  const ethereumUri = "ens/ethereum.polywrap.eth";
-  const erc20Response = await App.Ethereum_Module.deployContract(
-    {
-      abi: JSON.stringify(ERC20MintableAbi),
-      bytecode: ERC20MintableBytecode,
-      args: null,
-    },
-    client,
-    ethereumUri
-  );
+export const getERC20Mintable = async (signer: Wallet) => {
+  const provider = new ethers.providers.JsonRpcProvider(providers.ethereum);
+  const wallet = new Wallet(signer.privateKey, provider);
 
-  if (!erc20Response.ok) throw erc20Response.error;
-  const erc20Address = erc20Response.value;
+  const factory = new ethers.ContractFactory(ERC20MintableAbi, ERC20MintableBytecode, wallet);
 
-  return erc20Address;
+  const contract = await factory.deploy('TOKEN', 'TOK', signer.address, "10000000000000000000000000");
+
+  return await contract.deployed();
 };
 
 export const getEthAdapter = async (providerUrl: string, signer: Signer): Promise<EthAdapter> => {
   const ethersProvider = new ethers.providers.JsonRpcProvider(providerUrl);
 
   signer = signer.connect(ethersProvider);
+  //@ts-ignore
   const ethersAdapterConfig: EthersAdapterConfig = { ethers, signer };
   const ethAdapter = new EthersAdapter(ethersAdapterConfig);
   return ethAdapter;
