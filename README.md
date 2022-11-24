@@ -3,8 +3,8 @@
 ## Table of contents
 * [Installation](#installation)
 * [Getting Started](#getting-started)
-* [Safe Factory API Reference](#factory-api)
-* [Safe Core SDK API Reference](#sdk-api)
+* [Safe Factory Wrapper Reference](#safe-factory-wrapper)
+* [Safe Wrapper Reference](#safe-wrapper)
 ## <a name="installation">Installation</a>
 
 Install the package with yarn or npm:
@@ -208,7 +208,7 @@ const safeDeploymentResponse = await client.invoke({
   })
 ```
 
-## <a name="sdk-api">Safe Core SDK API Reference</a>
+## <a name="safe-wrapper">Safe Wrapper Reference</a>
 
 
 ### getAddress
