@@ -1,7 +1,5 @@
 # Polywrap Gnosis Safe Wrapper
 
-Software development kit that facilitates the interaction with the [Safe contracts](https://github.com/safe-global/safe-contracts).
-
 ## Table of contents
 * [Installation](#installation)
 * [Getting Started](#getting-started)
