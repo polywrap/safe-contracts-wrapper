@@ -96,9 +96,8 @@ const signedSafeTransaction = await client.invoke({
   args: {
       tx: safeTransactionData,
     },
-    env: {
-      safeAddress: <SAFE_ADDRESS>
-    }
+  env: {
+    safeAddress: <SAFE_ADDRESS>
   }
 });
 ```
@@ -117,9 +116,8 @@ const txHash = await client.invoke({
   args: {
       tx: signedSafeTransaction.data,
     },
-    env: {
-      safeAddress: <SAFE_ADDRESS>
-    }
+  env: {
+    safeAddress: <SAFE_ADDRESS>
   }
 });
 
@@ -130,9 +128,8 @@ await client.invoke({
   args: {
       hash: txHash,
     },
-    env: {
-      safeAddress: <SAFE_ADDRESS>
-    }
+  env: {
+    safeAddress: <SAFE_ADDRESS>
   }
 });
 ```
@@ -148,9 +145,8 @@ const executeTxResponse = await client.invoke({
   args: {
       tx: signedTransaction,
     },
-    env: {
-      safeAddress: <SAFE_ADDRESS>
-    }
+  env: {
+    safeAddress: <SAFE_ADDRESS>
   }
 });
 ```
@@ -204,8 +200,11 @@ const safeDeploymentResponse = await client.invoke({
   args: { 
     safeAccountConfig, 
     safeDeploymentConfig
-    }
-  })
+    },
+  env: {
+    safeAddress: <SAFE_ADDRESS>
+  }
+})
 ```
 
 ## <a name="safe-wrapper">Safe Wrapper Reference</a>
@@ -216,9 +215,12 @@ const safeDeploymentResponse = await client.invoke({
 Returns the address of the current SafeProxy contract.
 
 ```js
-const safeDeploymentResponse = await client.invoke({
+const address = await client.invoke({
   uri: 'ens/safe.wrapper.eth',
-  method: 'getAddress',
+  method: 'getAddress',,
+  env: {
+    safeAddress: <SAFE_ADDRESS>
+  }
 })
 ```
 
@@ -227,9 +229,12 @@ const safeDeploymentResponse = await client.invoke({
 Returns the Safe Master Copy contract version.
 
 ```js
-const safeDeploymentResponse = await client.invoke({
+const version = await client.invoke({
   uri: 'ens/safe.wrapper.eth',
-  method: 'getContractVersion',
+  method: 'getContractVersion',,
+  env: {
+    safeAddress: <SAFE_ADDRESS>
+  }
 })
 ```
 
@@ -241,6 +246,9 @@ Returns the list of Safe owner accounts.
 const owners = await client.invoke({
   uri: 'ens/safe.wrapper.eth',
   method: 'getOwners',
+  env: {
+    safeAddress: <SAFE_ADDRESS>
+  }
 })
 ```
 
@@ -252,6 +260,9 @@ Returns the Safe nonce.
 const nonce = await client.invoke({
   uri: 'ens/safe.wrapper.eth',
   method: 'getNonce',
+  env: {
+    safeAddress: <SAFE_ADDRESS>
+  }
 })
 ```
 
@@ -263,6 +274,9 @@ Returns the Safe threshold.
 const threshold = await client.invoke({
   uri: 'ens/safe.wrapper.eth',
   method: 'getThreshold',
+  env: {
+    safeAddress: <SAFE_ADDRESS>
+  }
 })
 ```
 
@@ -274,6 +288,9 @@ Returns the chainId of the connected network.
 const chainId = await client.invoke({
   uri: 'ens/safe.wrapper.eth',
   method: 'getChainId',
+  env: {
+    safeAddress: <SAFE_ADDRESS>
+  }
 })
 ```
 
@@ -284,7 +301,10 @@ Returns the ETH balance of the Safe.
 ```js
 const balance = await client.invoke({
   uri: 'ens/safe.wrapper.eth',
-  method: 'getChainId',
+  method: 'getBalance',
+  env: {
+    safeAddress: <SAFE_ADDRESS>
+  }
 })
 ```
 
@@ -296,6 +316,9 @@ Returns the list of addresses of all the enabled Safe modules.
 const moduleAddresses = await client.invoke({
   uri: 'ens/safe.wrapper.eth',
   method: 'getModules',
+  env: {
+    safeAddress: <SAFE_ADDRESS>
+  }
 })
 ```
 
@@ -309,6 +332,9 @@ const isEnabled = await client.invoke({
   method: 'isModuleEnabled',
   args: {
     moduleAddress: <address>
+  },
+  env: {
+    safeAddress: <SAFE_ADDRESS>
   }
 })
 ```
@@ -323,6 +349,9 @@ const isOwner = await client.invoke({
   method: 'isOwner',
   args: {
     ownerAddress: <address>
+  },
+  env: {
+    safeAddress: <SAFE_ADDRESS>
   }
 })
 ```
@@ -355,9 +384,11 @@ Returns a Safe transaction ready to be signed by the owners and executed. The Sa
     method: 'createTransaction',
     args: {
       tx: safeTransactionData
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
     }
   })
-
   ```
 
 * **MultiSend transactions**
@@ -385,8 +416,11 @@ Returns a Safe transaction ready to be signed by the owners and executed. The Sa
     method: 'createMultiSendTransaction',
     args: {
       txs: safeTransactionsData
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
     }
-  })
+    })
   ```
 
   This method can also receive the `options` parameter to set the optional properties in the MultiSend transaction:
@@ -421,6 +455,9 @@ Returns a Safe transaction ready to be signed by the owners and executed. The Sa
     args: {
       txs: safeTransactionsData,
       options
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
     }
   })
   ```
@@ -436,6 +473,9 @@ Returns a Safe transaction ready to be signed by the owners and executed. The Sa
       txs: safeTransactionsData,
       options,
       onlyCalls: onlyCalls
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
     }
   })
   ```
@@ -460,8 +500,27 @@ Returns the transaction hash of a Safe transaction.
 const safeTransactionData: SafeTransactionDataPartial = {
   // ...
 }
-const safeTransaction =  await safeSdk.createTransaction({ safeTransactionData })
-const txHash = await safeSdk.getTransactionHash(safeTransaction)
+const safeTransaction =  await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'createTransaction',
+    args: {
+      tx: safeTransactionData
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
+  
+const txHash = await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'getTransactionHash',
+    args: {
+      tx: safeTransaction
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
 ```
 
 ### signTransactionHash
@@ -469,12 +528,16 @@ const txHash = await safeSdk.getTransactionHash(safeTransaction)
 Signs a hash using the current owner account.
 
 ```js
-const safeTransactionData: SafeTransactionDataPartial = {
-  // ...
-}
-const safeTransaction =  await safeSdk.createTransaction({ safeTransactionData })
-const txHash = await safeSdk.getTransactionHash(safeTransaction)
-const signature = await safeSdk.signTransactionHash(txHash)
+const signature = await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'signTransactionHash',
+    args: {
+      hash: txHash
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
 ```
 
 ### signTypedData
@@ -482,11 +545,16 @@ const signature = await safeSdk.signTransactionHash(txHash)
 Signs a transaction according to the EIP-712 using the current signer account.
 
 ```js
-const safeTransactionData: SafeTransactionDataPartial = {
-  // ...
-}
-const safeTransaction = await safeSdk.createTransaction({ safeTransactionData })
-const signature = await safeSdk.signTypedData(safeTransaction)
+const signature = await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'signTypedData',
+    args: {
+      tx: safeTransaction
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
 ```
 
 ### signTransaction
@@ -494,21 +562,46 @@ const signature = await safeSdk.signTypedData(safeTransaction)
 Returns a new `SafeTransaction` object that includes the signature of the current owner. `eth_sign` will be used by default to generate the signature.
 
 ```js
-const safeTransactionData: SafeTransactionDataPartial = {
-  // ...
-}
-const safeTransaction = await safeSdk.createTransaction({ safeTransactionData })
-const signedSafeTransaction = await safeSdk.signTransaction(safeTransaction)
+const signedSafeTransaction = await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'addSignature',
+    args: {
+      tx: safeTransaction
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
 ```
 
 Optionally, an additional parameter can be passed to specify a different way of signing:
 
 ```js
-const signedSafeTransaction = await safeSdk.signTransaction(safeTransaction, 'eth_signTypedData')
+const signedSafeTransaction = await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'addSignature',
+    args: {
+      tx: safeTransaction
+      signingMethod: 'eth_signTypedData'
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
 ```
 
 ```js
-const signedSafeTransaction = await safeSdk.signTransaction(safeTransaction, 'eth_sign') // default option.
+const signedSafeTransaction = await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'addSignature',
+    args: {
+      tx: safeTransaction
+      signingMethod: 'eth_sign' // default option.
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
 ```
 
 ### approveTransactionHash
@@ -516,29 +609,22 @@ const signedSafeTransaction = await safeSdk.signTransaction(safeTransaction, 'et
 Approves a hash on-chain using the current owner account.
 
 ```js
-const safeTransactionData: SafeTransactionDataPartial = {
-  // ...
-}
-const safeTransaction =  await safeSdk.createTransaction({ safeTransactionData })
-const txHash = await safeSdk.getTransactionHash(safeTransaction)
-const txResponse = await safeSdk.approveTransactionHash(txHash)
-await txResponse.transactionResponse?.wait()
+const txResponse = await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'approveTransactionHash',
+    args: {
+      hash: txHash
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
 ```
 
 Optionally, some properties can be passed as execution options:
 
 ```js
-const options: Web3TransactionOptions = {
-  from, // Optional
-  gas, // Optional
-  gasPrice, // Optional
-  maxFeePerGas, // Optional
-  maxPriorityFeePerGas // Optional
-  nonce // Optional
-}
-```
-```js
-const options: EthersTransactionOptions = {
+const options = {
   from, // Optional
   gasLimit, // Optional
   gasPrice, // Optional
@@ -548,7 +634,17 @@ const options: EthersTransactionOptions = {
 }
 ```
 ```js
-const txResponse = await safeSdk.approveTransactionHash(txHash, options)
+const txResponse = await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'approveTransactionHash',
+    args: {
+      hash: txHash,
+      options: options
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
 ```
 
 ### getOwnersWhoApprovedTx
@@ -556,246 +652,16 @@ const txResponse = await safeSdk.approveTransactionHash(txHash, options)
 Returns a list of owners who have approved a specific Safe transaction.
 
 ```js
-const safeTransactionData: SafeTransactionDataPartial = {
-  // ...
-}
-const safeTransaction =  await safeSdk.createTransaction({ safeTransactionData })
-const txHash = await safeSdk.getTransactionHash(safeTransaction)
-const ownerAddresses = await safeSdk.getOwnersWhoApprovedTx(txHash)
-```
-
-### createEnableFallbackHandlerTx
-
-Returns the Safe transaction to enable the fallback handler.
-
-```js
-const safeTransaction = await safeSdk.createEnableFallbackHandlerTx(fallbackHandlerAddress)
-const txResponse = await safeSdk.executeTransaction(safeTransaction)
-await txResponse.transactionResponse?.wait()
-```
-
-This method can optionally receive the `options` parameter:
-
-```js
-const options: SafeTransactionOptionalProps = {
-  safeTxGas, // Optional
-  baseGas, // Optional
-  gasPrice, // Optional
-  gasToken, // Optional
-  refundReceiver, // Optional
-  nonce // Optional
-}
-const safeTransaction = await safeSdk.createEnableFallbackHandlerTx(fallbackHandlerAddress, options)
-```
-
-### createDisableFallbackHandlerTx
-
-Returns the Safe transaction to disable the fallback handler.
-
-```js
-const safeTransaction = await safeSdk.createDisableFallbackHandlerTx()
-const txResponse = await safeSdk.executeTransaction(safeTransaction)
-await txResponse.transactionResponse?.wait()
-```
-
-This method can optionally receive the `options` parameter:
-
-```js
-const options: SafeTransactionOptionalProps = { ... }
-const safeTransaction = await safeSdk.createDisableFallbackHandlerTx(options)
-```
-
-### createEnableGuardTx
-
-Returns the Safe transaction to enable a Safe guard.
-
-```js
-const safeTransaction = await safeSdk.createEnableGuardTx(guardAddress)
-const txResponse = await safeSdk.executeTransaction(safeTransaction)
-await txResponse.transactionResponse?.wait()
-```
-
-This method can optionally receive the `options` parameter:
-
-```js
-const options: SafeTransactionOptionalProps = {
-  safeTxGas, // Optional
-  baseGas, // Optional
-  gasPrice, // Optional
-  gasToken, // Optional
-  refundReceiver, // Optional
-  nonce // Optional
-}
-const safeTransaction = await safeSdk.createEnableGuardTx(guardAddress, options)
-```
-
-### createDisableGuardTx
-
-Returns the Safe transaction to disable a Safe guard.
-
-```js
-const safeTransaction = await safeSdk.createDisableGuardTx()
-const txResponse = await safeSdk.executeTransaction(safeTransaction)
-await txResponse.transactionResponse?.wait()
-```
-
-This method can optionally receive the `options` parameter:
-
-```js
-const options: SafeTransactionOptionalProps = { ... }
-const safeTransaction = await safeSdk.createDisableGuardTx(options)
-```
-
-### createEnableModuleTx
-
-Returns a Safe transaction ready to be signed that will enable a Safe module.
-
-```js
-const safeTransaction = await safeSdk.createEnableModuleTx(moduleAddress)
-const txResponse = await safeSdk.executeTransaction(safeTransaction)
-await txResponse.transactionResponse?.wait()
-```
-
-This method can optionally receive the `options` parameter:
-
-```js
-const options: SafeTransactionOptionalProps = { ... }
-const safeTransaction = await safeSdk.createEnableModuleTx(moduleAddress, options)
-```
-
-### createDisableModuleTx
-
-Returns a Safe transaction ready to be signed that will disable a Safe module.
-
-```js
-const safeTransaction = await safeSdk.createDisableModuleTx(moduleAddress)
-const txResponse = await safeSdk.executeTransaction(safeTransaction)
-await txResponse.transactionResponse?.wait()
-```
-
-This method can optionally receive the `options` parameter:
-
-```js
-const options: SafeTransactionOptionalProps = { ... }
-const safeTransaction = await safeSdk.createDisableModuleTx(moduleAddress, options)
-```
-
-### createAddOwnerTx
-
-Returns the Safe transaction to add an owner and optionally change the threshold.
-
-```js
-const params: AddOwnerTxParams = {
-  ownerAddress,
-  threshold // Optional. If `threshold` is not provided the current threshold will not change.
-}
-const safeTransaction = await safeSdk.createAddOwnerTx(params)
-const txResponse = await safeSdk.executeTransaction(safeTransaction)
-await txResponse.transactionResponse?.wait()
-```
-
-This method can optionally receive the `options` parameter:
-
-```js
-const options: SafeTransactionOptionalProps = { ... }
-const safeTransaction = await safeSdk.createAddOwnerTx(params, options)
-```
-
-### createRemoveOwnerTx
-
-Returns the Safe transaction to remove an owner and optionally change the threshold.
-
-```js
-const params: RemoveOwnerTxParams = {
-  ownerAddress,
-  newThreshold // Optional. If `newThreshold` is not provided, the current threshold will be decreased by one.
-}
-const safeTransaction = await safeSdk.createRemoveOwnerTx(params)
-const txResponse = await safeSdk.executeTransaction(safeTransaction)
-await txResponse.transactionResponse?.wait()
-```
-
-This method can optionally receive the `options` parameter:
-
-```js
-const options: SafeTransactionOptionalProps = { ... }
-const safeTransaction = await safeSdk.createRemoveOwnerTx(params, options)
-```
-
-### createSwapOwnerTx
-
-Returns the Safe transaction to replace an owner of the Safe with a new one.
-
-```js
-const params: SwapOwnerTxParams = {
-  oldOwnerAddress,
-  newOwnerAddress
-}
-const safeTransaction = await safeSdk.createSwapOwnerTx(params)
-const txResponse = await safeSdk.executeTransaction(safeTransaction)
-await txResponse.transactionResponse?.wait()
-```
-
-This method can optionally receive the `options` parameter:
-
-```js
-const options: SafeTransactionOptionalProps = { ... }
-const safeTransaction = await safeSdk.createSwapOwnerTx(params, options)
-```
-
-### createChangeThresholdTx
-
-Returns the Safe transaction to change the threshold.
-
-```js
-const safeTransaction = await safeSdk.createChangeThresholdTx(newThreshold)
-const txResponse = await safeSdk.executeTransaction(safeTransaction)
-await txResponse.transactionResponse?.wait()
-```
-
-This method can optionally receive the `options` parameter:
-
-```js
-const options: SafeTransactionOptionalProps = { ... }
-const safeTransaction = await safeSdk.createChangeThresholdTx(newThreshold, options)
-```
-
-### isValidTransaction
-
-Checks if a Safe transaction can be executed successfully with no errors.
-
-```js
-const safeTransactionData: SafeTransactionDataPartial = {
-  // ...
-}
-const safeTransaction =  await safeSdk.createTransaction({ safeTransactionData })
-const isValidTx = await safeSdk.isValidTransaction(safeTransaction)
-```
-
-Optionally, some properties can be passed as execution options:
-
-```js
-const options: Web3TransactionOptions = {
-  from, // Optional
-  gas, // Optional
-  gasPrice, // Optional
-  maxFeePerGas, // Optional
-  maxPriorityFeePerGas // Optional
-  nonce // Optional
-}
-```
-```js
-const options: EthersTransactionOptions = {
-  from, // Optional
-  gasLimit, // Optional
-  gasPrice, // Optional
-  maxFeePerGas, // Optional
-  maxPriorityFeePerGas // Optional
-  nonce // Optional
-}
-```
-```js
-const isValidTx = await safeSdk.isValidTransaction(safeTransaction, options)
+const ownerAddresses = await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'getOwnersWhoApprovedTx',
+    args: {
+      hash: txHash
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
 ```
 
 ### executeTransaction
@@ -803,28 +669,22 @@ const isValidTx = await safeSdk.isValidTransaction(safeTransaction, options)
 Executes a Safe transaction.
 
 ```js
-const safeTransactionData: SafeTransactionDataPartial = {
-  // ...
-}
-const safeTransaction =  await safeSdk.createTransaction({ safeTransactionData })
-const txResponse = await safeSdk.executeTransaction(safeTransaction)
-await txResponse.transactionResponse?.wait()
+const txResponse  await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'executeTransaction',
+    args: {
+      tx: signedSafeTransaction
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
 ```
 
 Optionally, some properties can be passed as execution options:
 
 ```js
-const options: Web3TransactionOptions = {
-  from, // Optional
-  gas, // Optional
-  gasPrice, // Optional
-  maxFeePerGas, // Optional
-  maxPriorityFeePerGas // Optional
-  nonce // Optional
-}
-```
-```js
-const options: EthersTransactionOptions = {
+const options = {
   from, // Optional
   gasLimit, // Optional
   gasPrice, // Optional
@@ -834,7 +694,17 @@ const options: EthersTransactionOptions = {
 }
 ```
 ```js
-const txResponse = await safeSdk.executeTransaction(safeTransaction, options)
+const txResponse  await client.invoke({
+    uri: 'ens/safe.wrapper.eth',
+    method: 'executeTransaction',
+    args: {
+      tx: signedSafeTransaction,
+      options: options,
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  })
 ```
 
 
