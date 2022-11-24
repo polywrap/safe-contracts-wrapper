@@ -7,7 +7,10 @@ import { Client } from "@polywrap/core-js";
 
 jest.setTimeout(1200000);
 
-describe("Off-chain signatures", () => {
+const safeVersion = process.env.SAFE_VERSION! as "1.2.0" | "1.3.0";
+console.log('safeVersion', safeVersion)
+
+describe(`Off-chain signatures v${safeVersion}`, () => {
   let safeAddress: string;
 
   let client: Client;
@@ -25,7 +28,7 @@ describe("Off-chain signatures", () => {
       ...plugins,
     }) as unknown as Client;
 
-    [safeAddress] = await setupContractNetworks(client);
+    [safeAddress] = await setupContractNetworks(client, {}, safeVersion);
 
     client = new PolywrapClient({
       ...plugins,

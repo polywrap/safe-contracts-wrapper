@@ -10,15 +10,20 @@ import { defaultIpfsProviders } from "@polywrap/client-config-builder-js";
 import { EthAdapter } from "@gnosis.pm/safe-core-sdk-types";
 import EthersAdapter, { EthersAdapterConfig } from "@gnosis.pm/safe-ethers-lib";
 import { providers } from "@polywrap/test-env-js";
+
+import { abi as factoryAbi_1_2_0, bytecode as factoryBytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafeProxyFactory.json";
 import {
   abi as factoryAbi_1_3_0,
   bytecode as factoryBytecode_1_3_0,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
 
+import { abi as safeAbi_1_2_0, bytecode as safeBytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafe.json";
 import { abi as safeAbi_1_3_0, bytecode as safeBytecode_1_3_0 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
+
+import { abi as multisendAbi_1_2_0, bytecode as multisendBytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/MultiSend.json";
 import {
-  abi as multisendAbi,
-  bytecode as multisendBytecode,
+  abi as multisendAbi_1_3_0,
+  bytecode as multisendBytecode_1_3_0,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/libraries/MultiSend.sol/MultiSend.json";
 
 import {
@@ -98,7 +103,8 @@ export async function getPlugins(
 const defaults = { owners: ["0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1", "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"], threshold: 1 };
 export const setupContractNetworks = async (
   client: Client,
-  options?: Partial<typeof defaults>
+  options?: Partial<typeof defaults>,
+  version: "1.3.0" | "1.2.0" = "1.3.0"
 ): Promise<
   [
     string,
@@ -123,31 +129,37 @@ export const setupContractNetworks = async (
   let multisendAddress: string;
   let multisendCallOnlyAddress: string;
 
-  const proxyFactoryContractResponse_v130 = await App.Ethereum_Module.deployContract(
+  const factoryAbi = version === "1.3.0" ? factoryAbi_1_3_0 : factoryAbi_1_2_0;
+  const factoryBytecode = version === "1.3.0" ? factoryBytecode_1_3_0 : factoryBytecode_1_2_0;
+
+  const proxyFactoryContractResponse = await App.Ethereum_Module.deployContract(
     {
-      abi: JSON.stringify(factoryAbi_1_3_0),
-      bytecode: factoryBytecode_1_3_0,
+      abi: JSON.stringify(factoryAbi),
+      bytecode: factoryBytecode,
       args: null,
     },
     client,
     ethereumUri
   );
 
-  if (!proxyFactoryContractResponse_v130.ok) throw proxyFactoryContractResponse_v130.error;
-  proxyContractAddress = proxyFactoryContractResponse_v130.value as string;
+  if (!proxyFactoryContractResponse.ok) throw proxyFactoryContractResponse.error;
+  proxyContractAddress = proxyFactoryContractResponse.value as string;
 
-  const safeFactoryContractResponse_v130 = await App.Ethereum_Module.deployContract(
+  const safeAbi = version === "1.3.0" ? safeAbi_1_3_0 : safeAbi_1_2_0;
+  const safeBytecode = version === "1.3.0" ? safeBytecode_1_3_0 : safeBytecode_1_2_0;
+
+  const safeFactoryContractResponse = await App.Ethereum_Module.deployContract(
     {
-      abi: JSON.stringify(safeAbi_1_3_0),
-      bytecode: safeBytecode_1_3_0,
+      abi: JSON.stringify(safeAbi),
+      bytecode: safeBytecode,
       args: null,
     },
     client,
     ethereumUri
   );
 
-  if (!safeFactoryContractResponse_v130.ok) throw safeFactoryContractResponse_v130.error;
-  safeContractAddress = safeFactoryContractResponse_v130.value as string;
+  if (!safeFactoryContractResponse.ok) throw safeFactoryContractResponse.error;
+  safeContractAddress = safeFactoryContractResponse.value as string;
 
   const safeResponse = await App.SafeFactory_Module.deploySafe(
     {
@@ -155,6 +167,7 @@ export const setupContractNetworks = async (
         owners: safeOptions.owners!,
         threshold: safeOptions.threshold!,
       },
+      safeDeploymentConfig: version === "1.3.0" ? null : { version: "1.2.0", saltNonce: Date.now().toString(), isL1Safe: null },
       txOverrides: { gasLimit: "1000000", gasPrice: "20" },
       customContractAdressess: {
         proxyFactoryContract: proxyContractAddress!,
@@ -167,6 +180,9 @@ export const setupContractNetworks = async (
 
   if (!safeResponse.ok) throw safeResponse.error;
   safeAddress = safeResponse.value!.safeAddress;
+
+  const multisendAbi = version === "1.3.0" ? multisendAbi_1_3_0 : multisendAbi_1_2_0;
+  const multisendBytecode = version === "1.3.0" ? multisendBytecode_1_3_0 : multisendBytecode_1_2_0;
 
   const multisendResponse = await App.Ethereum_Module.deployContract(
     {
@@ -211,7 +227,7 @@ export const getERC20Mintable = async (signer: Wallet) => {
 
   const factory = new ethers.ContractFactory(ERC20MintableAbi, ERC20MintableBytecode, wallet);
 
-  const contract = await factory.deploy('TOKEN', 'TOK', signer.address, "10000000000000000000000000");
+  const contract = await factory.deploy("TOKEN", "TOK", signer.address, "10000000000000000000000000");
 
   return await contract.deployed();
 };
@@ -247,20 +263,21 @@ export const setupTests = async (
     safeContractAddress: string;
     multisendAddress: string;
     multisendCallOnlyAddress: string;
-  }
+  },
+  version: "1.3.0" | "1.2.0" = "1.3.0"
 ) => {
   return {
     accounts: setupAccounts(),
     contractNetworks: {
       [chainId]: {
         multiSendAddress: contractNetworks.multisendAddress,
-        multiSendAbi: multisendAbi,
+        multiSendAbi: version === "1.3.0" ? multisendAbi_1_3_0 : multisendAbi_1_2_0,
         multiSendCallOnlyAddress: contractNetworks.multisendCallOnlyAddress,
         multiSendCallOnlyAbi: multisendCallOnlyAbi,
         safeMasterCopyAddress: contractNetworks.safeContractAddress,
-        safeMasterCopyAbi: safeAbi_1_3_0,
+        safeMasterCopyAbi: version === "1.3.0" ? safeAbi_1_3_0 : safeAbi_1_2_0,
         safeProxyFactoryAddress: contractNetworks.proxyContractAddress,
-        safeProxyFactoryAbi: factoryAbi_1_3_0,
+        safeProxyFactoryAbi: version === "1.3.0" ? factoryAbi_1_3_0 : factoryAbi_1_2_0,
       },
     },
   };
