@@ -26,6 +26,8 @@ type Module {
     approveTransactionHash(hash: String!, options: Interface_TransactionOptions): Ethereum_TxReceipt! @env(required: true)
     executeTransaction(tx: Interface_SafeTransaction!, options: Interface_TransactionOptions): Ethereum_TxReceipt! @env(required: true)
     getOwnersWhoApprovedTx(hash: String!): [String!]! @env(required: true)
+    getBalance: BigInt @env(required: true)
+    getChainId: BigInt @env(required: true)
 
     """Owner manager methods"""
     getOwners: [String!]! @env(required: true)

@@ -14,6 +14,8 @@ import {
   Args_approveTransactionHash,
   Args_createMultiSendTransaction,
   Args_executeTransaction,
+  Args_getBalance,
+  Args_getChainId,
   Args_getOwnersWhoApprovedTx,
   Args_signTransactionHash,
   Args_signTypedData,
@@ -318,4 +320,12 @@ export function executeTransaction(args: Args_executeTransaction, env: Env): Eth
   }).unwrap();
 
   return toTxReceipt(txReceipt);
+}
+
+export function getBalance(args: Args_getBalance, env: Env): BigInt {
+  return Ethereum_Module.getBalance({ address: env.safeAddress, connection: env.connection, blockTag: null }).unwrap();
+}
+
+export function getChainId(args: Args_getChainId, env: Env): BigInt {
+  return Ethereum_Module.getNetwork({ connection: env.connection }).unwrap().chainId;
 }
