@@ -5,9 +5,6 @@
 * [Getting Started](#getting-started)
 * [Safe Factory API Reference](#factory-api)
 * [Safe Core SDK API Reference](#sdk-api)
-* [License](#license)
-* [Contributors](#contributors)
-
 ## <a name="installation">Installation</a>
 
 Install the package with yarn or npm:
@@ -86,3 +83,75 @@ const safeTransaction = await client.invoke({
 Check the `createTransaction` method in the [Wrapper Reference](#wrapper-api) for additional details on creating MultiSend transactions.
 
 Before executing this transaction, it must be signed by the owners and this can be done off-chain or on-chain. In this example `owner1` will sign it off-chain, `owner2` will sign it on-chain and `owner3` will execute it (the executor also signs the transaction transparently).
+
+
+### 3.a. Off-chain signatures
+
+The `owner1` account signs the transaction off-chain.
+
+```js
+const signedSafeTransaction = await client.invoke({
+  uri: 'ens/safe.wrapper.eth',
+  method: "addSignature",
+  args: {
+      tx: safeTransactionData,
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  }
+});
+```
+
+Because the signature is off-chain, there is no interaction with the contract and the signature becomes available at `signedSafeTransaction.signatures`.
+
+### 3.b. On-chain signatures
+
+To sign transaction on-chain `owner2` should instantiate new PolywrapClient connected to ethereum ([Ethereum-plugin-config](#ethereum-plugin-config)). After `owner2` account is connected to the ethereum-plugin as a signer the transaction hash will be approved on-chain.
+
+```js
+// Get transaction hash
+const txHash = await client.invoke({
+  uri: 'ens/safe.wrapper.eth',
+  method: "getTransactionHash",
+  args: {
+      tx: signedSafeTransaction.data,
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  }
+});
+
+// Approve
+await client.invoke({
+  uri: 'ens/safe.wrapper.eth',
+  method: "approveTransactionHash",
+  args: {
+      hash: txHash,
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  }
+});
+```
+
+### 4. Transaction execution
+
+Lastly, `owner3` account is connected to the client as a signer and executor of the Safe transaction to execute it.
+
+```js
+const executeTxResponse = await client.invoke({
+  uri: 'ens/safe.wrapper.eth',
+  method: "executeTransaction",
+  args: {
+      tx: signedTransaction,
+    },
+    env: {
+      safeAddress: <SAFE_ADDRESS>
+    }
+  }
+});
+```
+
