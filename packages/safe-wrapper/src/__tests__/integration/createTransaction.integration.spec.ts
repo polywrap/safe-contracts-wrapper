@@ -31,7 +31,7 @@ describe("Transactions creation", () => {
     const setupContractsResult = await setupContractNetworks(client);
     safeAddress = setupContractsResult[0];
 
-    setupTests = setupTestsBase.bind({}, connection.chainId, setupContractsResult[1]);
+    setupTests = setupTestsBase.bind({}, connection.chainId, setupContractsResult[1], '1.3.0');
 
     client = new PolywrapClient({
       ...plugins,

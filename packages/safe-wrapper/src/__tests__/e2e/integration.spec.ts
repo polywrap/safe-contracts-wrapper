@@ -8,7 +8,11 @@ import { ethers } from "ethers";
 import { Client } from "@polywrap/core-js";
 
 jest.setTimeout(1200000);
-describe("Safe Wrapper", () => {
+
+const safeVersion = process.env.SAFE_VERSION! as "1.2.0" | "1.3.0";
+
+console.log('safeVersion', safeVersion)
+describe(`Safe Wrapper v${safeVersion}`, () => {
   const wrapper = App.SafeWrapper_Module;
   const connection = { networkNameOrChainId: "testnet" };
   const someAddr = "0x8dc847af872947ac18d5d63fa646eb65d4d99560";
@@ -36,7 +40,7 @@ describe("Safe Wrapper", () => {
       ...plugins,
     }) as unknown as Client;
 
-    [safeAddress] = await setupContractNetworks(client);
+    [safeAddress] = await setupContractNetworks(client, {}, safeVersion);
 
     client = new PolywrapClient({
       ...plugins,
@@ -55,7 +59,6 @@ describe("Safe Wrapper", () => {
   afterAll(async () => {
     await stopTestEnvironment();
   });
-
   describe("Owner Manager", () => {
     it("getOwners", async () => {
       const resp = await wrapper.getOwners({}, client, wrapperUri);
@@ -118,7 +121,6 @@ describe("Safe Wrapper", () => {
   describe("Module Manager", () => {
     it("getModules", async () => {
       const resp = await wrapper.getModules({}, client, wrapperUri);
-
       if (!resp.ok) throw resp.error;
       expect(resp.value).not.toBeNull();
       expect(resp.value).toEqual([]);
