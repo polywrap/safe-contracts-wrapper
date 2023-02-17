@@ -1,7 +1,22 @@
-#import { Module } into SafeContracts from "wrap://ens/safe.contracts.polywrap.eth"
-#import { Module, Connection, TxOverrides, StaticTxResult, TxRequest, EventNotification, Network, TxReceipt, TxResponse, Log, Access } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
-#import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
-#import * into Datetime from "wrap://ens/datetime.polywrap.eth"
+"""
+import { Module } into SafeContracts from "wrap://ens/safe.contracts.polywrap.eth"
+
+import {
+    Module,
+    Network,
+    Connection,
+    Log,
+    EventNotification,
+    Access,
+    TxRequest,
+    TxReceipt,
+    TxResponse,
+    TxOptions,
+    StaticTxResult
+} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.0.0"
+import * into Datetime from "wrap://ens/datetime.polywrap.eth"
+import * into Logger from "wrap://ens/wraps.eth:logger@1.0.0"
+"""
 
 type Module {
     getChainId(
@@ -13,7 +28,7 @@ type Module {
         safeDeploymentConfig: SafeDeploymentConfig,
         #options: TransactionOptions,
         connection: Ethereum_Connection,
-        txOverrides: Ethereum_TxOverrides,
+        txOverrides: Ethereum_TxOptions,
         customContractAdressess: CustomContract
     ): SafePayload
 

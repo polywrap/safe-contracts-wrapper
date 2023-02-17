@@ -32,6 +32,7 @@
     "@typescript-eslint/parser": "^5.40.1",
     "eslint": "^8.25.0",
     "lerna": "5.5.2",
-    "patch-package": "^6.5.0"
+    "patch-package": "^6.5.0",
+    "polywrap": "~0.10.0-pre"
   }
 }

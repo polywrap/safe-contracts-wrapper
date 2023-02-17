@@ -1,0 +1,4 @@
+- [ ] rename txOverrides to txOptions
+- [ ] clean up common schema
+- [ ] properly link together the wrappers (how? ipfs? wraps.eth? safe.eth?)
+- [ ] replace datetime

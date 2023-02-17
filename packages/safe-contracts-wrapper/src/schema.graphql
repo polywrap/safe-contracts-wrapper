@@ -1,12 +1,24 @@
-#import { Module, Connection, TxOverrides } into Ethereum from "wrap://ens/ethereum.polywrap.eth"
-#import { Module } into Logger from "wrap://ens/js-logger.polywrap.eth"
-#import { SignSignature, SafeTransaction, SafeTransactionData, TransactionOptions, SafeTransactionOptionalProps } into Interface from "wrap://ens/safe.interface.polywrap.eth"
+"""
+import {
+    Module,
+    Connection,
+    TxOptions
+} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.0.0"
+
+import {
+    SignSignature,
+    SafeTransaction,
+    SafeTransactionData,
+    TransactionOptions,
+    SafeTransactionOptionalProps
+} from "../../safe-common-types/schema.graphql"
+"""
 
 type Module {
     """
     Module to deploy and interact with the proxy factory smart-contract
     """
-    createProxy(address: String!, safeMasterCopyAddress: String!, initializer: String!, saltNonce: UInt32!, connection: Ethereum_Connection, txOverrides: Ethereum_TxOverrides): String
+    createProxy(address: String!, safeMasterCopyAddress: String!, initializer: String!, saltNonce: UInt32!, connection: Ethereum_Connection, txOverrides: Ethereum_TxOptions): String
     proxyCreationCode(address: String!, connection: Ethereum_Connection): String!
 
     """
@@ -20,14 +32,14 @@ type Module {
     getOwners(address: String!, connection: Ethereum_Connection): [String!]!
     isOwner(address: String!, ownerAddress: String!, connection: Ethereum_Connection): Boolean!
 
-    getTransactionHash(safeAddress: String!, safeTransactionData: Interface_SafeTransactionData!, connection: Ethereum_Connection): String!
+    getTransactionHash(safeAddress: String!, safeTransactionData: SafeTransactionData!, connection: Ethereum_Connection): String!
     approvedHashes(address: String!, ownerAddress: String!, hash: String!, connection: Ethereum_Connection): BigInt!
-    approveHash(safeAddress: String!, hash: String!, options: Interface_TransactionOptions, connection: Ethereum_Connection): Ethereum_TxReceipt!
+    approveHash(safeAddress: String!, hash: String!, options: TransactionOptions, connection: Ethereum_Connection): Ethereum_TxReceipt!
 
     getModules(address: String!, connection: Ethereum_Connection): [String!]!
     isModuleEnabled(address: String!, moduleAddress: String!, connection: Ethereum_Connection): Boolean!
 
-    execTransaction(safeAddress: String!, safeTransaction: Interface_SafeTransaction!, txOverrides: Ethereum_TxOverrides, connection: Ethereum_Connection): Ethereum_TxReceipt!
+    execTransaction(safeAddress: String!, safeTransaction: SafeTransaction!, txOverrides: Ethereum_TxOptions, connection: Ethereum_Connection): Ethereum_TxReceipt!
 
     encode(method: String!, args: [String!]!): String!
     estimateGas(address: String!, method: String!, args: [String!]!, connection: Ethereum_Connection): BigInt!
@@ -37,8 +49,8 @@ type Module {
 }
 
 type ContractNetworksConfig {
-      multiSendAddress: String
-      multiSendCallOnlyAddress: String
-      safeMasterCopyAddress: String
-      safeProxyFactoryAddress: String
+    multiSendAddress: String
+    multiSendCallOnlyAddress: String
+    safeMasterCopyAddress: String
+    safeProxyFactoryAddress: String
 }

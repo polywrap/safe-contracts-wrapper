@@ -1,7 +1,6 @@
 import {
   Ethereum_Module,
   Ethereum_Log,
-  Logger_Module,
   Args_createProxy,
   Args_proxyCreationCode,
   Args_estimateGas,
@@ -12,10 +11,9 @@ import {
   Args_getModules,
   Args_isModuleEnabled,
   Ethereum_TxReceipt,
-  Interface_SafeTransaction,
-  Ethereum_TxOverrides,
+  Ethereum_TxOptions,
 } from "./wrap";
-import { BigInt } from "@polywrap/wasm-as";
+import { BigInt, Box } from "@polywrap/wasm-as";
 import { JSON } from "assemblyscript-json";
 import {
   Args_approvedHashes,
@@ -42,6 +40,7 @@ export function encode(args: Args_encode): string {
   return Ethereum_Module.encodeFunction({
     method: args.method,
     args: args.args,
+    connection: null
   }).unwrap();
 }
 
@@ -51,7 +50,7 @@ export function estimateGas(args: Args_estimateGas): BigInt {
     method: args.method,
     args: args.args,
     connection: args.connection,
-    txOverrides: null,
+    options: null,
   }).unwrap();
 }
 
@@ -70,7 +69,7 @@ export function createProxy(args: Args_createProxy): string | null {
     method: "function createProxyWithNonce(address,bytes memory,uint256)",
     args: [args.safeMasterCopyAddress, args.initializer, args.saltNonce.toString()],
     connection: args.connection,
-    txOverrides: args.txOverrides,
+    options: args.txOverrides,
   }).unwrap();
 
   // ProxyCreation(address)
@@ -213,15 +212,20 @@ export function approveHash(args: Args_approveHash): Ethereum_TxReceipt {
     });
   }
 
+  const nonce = args.options ? args.options!.nonce : null;
+
   const response = Ethereum_Module.callContractMethodAndWait({
     method: "function approveHash(bytes32 hashToApprove) external",
     address: args.safeAddress,
     args: [args.hash],
     connection: args.connection,
-    txOverrides: {
+    options: {
       gasLimit: args.options ? args.options!.gasLimit : null,
       gasPrice: args.options ? args.options!.gasPrice : null,
       value: null,
+      maxFeePerGas: args.options ? args.options!.maxFeePerGas : null,
+      maxPriorityFeePerGas: args.options ? BigInt.from(args.options!.maxPriorityFeePerGas) : null,
+      nonce: nonce ? Box.from(nonce.toUInt32()) : null
     },
   }).unwrap();
 
@@ -263,22 +267,25 @@ export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt 
   const txData = args.safeTransaction.data;
   const txSignatures = args.safeTransaction.signatures!;
 
-  const txOverrides: Ethereum_TxOverrides = {
+  const txOptions: Ethereum_TxOptions = {
     gasLimit: args.txOverrides != null ? args.txOverrides!.gasLimit : null,
     gasPrice: args.txOverrides != null ? args.txOverrides!.gasPrice : null,
     value: args.txOverrides != null ? args.txOverrides!.value : null,
+    maxFeePerGas: args.txOverrides ? args.txOverrides!.maxFeePerGas : null,
+    maxPriorityFeePerGas: args.txOverrides ? args.txOverrides!.maxPriorityFeePerGas : null,
+    nonce: args.txOverrides ? args.txOverrides!.nonce : null
   };
 
   const method =
     "function execTransaction(address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address payable refundReceiver, bytes memory signatures) external payable returns (bool success)";
 
   const encodedSignatures = encodeSignatures(txSignatures);
-  if (!txOverrides.gasLimit) {
+  if (!txOptions.gasLimit) {
     const estimationArgs = getTransactionHashArgs(txData);
     estimationArgs.pop();
     estimationArgs.push(encodedSignatures);
 
-    txOverrides.gasLimit = estimateGas({
+    txOptions.gasLimit = estimateGas({
       address: args.safeAddress,
       method:
         "function execTransaction(address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address payable refundReceiver, bytes memory signatures)",
@@ -302,7 +309,7 @@ export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt 
       txData.refundReceiver!,
       encodedSignatures,
     ],
-    txOverrides: txOverrides,
+    options: txOptions,
     connection: args.connection,
   }).unwrap();
 }
