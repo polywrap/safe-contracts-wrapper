@@ -21,7 +21,7 @@ import {
   //Logger_Module,
   SafePayload,
   SafeContracts_Ethereum_Connection,
-  SafeContracts_Ethereum_TxOverrides,
+  SafeContracts_Ethereum_TxOptions,
   SafeContracts_Module,
 } from "./wrap";
 
@@ -77,18 +77,18 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
     };
   }
 
-  let txOverrides: SafeContracts_Ethereum_TxOverrides | null = null;
+  let txOptions: SafeContracts_Ethereum_TxOptions | null = null;
 
-  if (args.txOverrides != null) {
-    txOverrides = { value: null, gasLimit: null, gasPrice: null };
-    if (args.txOverrides!.value) {
-      txOverrides.value = args.txOverrides!.value;
+  if (args.txOptions != null) {
+    txOptions = { value: null, gasLimit: null, gasPrice: null };
+    if (args.txOptions!.value) {
+      txOptions.value = args.txOptions!.value;
     }
-    if (args.txOverrides!.gasLimit) {
-      txOverrides.gasLimit = args.txOverrides!.gasLimit;
+    if (args.txOptions!.gasLimit) {
+      txOptions.gasLimit = args.txOptions!.gasLimit;
     }
-    if (args.txOverrides!.gasPrice) {
-      txOverrides.gasPrice = args.txOverrides!.gasPrice;
+    if (args.txOptions!.gasPrice) {
+      txOptions.gasPrice = args.txOptions!.gasPrice;
     }
   }
   const chainId = getChainId({ connection: args.connection });
@@ -146,7 +146,7 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
     connection: connection,
     initializer: initializer,
     saltNonce: <u32>BigInt.from(saltNonce).toUInt64(),
-    txOverrides: txOverrides,
+    txOptions: txOptions,
   }).unwrap();
 
   if (safeAddress != null) {

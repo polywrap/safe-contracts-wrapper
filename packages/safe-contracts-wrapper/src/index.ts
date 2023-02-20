@@ -69,7 +69,7 @@ export function createProxy(args: Args_createProxy): string | null {
     method: "function createProxyWithNonce(address,bytes memory,uint256)",
     args: [args.safeMasterCopyAddress, args.initializer, args.saltNonce.toString()],
     connection: args.connection,
-    options: args.txOverrides,
+    options: args.txOptions,
   }).unwrap();
 
   // ProxyCreation(address)
@@ -268,12 +268,12 @@ export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt 
   const txSignatures = args.safeTransaction.signatures!;
 
   const txOptions: Ethereum_TxOptions = {
-    gasLimit: args.txOverrides != null ? args.txOverrides!.gasLimit : null,
-    gasPrice: args.txOverrides != null ? args.txOverrides!.gasPrice : null,
-    value: args.txOverrides != null ? args.txOverrides!.value : null,
-    maxFeePerGas: args.txOverrides ? args.txOverrides!.maxFeePerGas : null,
-    maxPriorityFeePerGas: args.txOverrides ? args.txOverrides!.maxPriorityFeePerGas : null,
-    nonce: args.txOverrides ? args.txOverrides!.nonce : null
+    gasLimit: args.txOptions != null ? args.txOptions!.gasLimit : null,
+    gasPrice: args.txOptions != null ? args.txOptions!.gasPrice : null,
+    value: args.txOptions != null ? args.txOptions!.value : null,
+    maxFeePerGas: args.txOptions ? args.txOptions!.maxFeePerGas : null,
+    maxPriorityFeePerGas: args.txOptions ? args.txOptions!.maxPriorityFeePerGas : null,
+    nonce: args.txOptions ? args.txOptions!.nonce : null
   };
 
   const method =

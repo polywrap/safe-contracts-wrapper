@@ -2,13 +2,9 @@ import { PolywrapClient } from "@polywrap/client-js";
 import {
   initTestEnvironment,
   stopTestEnvironment,
-  providers,
-  ensAddresses,
 } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
 import path from "path";
-
-import { getPlugins } from "../utils";
 
 import {
   abi as safeProxyFactoryAbi_1_2_0,
@@ -23,14 +19,14 @@ import {
   abi as safeAbi_1_3_0,
   bytecode as safeBytecode_1_3_0,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
-import { Client } from "@polywrap/core-js";
+import { getClientConfig } from "../utils";
 
 jest.setTimeout(500000);
 
 describe("ProxyFactory", () => {
   const CONNECTION = { networkNameOrChainId: "testnet" };
 
-  let client: Client;
+  const client = new PolywrapClient(getClientConfig());
   const signer = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
 
   const wrapperPath: string = path.join(
@@ -40,18 +36,11 @@ describe("ProxyFactory", () => {
     ".."
   );
   const wrapperUri = `fs/${wrapperPath}/build`;
-  const ethereumUri = "ens/ethereum.polywrap.eth";
+  const ethereumUri = "wrap://ens/wraps.eth:ethereum@1.0.0";
 
   describe("proxies", () => {
     beforeEach(async () => {
       await initTestEnvironment();
-
-      const config = getPlugins(
-        providers.ethereum,
-        providers.ipfs,
-        ensAddresses.ensAddress
-      );
-      client = new PolywrapClient(config) as unknown as Client;
     });
 
     afterEach(async () => {
@@ -229,13 +218,6 @@ describe("ProxyFactory", () => {
 
     beforeEach(async () => {
       await initTestEnvironment();
-
-      const config = getPlugins(
-        providers.ethereum,
-        providers.ipfs,
-        ensAddresses.ensAddress
-      );
-      client = new PolywrapClient(config) as unknown as Client;
 
       const singletonResponse = await App.Ethereum_Module.deployContract(
         {

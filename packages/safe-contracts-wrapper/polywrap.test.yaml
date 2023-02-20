@@ -1,4 +1,4 @@
-name: template-wasm-rs
+name: safe-wrapper-test
 format: 0.1
 validation: "./workflows/validator.cue"
 jobs:

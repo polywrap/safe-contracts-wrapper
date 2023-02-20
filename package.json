@@ -19,9 +19,8 @@
     "url": "https://github.com/ConsiderItDone/safe-contracts-wrapper"
   },
   "scripts": {
-    "build:interface": "yarn --cwd ./packages/safe-interface build",
     "patch": "yarn --cwd ./packages/safe-wrapper patch",
-    "build": "yarn build:interface && lerna run build --concurrency 1",
+    "build": "lerna run build --concurrency 1",
     "build:order": "lerna run build --scope @consideritdone/safe-interface && lerna run build --scope @consideritdone/safe-contracts-wrapper && lerna run build --scope @consideritdone/safe-factory-wrapper && lerna run build --scope @consideritdone/safe-safe-wrapper",
     "test:contracts": "lerna run test --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
     "test:factory": "lerna run test --concurrency 1 --scope @consideritdone/safe-factory-wrapper",

@@ -28,7 +28,7 @@ type Module {
         safeDeploymentConfig: SafeDeploymentConfig,
         #options: TransactionOptions,
         connection: Ethereum_Connection,
-        txOverrides: Ethereum_TxOptions,
+        txOptions: Ethereum_TxOptions,
         customContractAdressess: CustomContract
     ): SafePayload
 
