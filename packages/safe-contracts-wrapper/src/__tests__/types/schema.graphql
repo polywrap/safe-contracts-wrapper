@@ -1,2 +1,2 @@
 #import * into ProxyFactory from "ens/proxy-factory.eth"
-#import * into Ethereum from "ens/ethereum.polywrap.eth"
+#import * into Ethereum from "ens/wraps.eth:ethereum@1.0.0"

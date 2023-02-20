@@ -53,6 +53,10 @@ describe("ProxyFactory", () => {
           abi: JSON.stringify(safeProxyFactoryAbi_1_2_0),
           bytecode: safeProxyFactoryBytecode_1_2_0,
           args: null,
+          options: {
+            maxPriorityFeePerGas: "40000000",
+            maxFeePerGas: "4000000000",
+          },
           connection: CONNECTION,
         },
         client,
@@ -73,6 +77,10 @@ describe("ProxyFactory", () => {
           initializer: initCode,
           saltNonce,
           connection: CONNECTION,
+          txOptions: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
+          },
         },
         client,
         wrapperUri
@@ -92,6 +100,10 @@ describe("ProxyFactory", () => {
           bytecode: safeProxyFactoryBytecode_1_3_0,
           args: null,
           connection: CONNECTION,
+          options: {
+            maxPriorityFeePerGas: "40000000",
+            maxFeePerGas: "4000000000",
+          },
         },
         client,
         ethereumUri
@@ -111,6 +123,10 @@ describe("ProxyFactory", () => {
           initializer: initCode,
           saltNonce,
           connection: CONNECTION,
+          txOptions: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
+          },
         },
         client,
         wrapperUri
@@ -130,6 +146,10 @@ describe("ProxyFactory", () => {
           bytecode: safeProxyFactoryBytecode_1_3_0,
           args: null,
           connection: CONNECTION,
+          options: {
+            maxPriorityFeePerGas: "40000000",
+            maxFeePerGas: "4000000000",
+          },
         },
         client,
         ethereumUri
@@ -163,6 +183,10 @@ describe("ProxyFactory", () => {
           bytecode: safeProxyFactoryBytecode_1_3_0,
           args: null,
           connection: CONNECTION,
+          options: {
+            maxPriorityFeePerGas: "40000000",
+            maxFeePerGas: "4000000000",
+          },
         },
         client,
         ethereumUri
@@ -225,6 +249,10 @@ describe("ProxyFactory", () => {
           bytecode: safeBytecode_1_3_0,
           args: null,
           connection: CONNECTION,
+          options: {
+            maxPriorityFeePerGas: "40000000",
+            maxFeePerGas: "4000000000",
+          },
         },
         client,
         ethereumUri
@@ -239,6 +267,10 @@ describe("ProxyFactory", () => {
           bytecode: safeProxyFactoryBytecode_1_2_0,
           args: null,
           connection: CONNECTION,
+          options: {
+            maxPriorityFeePerGas: "40000000",
+            maxFeePerGas: "4000000000",
+          },
         },
         client,
         ethereumUri
@@ -256,6 +288,10 @@ describe("ProxyFactory", () => {
           initializer: initCode,
           saltNonce,
           connection: CONNECTION,
+          txOptions: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
+          },
         },
         client,
         wrapperUri
@@ -280,6 +316,10 @@ describe("ProxyFactory", () => {
             signer,
           ],
           connection: CONNECTION,
+          options: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
+          },
         },
         client,
         ethereumUri
