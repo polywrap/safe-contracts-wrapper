@@ -6,7 +6,10 @@ import {
   Connections,
 } from "ethereum-provider-js";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
-import { ClientConfigBuilder, defaultIpfsProviders } from "@polywrap/client-config-builder-js";
+import {
+  ClientConfigBuilder,
+  defaultIpfsProviders,
+} from "@polywrap/client-config-builder-js";
 import { ensAddresses, providers } from "@polywrap/test-env-js";
 
 export function getClientConfig(): CoreClientConfig {
@@ -17,7 +20,9 @@ export function getClientConfig(): CoreClientConfig {
       fallbackProviders: defaultIpfsProviders,
     })
     .addPackages({
-      "wrap://ens/ens.polywrap.eth": ensResolverPlugin({ addresses: { testnet: ensAddresses.ensAddress } }),
+      "wrap://ens/ens.polywrap.eth": ensResolverPlugin({
+        addresses: { testnet: ensAddresses.ensAddress },
+      }),
       "wrap://ens/wraps.eth:logger@1.0.0": loggerPlugin({
         logFunc: (level, message) => {
           console.log(level, message);
@@ -33,8 +38,16 @@ export function getClientConfig(): CoreClientConfig {
           },
           defaultNetwork: "testnet",
         }),
-      })
+      }),
     })
-    .addInterfaceImplementation("wrap://ens/wraps.eth:ethereum-provider@1.1.0", "wrap://ens/wraps.eth:ethereum-provider@1.1.0")
+    .addInterfaceImplementation(
+      "wrap://ens/wraps.eth:ethereum-provider@1.1.0",
+      "wrap://ens/wraps.eth:ethereum-provider@1.1.0"
+    )
+    // @TODO(cbrzn): Remove this once the ENS text record content hash has been updated
+    .addRedirect(
+      "ens/wraps.eth:ethereum@1.1.0",
+      "ipfs/QmZJqVyqHZsiRrLJ5mLUEJAFSsPkrPGHxT4EUksFMaJP3g"
+    )
     .build();
 }

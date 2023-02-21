@@ -667,6 +667,13 @@
   resolved "https://registry.yarnpkg.com/@ethersproject/logger/-/logger-5.7.0.tgz#6ce9ae168e74fecf287be17062b590852c311892"
   integrity sha512-0odtFdXu/XHtjQXJYA3u9G0G8btm0ND5Cu8M7i5vhEcE8/HmF4Lbdqanwyv4uQTr2tx6b7fQRmgLrsnpQlmnig==
 
+"@ethersproject/networks@5.7.0":
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/@ethersproject/networks/-/networks-5.7.0.tgz#df72a392f1a63a57f87210515695a31a245845ad"
+  integrity sha512-MG6oHSQHd4ebvJrleEQQ4HhVu8Ichr0RDYEfHzsVAVjHNM+w36x9wp9r+hf1JstMXtseXDtkiVoARAG6M959AA==
+  dependencies:
+    "@ethersproject/logger" "^5.7.0"
+
 "@ethersproject/networks@5.7.1", "@ethersproject/networks@^5.0.0", "@ethersproject/networks@^5.0.3", "@ethersproject/networks@^5.6.3", "@ethersproject/networks@^5.7.0":
   version "5.7.1"
   resolved "https://registry.yarnpkg.com/@ethersproject/networks/-/networks-5.7.1.tgz#118e1a981d757d45ccea6bb58d9fd3d9db14ead6"
@@ -737,6 +744,32 @@
     "@ethersproject/strings" "^5.6.1"
     "@ethersproject/transactions" "^5.6.2"
     "@ethersproject/web" "^5.6.1"
+    bech32 "1.1.4"
+    ws "7.4.6"
+
+"@ethersproject/providers@5.7.0":
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.7.0.tgz#a885cfc7650a64385e7b03ac86fe9c2d4a9c2c63"
+  integrity sha512-+TTrrINMzZ0aXtlwO/95uhAggKm4USLm1PbeCBR/3XZ7+Oey+3pMyddzZEyRhizHpy1HXV0FRWRMI1O3EGYibA==
+  dependencies:
+    "@ethersproject/abstract-provider" "^5.7.0"
+    "@ethersproject/abstract-signer" "^5.7.0"
+    "@ethersproject/address" "^5.7.0"
+    "@ethersproject/base64" "^5.7.0"
+    "@ethersproject/basex" "^5.7.0"
+    "@ethersproject/bignumber" "^5.7.0"
+    "@ethersproject/bytes" "^5.7.0"
+    "@ethersproject/constants" "^5.7.0"
+    "@ethersproject/hash" "^5.7.0"
+    "@ethersproject/logger" "^5.7.0"
+    "@ethersproject/networks" "^5.7.0"
+    "@ethersproject/properties" "^5.7.0"
+    "@ethersproject/random" "^5.7.0"
+    "@ethersproject/rlp" "^5.7.0"
+    "@ethersproject/sha2" "^5.7.0"
+    "@ethersproject/strings" "^5.7.0"
+    "@ethersproject/transactions" "^5.7.0"
+    "@ethersproject/web" "^5.7.0"
     bech32 "1.1.4"
     ws "7.4.6"
 
@@ -915,6 +948,17 @@
     "@ethersproject/signing-key" "^5.7.0"
     "@ethersproject/transactions" "^5.7.0"
     "@ethersproject/wordlists" "^5.7.0"
+
+"@ethersproject/web@5.7.0":
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/@ethersproject/web/-/web-5.7.0.tgz#40850c05260edad8b54827923bbad23d96aac0bc"
+  integrity sha512-ApHcbbj+muRASVDSCl/tgxaH2LBkRMEYfLOLVa0COipx0+nlu0QKet7U2lEg0vdkh8XRSLf2nd1f1Uk9SrVSGA==
+  dependencies:
+    "@ethersproject/base64" "^5.7.0"
+    "@ethersproject/bytes" "^5.7.0"
+    "@ethersproject/logger" "^5.7.0"
+    "@ethersproject/properties" "^5.7.0"
+    "@ethersproject/strings" "^5.7.0"
 
 "@ethersproject/web@5.7.1", "@ethersproject/web@^5.0.0", "@ethersproject/web@^5.0.4", "@ethersproject/web@^5.6.1", "@ethersproject/web@^5.7.0":
   version "5.7.1"
@@ -2512,7 +2556,7 @@
   resolved "https://registry.yarnpkg.com/@polywrap/asyncify-js/-/asyncify-js-0.9.2.tgz#d588a45190f4158fb78b45dab1420bca1ca18647"
   integrity sha512-Qdyk+cy0UIaewDnKphT+iTByKL5FJP1dWNWJNU9udhf0t1Bq/THiCAezN9ZJe74GTvWVQQkVYYCbUtiz+2/zyQ==
 
-"@polywrap/client-config-builder-js@0.10.0-pre.8":
+"@polywrap/client-config-builder-js@0.10.0-pre.8", "@polywrap/client-config-builder-js@~0.10.0-pre":
   version "0.10.0-pre.8"
   resolved "https://registry.yarnpkg.com/@polywrap/client-config-builder-js/-/client-config-builder-js-0.10.0-pre.8.tgz#2d6af1fbe42a5bce370d644d9833f6312ca1ea10"
   integrity sha512-QbnNc15DD2MVila+Ao9uiaqnFiXJ9HvgLPYbHTzpaxnTyUv4TlJT7gsmwtemcJPPqCGIWvIlml8UbJuVjmy3Aw==
@@ -6647,6 +6691,16 @@ ethereum-protocol@^1.0.1:
   resolved "https://registry.yarnpkg.com/ethereum-protocol/-/ethereum-protocol-1.0.1.tgz#b7d68142f4105e0ae7b5e178cf42f8d4dc4b93cf"
   integrity sha512-3KLX1mHuEsBW0dKG+c6EOJS1NBNqdCICvZW9sInmZTt5aY0oxmHVggYRE0lJu1tcnMD1K+AKHdLi6U43Awm1Vg==
 
+ethereum-provider-js@0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/ethereum-provider-js/-/ethereum-provider-js-0.2.0.tgz#f8511dcbaa8e1d51e65c496cf31a1883b25c0058"
+  integrity sha512-cPsf0y+JIQAWVqqnbLQVXsNhNg67esBJk1OGPk5t+vMb0JcZnZy0+fdpfXglj59KyopaygsTWBbus4diqNGdiQ==
+  dependencies:
+    "@ethersproject/address" "5.7.0"
+    "@ethersproject/providers" "5.7.0"
+    "@polywrap/core-js" "0.10.0-pre.7"
+    ethers "5.7.0"
+
 ethereumjs-abi@^0.6.8:
   version "0.6.8"
   resolved "https://registry.yarnpkg.com/ethereumjs-abi/-/ethereumjs-abi-0.6.8.tgz#71bc152db099f70e62f108b7cdfca1b362c6fcae"
@@ -6809,6 +6863,42 @@ ethers@5.0.7:
     "@ethersproject/wallet" "^5.0.0"
     "@ethersproject/web" "^5.0.0"
     "@ethersproject/wordlists" "^5.0.0"
+
+ethers@5.7.0:
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.7.0.tgz#0055da174b9e076b242b8282638bc94e04b39835"
+  integrity sha512-5Xhzp2ZQRi0Em+0OkOcRHxPzCfoBfgtOQA+RUylSkuHbhTEaQklnYi2hsWbRgs3ztJsXVXd9VKBcO1ScWL8YfA==
+  dependencies:
+    "@ethersproject/abi" "5.7.0"
+    "@ethersproject/abstract-provider" "5.7.0"
+    "@ethersproject/abstract-signer" "5.7.0"
+    "@ethersproject/address" "5.7.0"
+    "@ethersproject/base64" "5.7.0"
+    "@ethersproject/basex" "5.7.0"
+    "@ethersproject/bignumber" "5.7.0"
+    "@ethersproject/bytes" "5.7.0"
+    "@ethersproject/constants" "5.7.0"
+    "@ethersproject/contracts" "5.7.0"
+    "@ethersproject/hash" "5.7.0"
+    "@ethersproject/hdnode" "5.7.0"
+    "@ethersproject/json-wallets" "5.7.0"
+    "@ethersproject/keccak256" "5.7.0"
+    "@ethersproject/logger" "5.7.0"
+    "@ethersproject/networks" "5.7.0"
+    "@ethersproject/pbkdf2" "5.7.0"
+    "@ethersproject/properties" "5.7.0"
+    "@ethersproject/providers" "5.7.0"
+    "@ethersproject/random" "5.7.0"
+    "@ethersproject/rlp" "5.7.0"
+    "@ethersproject/sha2" "5.7.0"
+    "@ethersproject/signing-key" "5.7.0"
+    "@ethersproject/solidity" "5.7.0"
+    "@ethersproject/strings" "5.7.0"
+    "@ethersproject/transactions" "5.7.0"
+    "@ethersproject/units" "5.7.0"
+    "@ethersproject/wallet" "5.7.0"
+    "@ethersproject/web" "5.7.0"
+    "@ethersproject/wordlists" "5.7.0"
 
 ethers@5.7.1:
   version "5.7.1"

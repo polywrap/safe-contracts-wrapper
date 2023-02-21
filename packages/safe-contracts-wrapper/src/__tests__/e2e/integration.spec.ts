@@ -89,7 +89,7 @@ describe("ProxyFactory", () => {
       if (!response.ok) throw response.error;
       expect(response.value).not.toBeNull();
       expect(response.value).toEqual(
-        "0x0ddb56f661e5bd05fb252f5bc619f74039cd6d63"
+        "0x0000000ddb56f661e5bd05fb252f5bc619f74039"
       );
     });
 
@@ -135,7 +135,7 @@ describe("ProxyFactory", () => {
       if (!response.ok) throw response.error;
       expect(response.value).not.toBeNull();
       expect(response.value).toEqual(
-        "0x1b721366fc1837d57b5d40a82c546e665545c6bc"
+        "0x0000001b721366fc1837d57b5d40a82c546e6655"
       );
     });
 
@@ -303,10 +303,9 @@ describe("ProxyFactory", () => {
       await App.Ethereum_Module.callContractMethod(
         {
           address: proxyAddress,
-          method:
-            "function setup( address[] calldata _owners, uint256 _threshold, address to, bytes calldata data, address fallbackHandler, address paymentToken, uint256 payment, address payable paymentReceiver ) external",
+          method: "function setup(address[] _owners,uint256 _threshold,address to,bytes data,address fallbackHandler,address paymentToken,uint256 payment,address paymentReceiver)",
           args: [
-            JSON.stringify([signer]),
+            "[" + signer + "]",
             "1",
             signer,
             "0x",
