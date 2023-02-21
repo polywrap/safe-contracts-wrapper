@@ -3,7 +3,7 @@ import {
     Module,
     Connection,
     TxOptions
-} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.0.0"
+} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.1.0"
 
 import {
     SignSignature,

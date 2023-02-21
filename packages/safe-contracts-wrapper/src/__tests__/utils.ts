@@ -24,7 +24,7 @@ export function getClientConfig(): CoreClientConfig {
           return true;
         },
       }) as IWrapPackage,
-      "wrap://ens/wraps.eth:ethereum-provider@1.0.0": ethereumProviderPlugin({
+      "wrap://ens/wraps.eth:ethereum-provider@1.1.0": ethereumProviderPlugin({
         connections: new Connections({
           networks: {
             testnet: new Connection({
@@ -35,6 +35,6 @@ export function getClientConfig(): CoreClientConfig {
         }),
       })
     })
-    .addInterfaceImplementation("wrap://ens/wraps.eth:ethereum-provider@1.0.0", "wrap://ens/wraps.eth:ethereum-provider@1.0.0")
+    .addInterfaceImplementation("wrap://ens/wraps.eth:ethereum-provider@1.1.0", "wrap://ens/wraps.eth:ethereum-provider@1.1.0")
     .build();
 }
