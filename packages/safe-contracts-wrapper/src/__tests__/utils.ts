@@ -47,7 +47,7 @@ export function getClientConfig(): CoreClientConfig {
     // @TODO(cbrzn): Remove this once the ENS text record content hash has been updated
     .addRedirect(
       "ens/wraps.eth:ethereum@1.1.0",
-      "ipfs/QmZJqVyqHZsiRrLJ5mLUEJAFSsPkrPGHxT4EUksFMaJP3g"
+      "ipfs/QmS4Z679ZE8WwZSoYB8w9gDSERHAoWG1fX94oqdWpfpDq3"
     )
     .build();
 }

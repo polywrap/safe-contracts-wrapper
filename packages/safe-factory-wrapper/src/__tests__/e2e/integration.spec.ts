@@ -2,13 +2,11 @@ import { PolywrapClient } from "@polywrap/client-js";
 import {
   initTestEnvironment,
   stopTestEnvironment,
-  providers,
-  ensAddresses,
 } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
 import path from "path";
 
-import { getPlugins } from "../utils";
+import { getClientConfig } from "../utils";
 
 import {
   abi as factoryAbi_1_2_0,
@@ -29,7 +27,6 @@ import {
   abi as safeAbi_1_3_0,
   bytecode as safeBytecode_1_3_0,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
-import { Client } from "@polywrap/core-js";
 
 jest.setTimeout(500000);
 
@@ -38,7 +35,7 @@ const owners = ["0xd405aebF7b60eD2cb2Ac4497Bddd292DEe534E82"];
 describe("SafeFactory", () => {
   const CONNECTION = { networkNameOrChainId: "testnet" };
 
-  let client: Client;
+  const client = new PolywrapClient(getClientConfig());
 
   const wrapperPath: string = path.join(
     path.resolve(__dirname),
@@ -47,7 +44,7 @@ describe("SafeFactory", () => {
     ".."
   );
   const wrapperUri = `fs/${wrapperPath}/build`;
-  const ethereumUri = "ens/ethereum.polywrap.eth";
+  const ethereumUri = "wrap://ens/wraps.eth:ethereum@1.1.0";
 
   let proxyContractAddress_v120: string;
   let proxyContractAddress_v130: string;
@@ -56,15 +53,6 @@ describe("SafeFactory", () => {
 
   beforeAll(async () => {
     await initTestEnvironment();
-
-    const config = getPlugins(
-      providers.ethereum,
-      providers.ipfs,
-      ensAddresses.ensAddress
-    );
-
-    client = new PolywrapClient(config) as unknown as Client;
-
     /******* Contracts initialization *********/
 
     const proxyFactoryContractResponse_v120 =
@@ -74,6 +62,10 @@ describe("SafeFactory", () => {
           bytecode: factoryBytecode_1_2_0,
           args: null,
           connection: CONNECTION,
+          options: {
+            maxPriorityFeePerGas: "40000000",
+            maxFeePerGas: "4000000000",
+          },
         },
         client,
         ethereumUri
@@ -89,6 +81,10 @@ describe("SafeFactory", () => {
           abi: JSON.stringify(safeAbi_1_2_0),
           bytecode: safeBytecode_1_2_0,
           args: null,
+          options: {
+            maxPriorityFeePerGas: "40000000",
+            maxFeePerGas: "4000000000",
+          },
           connection: CONNECTION,
         },
         client,
@@ -104,6 +100,10 @@ describe("SafeFactory", () => {
           abi: JSON.stringify(factoryAbi_1_3_0),
           bytecode: factoryBytecode_1_3_0,
           args: null,
+          options: {
+            maxPriorityFeePerGas: "40000000",
+            maxFeePerGas: "4000000000",
+          },
           connection: CONNECTION,
         },
         client,
@@ -120,6 +120,10 @@ describe("SafeFactory", () => {
           abi: JSON.stringify(safeAbi_1_3_0),
           bytecode: safeBytecode_1_3_0,
           args: null,
+          options: {
+            maxPriorityFeePerGas: "40000000",
+            maxFeePerGas: "4000000000",
+          },
           connection: CONNECTION,
         },
         client,
@@ -163,6 +167,10 @@ describe("SafeFactory", () => {
             proxyFactoryContract: proxyContractAddress_v120!,
             safeFactoryContract: safeContractAddress_v120!,
           },
+          txOptions: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
+          },
         },
         client,
         wrapperUri
@@ -182,6 +190,10 @@ describe("SafeFactory", () => {
             threshold: -1,
           },
           connection: CONNECTION,
+          txOptions: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
+          },
           customContractAdressess: {
             proxyFactoryContract: proxyContractAddress_v120!,
             safeFactoryContract: safeContractAddress_v120!,
@@ -205,6 +217,10 @@ describe("SafeFactory", () => {
             threshold: 2,
           },
           connection: CONNECTION,
+          txOptions: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
+          },
           customContractAdressess: {
             proxyFactoryContract: proxyContractAddress_v120!,
             safeFactoryContract: safeContractAddress_v120!,
@@ -230,6 +246,10 @@ describe("SafeFactory", () => {
           safeDeploymentConfig: {
             saltNonce: "-2",
           },
+          txOptions: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
+          },
           connection: CONNECTION,
           customContractAdressess: {
             proxyFactoryContract: proxyContractAddress_v120!,
@@ -252,6 +272,10 @@ describe("SafeFactory", () => {
           safeAccountConfig: {
             owners: owners,
             threshold: 1,
+          },
+          txOptions: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
           },
           connection: CONNECTION,
           customContractAdressess: {
@@ -277,6 +301,10 @@ describe("SafeFactory", () => {
           },
           safeDeploymentConfig: {
             saltNonce: Date.now().toString(),
+          },
+          txOptions: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
           },
           connection: CONNECTION,
           customContractAdressess: {
@@ -497,6 +525,10 @@ describe("SafeFactory", () => {
           },
           safeDeploymentConfig: {
             saltNonce: saltNonce,
+          },
+          txOptions: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
           },
           connection: CONNECTION,
           customContractAdressess: {
