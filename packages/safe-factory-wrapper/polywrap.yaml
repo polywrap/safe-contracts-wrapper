@@ -7,7 +7,7 @@ source:
   schema: ./src/schema.graphql
   import_abis: 
     - uri: "wrap://ens/datetime.polywrap.eth"
-      abi: ./node_modules/polywrap-datetime-plugin/build/wrap.info
+      abi: ./node_modules/@polywrap/datetime-plugin-js/schema.graphql
     - uri: wrap://ens/safe.contracts.polywrap.eth
       abi: ../safe-contracts-wrapper/build/wrap.info
 extensions:

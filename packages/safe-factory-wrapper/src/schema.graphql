@@ -3,11 +3,8 @@ import { Module } into SafeContracts from "wrap://ens/safe.contracts.polywrap.et
 
 import {
     Module,
-    Network,
     Connection,
     Log,
-    EventNotification,
-    Access,
     TxRequest,
     TxReceipt,
     TxResponse,

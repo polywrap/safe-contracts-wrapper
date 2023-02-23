@@ -30,6 +30,6 @@
   },
   "dependencies": {
     "assemblyscript-json": "^1.1.0",
-    "polywrap-datetime-plugin": "npm:@fetsorn/polywrap-datetime-plugin@0.4.0"
+    "@polywrap/datetime-plugin-js": "1.0.0-pre.0"
   }
 }

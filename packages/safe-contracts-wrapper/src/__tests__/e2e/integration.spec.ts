@@ -333,6 +333,7 @@ describe("ProxyFactory", () => {
       const response = await App.ProxyFactory_Module.getThreshold(
         {
           address: proxyAddress,
+          connection: CONNECTION
         },
         client,
         wrapperUri
@@ -347,6 +348,7 @@ describe("ProxyFactory", () => {
       const response = await App.ProxyFactory_Module.getOwners(
         {
           address: proxyAddress,
+          connection: CONNECTION
         },
         client,
         wrapperUri
@@ -362,6 +364,7 @@ describe("ProxyFactory", () => {
         {
           address: proxyAddress,
           ownerAddress: signer,
+          connection: CONNECTION
         },
         client,
         wrapperUri
@@ -376,6 +379,7 @@ describe("ProxyFactory", () => {
       const response = await App.ProxyFactory_Module.getModules(
         {
           address: proxyAddress,
+          connection: CONNECTION
         },
         client,
         wrapperUri
@@ -391,6 +395,7 @@ describe("ProxyFactory", () => {
         {
           address: proxyAddress,
           moduleAddress: signer,
+          connection: CONNECTION
         },
         client,
         wrapperUri
