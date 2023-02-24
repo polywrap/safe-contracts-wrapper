@@ -10,7 +10,7 @@ import {
     TxResponse,
     TxOptions,
     StaticTxResult
-} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.0.0"
+} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.1.0"
 import * into Datetime from "wrap://ens/datetime.polywrap.eth"
 import * into Logger from "wrap://ens/wraps.eth:logger@1.0.0"
 """

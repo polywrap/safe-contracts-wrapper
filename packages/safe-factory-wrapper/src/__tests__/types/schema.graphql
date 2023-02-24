@@ -1,2 +1,2 @@
 #import * into Factory from "ens/factory.eth"
-#import * into Ethereum from "ens/ethereum.polywrap.eth"
+#import * into Ethereum from "wrap://ens/wraps.eth:ethereum@1.1.0"

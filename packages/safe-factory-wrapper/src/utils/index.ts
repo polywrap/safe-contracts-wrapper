@@ -6,7 +6,7 @@ import {
   SafeContracts_Ethereum_Connection,
   SafeContracts_Module,
 } from "../wrap";
-import { BigInt, Result } from "@polywrap/wasm-as";
+import { BigInt, Result, wrap_debug_log } from "@polywrap/wasm-as";
 import {
   getMultisendCallOnlyContractMap,
   getMultisendContractMap,
@@ -79,9 +79,8 @@ export function encodeSetupCallData(accountConfig: SafeAccountConfig): string {
     args.push(ZERO_ADDRESS);
   }
 
-  return SafeContracts_Module.encode({
-    method:
-      "function setup(address[] calldata _owners, uint256 _threshold, address to, bytes calldata data, address fallbackHandler, address paymentToken, uint256 payment, address payable paymentReceiver)",
+  return Ethereum_Module.encodeFunction({
+    method: "function setup(address[] _owners,uint256 _threshold,address to,bytes data,address fallbackHandler,address paymentToken,uint256 payment,address paymentReceiver)",
     args: args,
   }).unwrap();
 }
@@ -148,7 +147,7 @@ export function isContractDeployed(
   address: string,
   connection: Ethereum_Connection | null
 ): boolean {
-  const code = Ethereum_Module.sendRPC({
+  const code = Ethereum_Module.sendRpc({
     method: "eth_getCode",
     connection: connection,
     params: [address, "pending"],
@@ -190,26 +189,36 @@ export function generateSalt(
   nonce: string,
   initializer: string
 ): Result<string, string> {
+  wrap_debug_log(nonce);
+  wrap_debug_log(parseInt(nonce).toString().replace('.0', ''));
+
   const encodedNonce = Ethereum_Module.encodeParams({
     types: ["uint256"],
-    values: [nonce],
+    values: [parseInt(nonce).toString().replace('.0', '')]
   });
   if (encodedNonce.isErr) {
     return encodedNonce;
   }
 
-  const initializerHash = Ethereum_Module.solidityKeccak256({
-    types: ["bytes"],
-    values: [initializer],
-  });
-  if (initializerHash.isErr) {
-    return initializerHash;
-  }
+  wrap_debug_log("encodedNonce");
+  wrap_debug_log(encodedNonce.unwrap());
 
-  return Ethereum_Module.solidityKeccak256({
-    types: ["bytes"],
-    values: [initializerHash.unwrap() + encodedNonce.unwrap().slice(2)],
-  });
+  wrap_debug_log("initializer");
+  wrap_debug_log(initializer);
+  const initializerHash = Ethereum_Module.solidityKeccak256Bytes({ bytes: initializer });
+
+  wrap_debug_log("initializerHash");
+  
+  if (initializerHash.isErr) {
+    wrap_debug_log("initializerHash error :/");
+    wrap_debug_log(initializerHash.unwrapErr());
+
+    return Result.Err<string, string>(initializerHash.unwrapErr());
+  }
+  
+  wrap_debug_log(String.UTF8.decode(initializerHash.unwrap()));
+  const bytes = Ethereum_Module.solidityKeccak256Bytes({ bytes: String.UTF8.decode(initializerHash.unwrap()) + encodedNonce.unwrap().slice(2) });
+  return Result.Ok<string, string>(String.UTF8.decode(bytes.unwrap()));
 }
 
 /**
@@ -224,21 +233,15 @@ export function generateAddress2(
   salt: string,
   initCode: string
 ): Result<string, string> {
-  const initCodeHash = Ethereum_Module.solidityKeccak256({
-    types: ["bytes"],
-    values: [initCode],
+  const initCodeHash = Ethereum_Module.generateCreate2Address({
+    address,
+    salt,
+    initCode
   });
+
   if (initCodeHash.isErr) {
     return initCodeHash;
   }
 
-  const hash = Ethereum_Module.solidityKeccak256({
-    types: ["bytes1", "address", "bytes32", "bytes32"],
-    values: ["0xff", address, salt, initCodeHash.unwrap()],
-  });
-  if (hash.isErr) {
-    return hash;
-  }
-
-  return Result.Ok<string, string>("0x" + hash.unwrap().slice(-40));
+  return initCodeHash
 }

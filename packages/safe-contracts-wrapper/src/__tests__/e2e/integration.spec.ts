@@ -24,6 +24,7 @@ import { getClientConfig } from "../utils";
 jest.setTimeout(500000);
 
 describe("ProxyFactory", () => {
+  console.log(__dirname)
   const CONNECTION = { networkNameOrChainId: "testnet" };
 
   const client = new PolywrapClient(getClientConfig());

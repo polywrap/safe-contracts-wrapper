@@ -18,7 +18,7 @@ import {
   Args_predictSafeAddress,
   Datetime_Module,
   Ethereum_Module,
-  //Logger_Module,
+  Logger_Module,
   SafePayload,
   SafeContracts_Ethereum_Connection,
   SafeContracts_Ethereum_TxOptions,
@@ -26,9 +26,9 @@ import {
 } from "./wrap";
 
 export function getChainId(args: Args_getChainId): String {
-  return Ethereum_Module.getNetwork({
+  return Ethereum_Module.getChainId({
     connection: args.connection,
-  }).unwrap().chainId.toString();
+  }).unwrap();
 }
 
 export function deploySafe(args: Args_deploySafe): SafePayload | null {
@@ -251,14 +251,14 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
   }
 
   const initializer = encodeSetupCallData(args.safeAccountConfig);
-  // Logger_Module.log({ level: 0, message: "initializer " + initializer });
+  Logger_Module.log({ level: 0, message: "initializer " + initializer });
 
   const salt = generateSalt(saltNonce, initializer);
   if (salt.isErr) {
-    // Logger_Module.log({ level: 0, message: "salt error: " + salt.unwrapErr() });
+    Logger_Module.log({ level: 0, message: "salt error: " + salt.unwrapErr() });
     return "";
   }
-  // Logger_Module.log({ level: 0, message: "salt " + salt.unwrap() });
+  Logger_Module.log({ level: 0, message: "salt " + salt.unwrap() });
 
   const initCode = getInitCode(
     safeFactoryContractAddress,
@@ -266,13 +266,13 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
     connection
   );
   if (initCode.isErr) {
-    // Logger_Module.log({
-    // level: 0,
-    //   message: "initCode error: " + initCode.unwrapErr(),
-    // });
+    Logger_Module.log({
+    level: 0,
+      message: "initCode error: " + initCode.unwrapErr(),
+    });
     return "";
   }
-  // Logger_Module.log({ level: 0, message: "initCode " + initCode.unwrap() });
+  Logger_Module.log({ level: 0, message: "initCode " + initCode.unwrap() });
 
   let address = generateAddress2(
     safeFactoryContractAddress,
@@ -280,13 +280,13 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
     initCode.unwrap()
   );
   if (address.isErr) {
-    // Logger_Module.log({
-    //   level: 0,
-    //   message: "address error: " + address.unwrapErr(),
-    // });
+    Logger_Module.log({
+      level: 0,
+      message: "address error: " + address.unwrapErr(),
+    });
     return "";
   }
-  // Logger_Module.log({ level: 0, message: "address " + address.unwrap() });
+  Logger_Module.log({ level: 0, message: "address " + address.unwrap() });
 
   return address.unwrap();
 }

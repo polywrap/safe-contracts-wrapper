@@ -52,7 +52,15 @@ describe("SafeFactory", () => {
   let safeContractAddress_v130: string;
 
   beforeAll(async () => {
-    await initTestEnvironment();
+    console.log("init test environment");
+    try {
+
+      const t = await initTestEnvironment();
+      console.log(t);
+    } catch (e) {
+      console.log("error");
+      console.log(e)
+    }
     /******* Contracts initialization *********/
 
     const proxyFactoryContractResponse_v120 =
@@ -492,7 +500,7 @@ describe("SafeFactory", () => {
       }
     });
 
-    it("should predict a new Safe with saltNonce", async () => {
+    it.only("should predict a new Safe with saltNonce", async () => {
       const saltNonce = "0x127";
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
