@@ -81,7 +81,7 @@ export function createProxy(args: Args_createProxy): string | null {
   if (index == -1) {
     return null;
   }
-  const address = "0x" + tx.logs[index].data.slice(26, 66);
+  const address = "0x" + tx.logs[index].data.slice(32, 72);
 
   return address;
 }

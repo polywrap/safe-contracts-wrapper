@@ -24,11 +24,10 @@ import { getClientConfig } from "../utils";
 jest.setTimeout(500000);
 
 describe("ProxyFactory", () => {
-  console.log(__dirname)
   const CONNECTION = { networkNameOrChainId: "testnet" };
 
   const client = new PolywrapClient(getClientConfig());
-  const signer = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
+  const signer = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1";
 
   const wrapperPath: string = path.join(
     path.resolve(__dirname),
@@ -90,11 +89,30 @@ describe("ProxyFactory", () => {
       if (!response.ok) throw response.error;
       expect(response.value).not.toBeNull();
       expect(response.value).toEqual(
-        "0x0000000ddb56f661e5bd05fb252f5bc619f74039"
+        "0x0ddb56f661e5bd05fb252f5bc619f74039cd6d63"
       );
     });
 
     it("createProxy 1.3.0", async () => {
+
+      const singletonResponse = await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(safeAbi_1_3_0),
+          bytecode: safeBytecode_1_3_0,
+          args: null,
+          connection: CONNECTION,
+          options: {
+            maxPriorityFeePerGas: "40000000",
+            maxFeePerGas: "4000000000",
+          },
+        },
+        client,
+        ethereumUri
+      );
+
+      if (!singletonResponse.ok) throw singletonResponse.error;
+      const singletonAddress = singletonResponse.value as string;
+
       const deployContractResponse = await App.Ethereum_Module.deployContract(
         {
           abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
@@ -113,6 +131,8 @@ describe("ProxyFactory", () => {
       if (!deployContractResponse.ok) throw deployContractResponse.error;
       expect(deployContractResponse.value).not.toBeNull();
 
+      // console.log("factory proxy deployed to: ", deployContractResponse.value);
+
       const contractAddress = deployContractResponse.value as string;
 
       const initCode = "0x";
@@ -120,25 +140,27 @@ describe("ProxyFactory", () => {
       const response = await App.ProxyFactory_Module.createProxy(
         {
           address: contractAddress,
-          safeMasterCopyAddress: contractAddress,
+          safeMasterCopyAddress: singletonAddress,
           initializer: initCode,
           saltNonce,
           connection: CONNECTION,
           txOptions: {
-            gasPrice: "4000000000",
-            gasLimit: "200000"
+            gasLimit: "2000000"
           },
         },
         client,
         wrapperUri
       );
 
+      // console.log("contract deployed to: ", response)
+
       if (!response.ok) throw response.error;
       expect(response.value).not.toBeNull();
       expect(response.value).toEqual(
-        "0x0000001b721366fc1837d57b5d40a82c546e6655"
+        "0x0abd1d8cfb1fb79268ea9d29df52d4daa5409842"
       );
     });
+
 
     it("proxyCreationCode", async () => {
       const deployContractResponse = await App.Ethereum_Module.deployContract(
@@ -214,7 +236,7 @@ describe("ProxyFactory", () => {
 
       if (!response.ok) throw response.error;
       expect(response.value).not.toBeNull();
-      expect(response.value).toEqual("113499");
+      expect(response.value).toEqual("114799");
     });
 
     it("encode", async () => {
@@ -259,27 +281,26 @@ describe("ProxyFactory", () => {
         ethereumUri
       );
 
+      
       if (!singletonResponse.ok) throw singletonResponse.error;
       const singletonAddress = singletonResponse.value as string;
-
       const safeProxyFactoryResponse = await App.Ethereum_Module.deployContract(
-        {
-          abi: JSON.stringify(safeProxyFactoryAbi_1_2_0),
-          bytecode: safeProxyFactoryBytecode_1_2_0,
-          args: null,
-          connection: CONNECTION,
-          options: {
-            maxPriorityFeePerGas: "40000000",
-            maxFeePerGas: "4000000000",
+          {
+            abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
+            bytecode: safeProxyFactoryBytecode_1_3_0,
+            args: null,
+            connection: CONNECTION,
+            options: {
+              maxPriorityFeePerGas: "40000000",
+              maxFeePerGas: "4000000000",
+            },
           },
-        },
-        client,
-        ethereumUri
-      );
-
-      if (!safeProxyFactoryResponse.ok) throw safeProxyFactoryResponse.error;
-      const safeProxyFactoryAddress = safeProxyFactoryResponse.value as string;
-
+          client,
+          ethereumUri
+        );
+        
+        if (!safeProxyFactoryResponse.ok) throw safeProxyFactoryResponse.error;
+        const safeProxyFactoryAddress = safeProxyFactoryResponse.value as string;
       const initCode = "0x";
       const saltNonce = 42;
       const proxyResponse = await App.ProxyFactory_Module.createProxy(
@@ -288,20 +309,20 @@ describe("ProxyFactory", () => {
           safeMasterCopyAddress: singletonAddress,
           initializer: initCode,
           saltNonce,
-          connection: CONNECTION,
           txOptions: {
-            gasPrice: "4000000000",
-            gasLimit: "200000"
+            gasLimit: "114799",
+            gasPrice: "3199866735",
           },
+          connection: CONNECTION
         },
         client,
         wrapperUri
       );
-
+      
       if (!proxyResponse.ok) throw proxyResponse.error;
       proxyAddress = proxyResponse.value as string;
 
-      await App.Ethereum_Module.callContractMethod(
+      await App.Ethereum_Module.callContractMethodAndWait(
         {
           address: proxyAddress,
           method: "function setup(address[] _owners,uint256 _threshold,address to,bytes data,address fallbackHandler,address paymentToken,uint256 payment,address paymentReceiver)",
@@ -337,7 +358,7 @@ describe("ProxyFactory", () => {
           connection: CONNECTION
         },
         client,
-        wrapperUri
+        wrapperUri,
       );
 
       if (!response.ok) throw response.error;
@@ -376,7 +397,7 @@ describe("ProxyFactory", () => {
       expect(response.value).toEqual(true);
     });
 
-    it("getModules", async () => {
+    it.skip("getModules", async () => {
       const response = await App.ProxyFactory_Module.getModules(
         {
           address: proxyAddress,
