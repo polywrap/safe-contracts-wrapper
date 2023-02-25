@@ -153,6 +153,7 @@ export function isContractDeployed(
     params: [address, "pending"],
   }).unwrap();
 
+  wrap_debug_log("code: " + code);
   if (code != null) {
     return code != "0x";
   }
@@ -189,8 +190,6 @@ export function generateSalt(
   nonce: string,
   initializer: string
 ): Result<string, string> {
-  wrap_debug_log(nonce);
-  wrap_debug_log(parseInt(nonce).toString().replace('.0', ''));
 
   const encodedNonce = Ethereum_Module.encodeParams({
     types: ["uint256"],
@@ -216,9 +215,8 @@ export function generateSalt(
     return Result.Err<string, string>(initializerHash.unwrapErr());
   }
   
-  wrap_debug_log(String.UTF8.decode(initializerHash.unwrap()));
-  const bytes = Ethereum_Module.solidityKeccak256Bytes({ bytes: String.UTF8.decode(initializerHash.unwrap()) + encodedNonce.unwrap().slice(2) });
-  return Result.Ok<string, string>(String.UTF8.decode(bytes.unwrap()));
+  const bytes = Ethereum_Module.solidityKeccak256Bytes({ bytes: initializerHash.unwrap() + encodedNonce.unwrap().slice(2) });
+  return Result.Ok<string, string>(bytes.unwrap());
 }
 
 /**

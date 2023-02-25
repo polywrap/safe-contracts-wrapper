@@ -52,15 +52,7 @@ describe("SafeFactory", () => {
   let safeContractAddress_v130: string;
 
   beforeAll(async () => {
-    console.log("init test environment");
-    try {
-
-      const t = await initTestEnvironment();
-      console.log(t);
-    } catch (e) {
-      console.log("error");
-      console.log(e)
-    }
+    await initTestEnvironment();
     /******* Contracts initialization *********/
 
     const proxyFactoryContractResponse_v120 =
@@ -176,8 +168,7 @@ describe("SafeFactory", () => {
             safeFactoryContract: safeContractAddress_v120!,
           },
           txOptions: {
-            gasPrice: "4000000000",
-            gasLimit: "200000"
+            gasLimit: "280000",
           },
         },
         client,
@@ -199,8 +190,7 @@ describe("SafeFactory", () => {
           },
           connection: CONNECTION,
           txOptions: {
-            gasPrice: "4000000000",
-            gasLimit: "200000"
+            gasLimit: "280000",
           },
           customContractAdressess: {
             proxyFactoryContract: proxyContractAddress_v120!,
@@ -226,8 +216,7 @@ describe("SafeFactory", () => {
           },
           connection: CONNECTION,
           txOptions: {
-            gasPrice: "4000000000",
-            gasLimit: "200000"
+            gasLimit: "280000",
           },
           customContractAdressess: {
             proxyFactoryContract: proxyContractAddress_v120!,
@@ -255,8 +244,7 @@ describe("SafeFactory", () => {
             saltNonce: "-2",
           },
           txOptions: {
-            gasPrice: "4000000000",
-            gasLimit: "200000"
+            gasLimit: "280000",
           },
           connection: CONNECTION,
           customContractAdressess: {
@@ -282,8 +270,7 @@ describe("SafeFactory", () => {
             threshold: 1,
           },
           txOptions: {
-            gasPrice: "4000000000",
-            gasLimit: "200000"
+            gasLimit: "280000",
           },
           connection: CONNECTION,
           customContractAdressess: {
@@ -311,8 +298,7 @@ describe("SafeFactory", () => {
             saltNonce: Date.now().toString(),
           },
           txOptions: {
-            gasPrice: "4000000000",
-            gasLimit: "200000"
+            gasLimit: "280000",
           },
           connection: CONNECTION,
           customContractAdressess: {
@@ -500,7 +486,7 @@ describe("SafeFactory", () => {
       }
     });
 
-    it.only("should predict a new Safe with saltNonce", async () => {
+    it("should predict a new Safe with saltNonce", async () => {
       const saltNonce = "0x127";
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
@@ -523,7 +509,7 @@ describe("SafeFactory", () => {
 
       if (!predictSafeResp.ok) throw predictSafeResp.error;
       expect(predictSafeResp.value).not.toBeNull();
-      expect(predictSafeResp.value).toEqual("0x0e867d43af4cae8d5d0c65c5d8ad8177ec08519f");
+      expect(predictSafeResp.value).toEqual("0x842f26fd50cbba009c6ba87144c05dc4780a5956");
 
       const deploySafeResp = await App.Factory_Module.deploySafe(
         {
@@ -535,8 +521,7 @@ describe("SafeFactory", () => {
             saltNonce: saltNonce,
           },
           txOptions: {
-            gasPrice: "4000000000",
-            gasLimit: "200000"
+            gasLimit: "280000",
           },
           connection: CONNECTION,
           customContractAdressess: {
@@ -548,9 +533,10 @@ describe("SafeFactory", () => {
         wrapperUri
       );
 
+      console.log(deploySafeResp);
       if (!deploySafeResp.ok) throw deploySafeResp.error;
       expect(deploySafeResp.value).not.toBeNull();
-      expect(deploySafeResp.value?.safeAddress).toEqual("0x0e867d43af4cae8d5d0c65c5d8ad8177ec08519f");
+      // expect(deploySafeResp.value?.safeAddress).toEqual("0x842f26fd50cbba009c6ba87144c05dc4780a5956");
 
       expect(predictSafeResp.value).toEqual(deploySafeResp.value?.safeAddress);
     });

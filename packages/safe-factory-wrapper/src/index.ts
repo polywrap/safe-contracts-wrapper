@@ -130,15 +130,15 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
     );
   }
 
-  // Logger_Module.log({
-  //   level: 0,
-  //   message: "safeFactoryContractAddress" + safeFactoryContractAddress,
-  // });
+  Logger_Module.log({
+    level: 0,
+    message: "safeFactoryContractAddress" + safeFactoryContractAddress,
+  });
 
-  // Logger_Module.log({
-  //   level: 0,
-  //   message: "safeContractAddress" + safeContractAddress,
-  // });
+  Logger_Module.log({
+    level: 0,
+    message: "safeContractAddress" + safeContractAddress,
+  });
 
   const safeAddress = SafeContracts_Module.createProxy({
     safeMasterCopyAddress: safeContractAddress,

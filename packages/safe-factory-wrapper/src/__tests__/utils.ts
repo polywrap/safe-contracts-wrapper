@@ -8,7 +8,7 @@ import { defaultIpfsProviders, ClientConfigBuilder } from "@polywrap/client-conf
 import { ensAddresses, providers } from "@polywrap/test-env-js";
 import { IWrapPackage } from "@polywrap/core-js";
 
-export const safeContractsPath = path.resolve(path.join(__dirname, "../../safe-contracts-wrapper"));
+export const safeContractsPath = path.resolve(path.join(__dirname, "../../../safe-contracts-wrapper"));
 
 export function getClientConfig(): CoreClientConfig {
   const ethereumWrapperPath: string = path.join(
