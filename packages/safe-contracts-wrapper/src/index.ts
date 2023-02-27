@@ -13,7 +13,7 @@ import {
   Ethereum_TxReceipt,
   Ethereum_TxOptions,
 } from "./wrap";
-import { BigInt, Box } from "@polywrap/wasm-as";
+import { BigInt, Box, wrap_debug_log } from "@polywrap/wasm-as";
 import { JSON } from "assemblyscript-json";
 import {
   Args_approvedHashes,
@@ -39,8 +39,7 @@ import {
 export function encode(args: Args_encode): string {
   return Ethereum_Module.encodeFunction({
     method: args.method,
-    args: args.args,
-    connection: null
+    args: args.args
   }).unwrap();
 }
 
@@ -72,6 +71,7 @@ export function createProxy(args: Args_createProxy): string | null {
     options: args.txOptions,
   }).unwrap();
 
+  // wrap_debug_log("createProxy tx: " + tx.transactionHash);
   // ProxyCreation(address)
   const proxyCreation_1_2_0 = "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80";
   // ProxyCreation(address,address)
@@ -81,6 +81,10 @@ export function createProxy(args: Args_createProxy): string | null {
   if (index == -1) {
     return null;
   }
+
+  // wrap_debug_log("createProxy index: " + index.toString());
+  // wrap_debug_log("createProxy sliced: " + tx.logs[index].data.slice(32, 72));
+  // wrap_debug_log("createProxy data sliced: " + tx.logs[index].data.slice(26, 66));
   const address = "0x" + tx.logs[index].data.slice(32, 72);
 
   return address;

@@ -153,7 +153,6 @@ export function isContractDeployed(
     params: [address, "pending"],
   }).unwrap();
 
-  wrap_debug_log("code: " + code);
   if (code != null) {
     return code != "0x";
   }
@@ -191,32 +190,30 @@ export function generateSalt(
   initializer: string
 ): Result<string, string> {
 
-  const encodedNonce = Ethereum_Module.encodeParams({
+  const saltNonce = Ethereum_Module.encodeParams({
     types: ["uint256"],
-    values: [parseInt(nonce).toString().replace('.0', '')]
-  });
-  if (encodedNonce.isErr) {
-    return encodedNonce;
+    values: [u32(parseInt(nonce)).toString()]
+  }); 
+  if (saltNonce.isErr) {
+    return saltNonce;
   }
 
-  wrap_debug_log("encodedNonce");
-  wrap_debug_log(encodedNonce.unwrap());
-
-  wrap_debug_log("initializer");
-  wrap_debug_log(initializer);
-  const initializerHash = Ethereum_Module.solidityKeccak256Bytes({ bytes: initializer });
-
-  wrap_debug_log("initializerHash");
-  
+  let initializerHash = Ethereum_Module.wKeccak256({ bytes: initializer }); 
   if (initializerHash.isErr) {
-    wrap_debug_log("initializerHash error :/");
-    wrap_debug_log(initializerHash.unwrapErr());
-
     return Result.Err<string, string>(initializerHash.unwrapErr());
   }
-  
-  const bytes = Ethereum_Module.solidityKeccak256Bytes({ bytes: initializerHash.unwrap() + encodedNonce.unwrap().slice(2) });
-  return Result.Ok<string, string>(bytes.unwrap());
+
+  let initHash = initializerHash.unwrap();
+
+  let encodePacked = Ethereum_Module.keccak256EncodeBytes({
+    bytes: initHash + saltNonce.unwrap().slice(2)
+  });
+
+  if (encodePacked.isErr) {
+    return Result.Err<string, string>(encodePacked.unwrapErr());
+  }
+
+  return Result.Ok<string, string>(encodePacked.unwrap());
 }
 
 /**
@@ -231,10 +228,11 @@ export function generateAddress2(
   salt: string,
   initCode: string
 ): Result<string, string> {
+
   const initCodeHash = Ethereum_Module.generateCreate2Address({
     address,
+    initCode,
     salt,
-    initCode
   });
 
   if (initCodeHash.isErr) {

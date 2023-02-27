@@ -8,5 +8,7 @@ source:
   import_abis:
     - uri: wrap://ens/safe.interface.polywrap.eth
       abi: ../safe-interface/build/wrap.info
+    - uri: wrap://ens/wraps.eth:ethereum@1.1.0
+      abi: ../../../ethereum/wrapper/build/wrap.info
 extensions:
   build: ./polywrap.build.yaml

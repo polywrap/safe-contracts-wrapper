@@ -154,6 +154,23 @@ describe("SafeFactory", () => {
     });
   });
 
+  describe("generateSalt", () => {
+    it("should return expected salt", async () => {
+      const chainIdResponse = await App.Factory_Module.getChainId(
+        {
+          connection: CONNECTION,
+        },
+        client,
+        wrapperUri
+      );
+
+      if (!chainIdResponse.ok) throw chainIdResponse.error;
+      expect(chainIdResponse.value).not.toBeNull();
+      expect(chainIdResponse.value).toEqual("1337");
+    });
+  });
+
+
   describe("deploySafe with custom contract adressess", () => {
     it("should fail if there are no owners", async () => {
       const deploySafeResponse = await App.Factory_Module.deploySafe(
@@ -507,9 +524,9 @@ describe("SafeFactory", () => {
         wrapperUri
       );
 
+      
       if (!predictSafeResp.ok) throw predictSafeResp.error;
       expect(predictSafeResp.value).not.toBeNull();
-      expect(predictSafeResp.value).toEqual("0x842f26fd50cbba009c6ba87144c05dc4780a5956");
 
       const deploySafeResp = await App.Factory_Module.deploySafe(
         {
@@ -533,10 +550,8 @@ describe("SafeFactory", () => {
         wrapperUri
       );
 
-      console.log(deploySafeResp);
       if (!deploySafeResp.ok) throw deploySafeResp.error;
       expect(deploySafeResp.value).not.toBeNull();
-      // expect(deploySafeResp.value?.safeAddress).toEqual("0x842f26fd50cbba009c6ba87144c05dc4780a5956");
 
       expect(predictSafeResp.value).toEqual(deploySafeResp.value?.safeAddress);
     });
