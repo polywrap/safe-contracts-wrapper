@@ -2,7 +2,7 @@ import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
 import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getEthAdapter, getPlugins, setupContractNetworks, setupTests as setupTestsBase } from "../utils";
+import { getEthAdapter, setupContractNetworks, setupTests as setupTestsBase } from "../utils";
 
 import { Client } from "@polywrap/core-js";
 import Safe from "@gnosis.pm/safe-core-sdk";

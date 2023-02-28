@@ -32,11 +32,17 @@ import { abi as ERC20MintableAbi, bytecode as ERC20MintableBytecode } from "./ER
 import * as App from "./types/wrap";
 import { CoreClientConfig, PolywrapClient } from "@polywrap/client-js";
 import { defaultIpfsProviders, ClientConfigBuilder } from "@polywrap/client-config-builder-js";
-import { IWrapPackage } from "@polywrap/core-js";
+import { Env, IWrapPackage } from "@polywrap/core-js";
 
 export const safeContractsPath = path.resolve(path.join(__dirname, "../../../safe-contracts-wrapper"));
 
-export function getClientConfig(): CoreClientConfig {
+
+interface CustomizableConfig {
+  signer?: Wallet,
+  safeEnv?: Env,
+}
+
+export function getClientConfig(customConfig?: CustomizableConfig): CoreClientConfig {
   const ethereumWrapperPath: string = path.join(
     path.resolve(__dirname),
     "..",
@@ -48,12 +54,22 @@ export function getClientConfig(): CoreClientConfig {
 
   const ethereumWrapperUri = `wrap://fs/${ethereumWrapperPath}/ethereum/wrapper/build`
   const safeWrapperUri = `wrap://fs/${safeContractsPath}/build`
-  return new ClientConfigBuilder()
-    .addDefaults()
-    .addEnv("wrap://package/ipfs-resolver", {
+
+  const envs: Record<string, Record<string, unknown>> = {
+    "wrap://package/ipfs-resolver": {
       provider: providers.ipfs,
       fallbackProviders: defaultIpfsProviders,
-    })
+    },
+  }
+
+  if (customConfig && customConfig.safeEnv) {
+    envs[customConfig.safeEnv.uri.uri] = customConfig.safeEnv.env
+  }
+  const defaultSigner = new Wallet("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d");
+
+  return new ClientConfigBuilder()
+    .addDefaults()
+    .addEnvs(envs)
     .addPackages({
       "wrap://ens/ens.polywrap.eth": ensResolverPlugin({
         addresses: { testnet: ensAddresses.ensAddress },
@@ -69,6 +85,7 @@ export function getClientConfig(): CoreClientConfig {
           networks: {
             testnet: new Connection({
               provider: providers.ethereum,
+              signer: customConfig?.signer ?? defaultSigner
             }),
           },
           defaultNetwork: "testnet",
@@ -129,6 +146,10 @@ export const setupContractNetworks = async (
       abi: JSON.stringify(factoryAbi),
       bytecode: factoryBytecode,
       args: null,
+      options: {
+        maxPriorityFeePerGas: "40000000",
+        maxFeePerGas: "4000000000",
+      },
     },
     client,
     ethereumUri
@@ -145,6 +166,10 @@ export const setupContractNetworks = async (
       abi: JSON.stringify(safeAbi),
       bytecode: safeBytecode,
       args: null,
+      options: {
+        maxPriorityFeePerGas: "40000000",
+        maxFeePerGas: "4000000000",
+      },
     },
     client,
     ethereumUri
@@ -160,7 +185,9 @@ export const setupContractNetworks = async (
         threshold: safeOptions.threshold!,
       },
       safeDeploymentConfig: version === "1.3.0" ? null : { version: "1.2.0", saltNonce: Date.now().toString(), isL1Safe: null },
-      txOverrides: { gasLimit: "1000000", gasPrice: "20" },
+      txOptions: {
+        gasLimit: "280000",
+      },
       customContractAdressess: {
         proxyFactoryContract: proxyContractAddress!,
         safeFactoryContract: safeContractAddress!,
@@ -181,6 +208,10 @@ export const setupContractNetworks = async (
       abi: JSON.stringify(multisendAbi),
       bytecode: multisendBytecode,
       args: null,
+      options: {
+        maxPriorityFeePerGas: "40000000",
+        maxFeePerGas: "4000000000",
+      },
     },
     client,
     ethereumUri
@@ -194,6 +225,10 @@ export const setupContractNetworks = async (
       abi: JSON.stringify(multisendCallOnlyAbi),
       bytecode: multisendCallOnlyBytecode,
       args: null,
+      options: {
+        maxPriorityFeePerGas: "40000000",
+        maxFeePerGas: "4000000000",
+      },
     },
     client,
     ethereumUri
