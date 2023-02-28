@@ -1,11 +1,9 @@
 import { BigInt } from "@polywrap/wasm-as";
-import { Ethereum_Module } from "../wrap";
-import { Interface_SafeTransactionData } from "../wrap/imported/Interface_SafeTransactionData";
-import { Interface_SafeTransactionOptionalProps } from "../wrap/imported/Interface_SafeTransactionOptionalProps";
+import { SafeTransactionData, SafeTransactionOptionalProps } from "../wrap";
 import { ZERO_ADDRESS } from "./constants";
 import { arrayify } from "./signature";
 
-export function getTransactionHashArgs(tx: Interface_SafeTransactionData): string[] {
+export function getTransactionHashArgs(tx: SafeTransactionData): string[] {
   return [
     tx.to,
     tx.value.toString(),
@@ -21,10 +19,10 @@ export function getTransactionHashArgs(tx: Interface_SafeTransactionData): strin
 }
 
 export function createTransactionFromPartial(
-  transactionData: Interface_SafeTransactionData,
-  options: Interface_SafeTransactionOptionalProps | null
-): Interface_SafeTransactionData {
-  let transaction: Interface_SafeTransactionData = {
+  transactionData: SafeTransactionData,
+  options: SafeTransactionOptionalProps | null
+): SafeTransactionData {
+  let transaction: SafeTransactionData = {
     data: transactionData.data,
     to: transactionData.to,
     value: transactionData.value,
@@ -87,7 +85,7 @@ export function createTransactionFromPartial(
   return transaction;
 }
 
-export const encodeMultiSendData = (transactionDataArr: Interface_SafeTransactionData[]): string => {
+export const encodeMultiSendData = (transactionDataArr: SafeTransactionData[]): string => {
   let dataStr = "";
 
   for (let i = 0; i < transactionDataArr.length; i++) {
@@ -98,13 +96,13 @@ export const encodeMultiSendData = (transactionDataArr: Interface_SafeTransactio
   return "0x" + dataStr;
 };
 
-export function encodeMetaTransaction(tx: Interface_SafeTransactionData): string {
+export function encodeMetaTransaction(tx: SafeTransactionData): string {
   const data = arrayify(tx.data);
 
-  const encoded = Ethereum_Module.solidityPack({
-    types: ["uint8", "address", "uint256", "uint256", "bytes"],
-    values: [tx.operation!.toString(), tx.to, tx.value.toString(), data.length.toString(), "[" + data.toString() + "]"],
-  }).unwrap();
+  // const encoded = Ethereum_Module.solidityPack({
+  //   types: ["uint8", "address", "uint256", "uint256", "bytes"],
+  //   values: [tx.operation!.toString(), tx.to, tx.value.toString(), data.length.toString(), "[" + data.toString() + "]"],
+  // }).unwrap();
 
-  return encoded.slice(2);
+  return "0x1".slice(2);
 }

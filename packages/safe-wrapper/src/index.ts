@@ -5,8 +5,12 @@ import {
   Ethereum_Module,
   SafeContracts_Module,
   Ethereum_TxReceipt,
-  Ethereum_TxOverrides,
-  Interface_SignSignature,
+  Ethereum_TxOptions,
+  SafeContracts_SignSignature,
+  SafeContracts_Ethereum_TxOptions,
+  SafeTransactionData,
+  SignSignature,
+  SafeTransaction,
 } from "./wrap";
 import { Args_getTransactionHash } from "./wrap/Module";
 import { adjustVInSignature, arrayify, createTransactionFromPartial, encodeMultiSendData, generatePreValidatedSignature } from "./utils";
@@ -22,8 +26,6 @@ import {
 } from "./wrap/Module/serialization";
 import { BigInt, Box } from "@polywrap/wasm-as";
 import { generateTypedData, toJsonTypedData } from "./utils/typedData";
-import { Interface_SafeTransaction } from "./wrap/imported/Interface_SafeTransaction";
-import { Interface_SafeTransactionData } from "./wrap/imported/Interface_SafeTransactionData";
 
 import * as ownerManager from "./managers/ownerManager";
 import * as contractManager from "./managers/contractManager";
@@ -31,16 +33,16 @@ import { toTransaction, toTransactionData, toTxReceipt } from "./utils/typeMap";
 
 export * from "./managers";
 
-export function createTransaction(args: Args_createTransaction, env: Env): Interface_SafeTransaction {
+export function createTransaction(args: Args_createTransaction, env: Env): SafeTransaction {
   const transactionData = createTransactionFromPartial(args.tx, args.options);
 
   return {
     data: transactionData,
-    signatures: new Map<string, Interface_SignSignature>(),
+    signatures: new Map<string, SignSignature>(),
   };
 }
 
-export function createMultiSendTransaction(args: Args_createMultiSendTransaction, env: Env): Interface_SafeTransaction {
+export function createMultiSendTransaction(args: Args_createMultiSendTransaction, env: Env): SafeTransaction {
   if (args.txs.length == 0) {
     throw new Error("Invalid empty array of transactions");
   }
@@ -56,18 +58,18 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
     args: [multiSendData],
   }).unwrap();
 
-  const transactionData = createTransactionFromPartial({ data: "", to: "", value: BigInt.from("") } as Interface_SafeTransactionData, null);
+  const transactionData = createTransactionFromPartial({ data: "", to: "", value: BigInt.from("") } as SafeTransactionData, null);
 
   let multiSendAddress: string = "";
 
   if (args.customMultiSendContractAddress != null) {
     multiSendAddress = args.customMultiSendContractAddress!;
   } else {
-    const network = Ethereum_Module.getNetwork({ connection: env.connection }).unwrap();
+    const chainId = Ethereum_Module.getChainId({ connection: env.connection }).unwrap();
     const isL1Safe = true; // TODO figure out how get it from safe
     const version = contractManager.getContractVersion({}, env);
     const contractNetworks = SafeContracts_Module.getSafeContractNetworks({
-      chainId: network.chainId.toString(),
+      chainId,
       isL1Safe: Box.from(isL1Safe),
       version: version,
     }).unwrap();
@@ -79,7 +81,7 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
     }
   }
 
-  const multiSendTransaction: Interface_SafeTransactionData = {
+  const multiSendTransaction: SafeTransactionData = {
     to: multiSendAddress,
     value: BigInt.from("0"),
     data: data,
@@ -94,11 +96,11 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
 
   return {
     data: multiSendTransaction,
-    signatures: new Map<string, Interface_SignSignature>(),
+    signatures: new Map<string, SignSignature>(),
   };
 }
 
-export function addSignature(args: Args_addSignature, env: Env): Interface_SafeTransaction {
+export function addSignature(args: Args_addSignature, env: Env): SafeTransaction {
   const signerAddress = Ethereum_Module.getSignerAddress({
     connection: {
       node: env.connection.node,
@@ -123,7 +125,7 @@ export function addSignature(args: Args_addSignature, env: Env): Interface_SafeT
 
   //If no signatures - create signatures map
   if (signatures == null) {
-    signatures = new Map<string, Interface_SignSignature>();
+    signatures = new Map<string, SignSignature>();
   }
 
   if (args.signingMethod != null && args.signingMethod! == "eth_signTypedData") {
@@ -151,7 +153,7 @@ export function getTransactionHash(args: Args_getTransactionHash, env: Env): str
   }).unwrap();
 }
 
-export function signTransactionHash(args: Args_signTransactionHash, env: Env): Interface_SignSignature {
+export function signTransactionHash(args: Args_signTransactionHash, env: Env): SignSignature {
   const signer = Ethereum_Module.getSignerAddress({
     connection: env.connection,
   }).unwrap();
@@ -202,10 +204,13 @@ export function approveTransactionHash(args: Args_approveTransactionHash, env: E
     address: env.safeAddress,
     args: [args.hash],
     connection: env.connection,
-    txOverrides: {
-      gasLimit: args.options ? args.options!.gasLimit : null,
-      gasPrice: args.options ? args.options!.gasPrice : null,
+    options: {
+      gasLimit: null,
+      maxFeePerGas: null,
+      maxPriorityFeePerGas: null,
       value: null,
+      gasPrice: null,
+      nonce: null
     },
   }).unwrap();
 
@@ -226,21 +231,21 @@ export function getOwnersWhoApprovedTx(args: Args_getOwnersWhoApprovedTx, env: E
   return ownersWhoApproved;
 }
 
-export function signTypedData(args: Args_signTypedData, env: Env): Interface_SignSignature {
+export function signTypedData(args: Args_signTypedData, env: Env): SignSignature {
   const recreatedTx = createTransactionFromPartial(args.tx, null);
 
   const safeVersion = contractManager.getContractVersion({}, env);
 
-  const chainId = Ethereum_Module.getNetwork({ connection: env.connection }).unwrap().chainId;
+  const chainId = Ethereum_Module.getChainId({ connection: env.connection }).unwrap();
 
   const typedData = generateTypedData(env.safeAddress, safeVersion, chainId, recreatedTx);
   const jsonTypedData = toJsonTypedData(typedData);
 
-  const signature = Ethereum_Module.signTypedData({ payload: jsonTypedData, connection: env.connection }).unwrap()!;
+  // const signature = Ethereum_Module.signTypedData({ payload: jsonTypedData, connection: env.connection }).unwrap()!;
 
   return {
     signer: Ethereum_Module.getSignerAddress({ connection: env.connection }).unwrap(),
-    data: adjustVInSignature("eth_signTypedData", signature, null, null),
+    data: adjustVInSignature("eth_signTypedData", "", null, null),
   };
 }
 
@@ -293,29 +298,31 @@ export function executeTransaction(args: Args_executeTransaction, env: Env): Eth
     }
   }
 
-  const txOverrides: Ethereum_TxOverrides = { gasLimit: null, gasPrice: null, value: null };
+  const txOptions: SafeContracts_Ethereum_TxOptions = {
+    gasLimit: null,
+    gasPrice: null,
+    value: null,
+    maxFeePerGas: null,
+    maxPriorityFeePerGas: null,
+    nonce: null
+  };
 
   if (args.options != null) {
     if (args.options!.gas && args.options!.gasLimit) {
       throw new Error("Cannot specify gas and gasLimit together in transaction options");
     }
     if (args.options!.gasLimit) {
-      txOverrides.gasLimit = args.options!.gasLimit;
+      txOptions.gasLimit = args.options!.gasLimit;
     }
     if (args.options!.gasPrice) {
-      txOverrides.gasPrice = args.options!.gasPrice;
+      txOptions.gasPrice = args.options!.gasPrice;
     }
   }
 
   const txReceipt = SafeContracts_Module.execTransaction({
     safeAddress: env.safeAddress,
     safeTransaction: toTransaction(signedSafeTransaction),
-    txOverrides: {
-      gasLimit: txOverrides.gasLimit,
-      gasPrice: txOverrides.gasPrice,
-      value: txOverrides.value,
-    },
-
+    txOptions,
     connection: { networkNameOrChainId: env.connection.networkNameOrChainId, node: env.connection.node },
   }).unwrap();
 
@@ -326,6 +333,6 @@ export function getBalance(args: Args_getBalance, env: Env): BigInt {
   return Ethereum_Module.getBalance({ address: env.safeAddress, connection: env.connection, blockTag: null }).unwrap();
 }
 
-export function getChainId(args: Args_getChainId, env: Env): BigInt {
-  return Ethereum_Module.getNetwork({ connection: env.connection }).unwrap().chainId;
+export function getChainId(args: Args_getChainId, env: Env): String {
+  return Ethereum_Module.getChainId({ connection: env.connection }).unwrap();
 }

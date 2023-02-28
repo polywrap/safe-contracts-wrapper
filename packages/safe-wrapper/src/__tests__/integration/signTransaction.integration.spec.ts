@@ -6,13 +6,12 @@ import { getEthAdapter, getPlugins, setupContractNetworks, setupTests as setupTe
 import Safe from "@gnosis.pm/safe-core-sdk";
 import { SafeTransactionDataPartial } from "@gnosis.pm/safe-core-sdk-types";
 import { Client } from "@polywrap/core-js";
-import { zeroAddress } from "ethereumjs-util";
 
 jest.setTimeout(1200000);
 
 describe("Safe Wrapper", () => {
   let safeAddress: string;
-
+  const zeroAddress = "";
   let client: Client;
   const wrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..");
   const wrapperUri = `fs/${wrapperPath}/build`;

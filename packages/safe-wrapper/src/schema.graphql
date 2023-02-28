@@ -6,7 +6,7 @@ import {
     Connection,
     TxReceipt,
     TxOptions
-} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.0.0"
+} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.1.0"
 import * into Logger from "wrap://ens/wraps.eth:logger@1.0.0"
 
 import {
@@ -42,7 +42,7 @@ type Module {
     executeTransaction(tx: SafeTransaction!, options: TransactionOptions): Ethereum_TxReceipt! @env(required: true)
     getOwnersWhoApprovedTx(hash: String!): [String!]! @env(required: true)
     getBalance: BigInt @env(required: true)
-    getChainId: BigInt @env(required: true)
+    getChainId: String @env(required: true)
 
     """Owner manager methods"""
     getOwners: [String!]! @env(required: true)

@@ -1,4 +1,4 @@
-import { Interface_SignSignature } from "../wrap";
+import { SignSignature } from "../wrap";
 
 export function arrayify(value: string): Uint8Array {
   let hex = value.substring(2);
@@ -62,7 +62,7 @@ export function adjustVInSignature(
   return signature;
 }
 
-export function generatePreValidatedSignature(owner: string): Interface_SignSignature {
+export function generatePreValidatedSignature(owner: string): SignSignature {
   const signature = "0x000000000000000000000000" + owner.slice(2) + "0000000000000000000000000000000000000000000000000000000000000000" + "01";
 
   return {

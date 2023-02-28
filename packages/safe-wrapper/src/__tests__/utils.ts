@@ -1,15 +1,12 @@
 import path from "path";
-import { ClientConfig } from "@polywrap/client-js";
 import { ensResolverPlugin } from "@polywrap/ens-resolver-plugin-js";
-import { Connection, Connections, ethereumPlugin } from "@polywrap/ethereum-plugin-js";
-import { dateTimePlugin } from "polywrap-datetime-plugin";
+import { Connection, Connections, ethereumProviderPlugin } from "ethereum-provider-js";
+import { dateTimePlugin } from "@cbrazon/datetime-plugin-js";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
 import { ethers, Signer, Wallet } from "ethers";
-import { ipfsPlugin } from "@polywrap/ipfs-plugin-js";
-import { defaultIpfsProviders } from "@polywrap/client-config-builder-js";
 import { EthAdapter } from "@gnosis.pm/safe-core-sdk-types";
 import EthersAdapter, { EthersAdapterConfig } from "@gnosis.pm/safe-ethers-lib";
-import { providers } from "@polywrap/test-env-js";
+import { ensAddresses, providers } from "@polywrap/test-env-js";
 
 import { abi as factoryAbi_1_2_0, bytecode as factoryBytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafeProxyFactory.json";
 import {
@@ -33,76 +30,71 @@ import {
 
 import { abi as ERC20MintableAbi, bytecode as ERC20MintableBytecode } from "./ERC20Mock.json";
 import * as App from "./types/wrap";
-import { Client } from "@polywrap/core-js";
+import { CoreClientConfig, PolywrapClient } from "@polywrap/client-js";
+import { defaultIpfsProviders, ClientConfigBuilder } from "@polywrap/client-config-builder-js";
+import { IWrapPackage } from "@polywrap/core-js";
 
 export const safeContractsPath = path.resolve(path.join(__dirname, "../../../safe-contracts-wrapper"));
 
-export async function getPlugins(
-  ethereum: string,
-  ipfs: string,
-  ensAddress: string,
-  networkName: string,
-  wallet = new Wallet("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
-): Promise<Partial<ClientConfig>> {
-  return {
-    envs: [
-      {
-        uri: "wrap://ens/ipfs.polywrap.eth",
-        env: {
-          provider: ipfs,
-          fallbackProviders: defaultIpfsProviders,
+export function getClientConfig(): CoreClientConfig {
+  const ethereumWrapperPath: string = path.join(
+    path.resolve(__dirname),
+    "..",
+    "..",
+    "..",
+    "..",
+    ".."
+  );
+
+  const ethereumWrapperUri = `wrap://fs/${ethereumWrapperPath}/ethereum/wrapper/build`
+  const safeWrapperUri = `wrap://fs/${safeContractsPath}/build`
+  return new ClientConfigBuilder()
+    .addDefaults()
+    .addEnv("wrap://package/ipfs-resolver", {
+      provider: providers.ipfs,
+      fallbackProviders: defaultIpfsProviders,
+    })
+    .addPackages({
+      "wrap://ens/ens.polywrap.eth": ensResolverPlugin({
+        addresses: { testnet: ensAddresses.ensAddress },
+      }),
+      "wrap://ens/wraps.eth:logger@1.0.0": loggerPlugin({
+        logFunc: (level, message) => {
+          console.log(level, message);
+          return true;
         },
-      },
-    ],
-    plugins: [
-      {
-        uri: "wrap://ens/ipfs.polywrap.eth",
-        plugin: ipfsPlugin({}),
-      },
-      {
-        uri: "wrap://ens/ens.polywrap.eth",
-        plugin: ensResolverPlugin({ addresses: { testnet: ensAddress } }),
-      },
-      {
-        uri: "wrap://ens/datetime.polywrap.eth",
-        //@ts-ignore
-        plugin: dateTimePlugin({}),
-      },
-      {
-        uri: "wrap://ens/js-logger.polywrap.eth",
-        plugin: loggerPlugin({
-          logFunc: (level, message) => {
-            console.log(level, message);
-            return true;
+      }) as IWrapPackage,
+      "wrap://ens/wraps.eth:ethereum-provider@1.1.0": ethereumProviderPlugin({
+        connections: new Connections({
+          networks: {
+            testnet: new Connection({
+              provider: providers.ethereum,
+            }),
           },
+          defaultNetwork: "testnet",
         }),
-      },
-      {
-        uri: "wrap://ens/ethereum.polywrap.eth",
-        plugin: ethereumPlugin({
-          connections: new Connections({
-            networks: {
-              testnet: new Connection({
-                provider: ethereum,
-                signer: wallet,
-              }),
-              [networkName]: new Connection({
-                provider: ethereum,
-                signer: wallet,
-              }),
-              mainnet: new Connection({ provider: "http://localhost:8546" }),
-            },
-            defaultNetwork: networkName,
-          }),
-        }),
-      },
-    ],
-    redirects: [{ from: "wrap://ens/safe.contracts.polywrap.eth", to: `wrap://fs/${safeContractsPath}/build` }],
-  };
-}
+      }),
+      "wrap://ens/datetime.polywrap.eth": dateTimePlugin({}),
+    })
+    .addInterfaceImplementation(
+      "wrap://ens/wraps.eth:ethereum-provider@1.1.0",
+      "wrap://ens/wraps.eth:ethereum-provider@1.1.0"
+    )
+    // @TODO(cbrzn): Remove this once the ENS text record content hash has been updated
+    .addRedirect(
+      "ens/wraps.eth:ethereum@1.1.0",
+      ethereumWrapperUri
+    )
+    .addRedirect(
+      "wrap://ens/safe.contracts.polywrap.eth",
+      safeWrapperUri
+    )
+    .build();
+};
+
 const defaults = { owners: ["0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1", "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"], threshold: 1 };
 export const setupContractNetworks = async (
-  client: Client,
+  client: PolywrapClient,
   options?: Partial<typeof defaults>,
   version: "1.3.0" | "1.2.0" = "1.3.0"
 ): Promise<
@@ -117,7 +109,7 @@ export const setupContractNetworks = async (
   ]
 > => {
   const safeOptions = { ...defaults, ...options };
-  const ethereumUri = "ens/ethereum.polywrap.eth";
+  const ethereumUri = "ens/wraps.eth:ethereum@1.1.0";
 
   const safeWrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..", "safe-factory-wrapper");
   const safeWrapperUri = `fs/${safeWrapperPath}/build`;

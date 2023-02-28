@@ -1,23 +1,24 @@
 import {
   Ethereum_Log,
   Ethereum_TxReceipt,
-  Interface_SafeTransaction,
-  Interface_SafeTransactionData,
-  Interface_SignSignature,
+  SafeContracts_SafeTransaction,
+  SafeContracts_SafeTransactionData,
+  SafeContracts_SignSignature,
   SafeContracts_Ethereum_TxReceipt,
-  SafeContracts_Interface_SafeTransaction,
-  SafeContracts_Interface_SafeTransactionData,
-  SafeContracts_Interface_SignSignature,
+  SafeTransaction,
+  SafeTransactionData,
+  SignSignature,
+
 } from "../wrap";
 
-export function toTransaction(tx: Interface_SafeTransaction): SafeContracts_Interface_SafeTransaction {
+export function toTransaction(tx: SafeTransaction): SafeContracts_SafeTransaction {
   return {
     data: toTransactionData(tx.data),
     signatures: toTransactionSignatures(tx.signatures!),
   };
 }
 
-export function toTransactionData(txData: Interface_SafeTransactionData): SafeContracts_Interface_SafeTransactionData {
+export function toTransactionData(txData: SafeTransactionData): SafeContracts_SafeTransactionData {
   return {
     data: txData.data,
     baseGas: txData.baseGas,
@@ -32,8 +33,8 @@ export function toTransactionData(txData: Interface_SafeTransactionData): SafeCo
   };
 }
 
-export function toTransactionSignatures(signatures: Map<string, Interface_SignSignature>): Map<string, SafeContracts_Interface_SignSignature> {
-  const newMap = new Map<string, SafeContracts_Interface_SignSignature>();
+export function toTransactionSignatures(signatures: Map<string, SignSignature>): Map<string, SafeContracts_SignSignature> {
+  const newMap = new Map<string, SafeContracts_SignSignature>();
 
   const keys = signatures.keys();
   for (let i = 0; i < keys.length; i++) {
@@ -51,7 +52,6 @@ export function toTxReceipt(txReceipt: SafeContracts_Ethereum_TxReceipt): Ethere
     _type: txReceipt._type,
     blockHash: txReceipt.blockHash,
     blockNumber: txReceipt.blockNumber,
-    byzantium: txReceipt.byzantium,
     confirmations: txReceipt.confirmations,
     contractAddress: txReceipt.contractAddress,
     cumulativeGasUsed: txReceipt.cumulativeGasUsed,

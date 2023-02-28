@@ -1,5 +1,5 @@
 import { BigInt, JSON, JSONEncoder } from "@polywrap/wasm-as";
-import { Interface_SafeTransactionData } from "../wrap/imported/Interface_SafeTransactionData";
+import { SafeTransactionData } from "../wrap";
 
 export const EIP712_DOMAIN_BEFORE_V130: TypedDataField[] = [
   {
@@ -35,7 +35,7 @@ class TypedData {
   types: TypedTypes;
   primaryType: string;
   domain: Domain;
-  message: Interface_SafeTransactionData;
+  message: SafeTransactionData;
 }
 
 function EQ_OR_GT_1_3_0(version: u64): bool {
@@ -45,8 +45,8 @@ function EQ_OR_GT_1_3_0(version: u64): bool {
 export function generateTypedData(
   safeAddress: string,
   safeVersion: string,
-  chainId: BigInt,
-  safeTransactionData: Interface_SafeTransactionData
+  chainId: string,
+  safeTransactionData: SafeTransactionData
 ): TypedData {
   const safeNumberVersion = U64.parseInt(safeVersion.replaceAll(".", ""));
 
@@ -75,7 +75,7 @@ export function generateTypedData(
     message: safeTransactionData,
   };
   if (eip712WithChainId) {
-    typedData.domain.chainId = chainId.toUInt64();
+    typedData.domain.chainId = u32(parseInt(chainId));
   }
   return typedData;
 }
