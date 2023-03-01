@@ -11,6 +11,7 @@ import {
     TxOptions,
     StaticTxResult
 } into Ethereum from "wrap://ens/wraps.eth:ethereum@1.1.0"
+import { Module } into EthersUtils from "wrap://ens/wraps.eth:ethereum-utils@0.0.1"
 import * into Datetime from "wrap://ens/datetime.polywrap.eth"
 import * into Logger from "wrap://ens/wraps.eth:logger@1.0.0"
 """

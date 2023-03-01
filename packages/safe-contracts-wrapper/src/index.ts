@@ -13,7 +13,7 @@ import {
   Ethereum_TxReceipt,
   Ethereum_TxOptions,
 } from "./wrap";
-import { BigInt, Box, wrap_debug_log } from "@polywrap/wasm-as";
+import { BigInt, Box } from "@polywrap/wasm-as";
 import { JSON } from "assemblyscript-json";
 import {
   Args_approvedHashes,
@@ -281,7 +281,7 @@ export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt 
   };
 
   const method =
-    "function execTransaction(address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address payable refundReceiver, bytes memory signatures) external payable returns (bool success)";
+    "function execTransaction(address,uint256,bytes calldata,uint8,uint256,uint256,uint256,address,address,bytes memory)()";
 
   const encodedSignatures = encodeSignatures(txSignatures);
   if (!txOptions.gasLimit) {
@@ -291,8 +291,7 @@ export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt 
 
     txOptions.gasLimit = estimateGas({
       address: args.safeAddress,
-      method:
-        "function execTransaction(address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address payable refundReceiver, bytes memory signatures)",
+      method,
       args: estimationArgs,
       connection: args.connection,
     });
@@ -300,7 +299,7 @@ export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt 
 
   return Ethereum_Module.callContractMethodAndWait({
     address: args.safeAddress,
-    method: method,
+    method,
     args: [
       txData.to,
       txData.value.toString(),

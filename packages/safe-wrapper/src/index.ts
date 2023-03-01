@@ -5,8 +5,6 @@ import {
   Ethereum_Module,
   SafeContracts_Module,
   Ethereum_TxReceipt,
-  Ethereum_TxOptions,
-  SafeContracts_SignSignature,
   SafeContracts_Ethereum_TxOptions,
   SafeTransactionData,
   SignSignature,
@@ -24,7 +22,7 @@ import {
   Args_signTransactionHash,
   Args_signTypedData,
 } from "./wrap/Module/serialization";
-import { BigInt, Box } from "@polywrap/wasm-as";
+import { BigInt, Box, wrap_debug_log } from "@polywrap/wasm-as";
 import { generateTypedData, toJsonTypedData } from "./utils/typedData";
 
 import * as ownerManager from "./managers/ownerManager";
@@ -54,7 +52,7 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
   const multiSendData = encodeMultiSendData(args.txs);
 
   const data = Ethereum_Module.encodeFunction({
-    method: "function multiSend(bytes transactions) public",
+    method: "function multiSend(bytes transactions)",
     args: [multiSendData],
   }).unwrap();
 
@@ -127,7 +125,6 @@ export function addSignature(args: Args_addSignature, env: Env): SafeTransaction
   if (signatures == null) {
     signatures = new Map<string, SignSignature>();
   }
-
   if (args.signingMethod != null && args.signingMethod! == "eth_signTypedData") {
     const signature = signTypedData({ tx: args.tx.data }, env);
     signatures.set(signerAddress, signature);
@@ -190,7 +187,7 @@ export function approveTransactionHash(args: Args_approveTransactionHash, env: E
   if (args.options != null && !args.options!.gasLimit) {
     args.options!.gasLimit = SafeContracts_Module.estimateGas({
       address: env.safeAddress,
-      method: "function approveHash(bytes32 hashToApprove) external",
+      method: "function approveHash(bytes32 hashToApprove)",
       args: [args.hash],
       connection: {
         networkNameOrChainId: env.connection.networkNameOrChainId,
@@ -200,7 +197,7 @@ export function approveTransactionHash(args: Args_approveTransactionHash, env: E
   }
 
   const response = Ethereum_Module.callContractMethodAndWait({
-    method: "function approveHash(bytes32 hashToApprove) external",
+    method: "function approveHash(bytes32 hashToApprove)",
     address: env.safeAddress,
     args: [args.hash],
     connection: env.connection,
@@ -241,11 +238,11 @@ export function signTypedData(args: Args_signTypedData, env: Env): SignSignature
   const typedData = generateTypedData(env.safeAddress, safeVersion, chainId, recreatedTx);
   const jsonTypedData = toJsonTypedData(typedData);
 
-  // const signature = Ethereum_Module.signTypedData({ payload: jsonTypedData, connection: env.connection }).unwrap()!;
+  const signature = Ethereum_Module.signTypedData({ payload: jsonTypedData, connection: env.connection }).unwrap();
 
   return {
     signer: Ethereum_Module.getSignerAddress({ connection: env.connection }).unwrap(),
-    data: adjustVInSignature("eth_signTypedData", "", null, null),
+    data: adjustVInSignature("eth_signTypedData", signature, null, null),
   };
 }
 

@@ -186,7 +186,7 @@ export const setupContractNetworks = async (
       },
       safeDeploymentConfig: version === "1.3.0" ? null : { version: "1.2.0", saltNonce: Date.now().toString(), isL1Safe: null },
       txOptions: {
-        gasLimit: "280000",
+        gasLimit: "300000",
       },
       customContractAdressess: {
         proxyFactoryContract: proxyContractAddress!,

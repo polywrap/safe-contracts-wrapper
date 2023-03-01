@@ -5,6 +5,7 @@ import {
   SafeDeploymentConfig,
   SafeContracts_Ethereum_Connection,
   SafeContracts_Module,
+  EthersUtils_Module,
 } from "../wrap";
 import { BigInt, Result, wrap_debug_log } from "@polywrap/wasm-as";
 import {
@@ -198,14 +199,14 @@ export function generateSalt(
     return saltNonce;
   }
 
-  let initializerHash = Ethereum_Module.wKeccak256({ bytes: initializer }); 
+  let initializerHash = EthersUtils_Module.keccak256Bytes({ bytes: initializer }); 
   if (initializerHash.isErr) {
     return Result.Err<string, string>(initializerHash.unwrapErr());
   }
 
   let initHash = initializerHash.unwrap();
 
-  let encodePacked = Ethereum_Module.keccak256EncodeBytes({
+  let encodePacked = EthersUtils_Module.keccak256BytesEncodePacked({
     bytes: initHash + saltNonce.unwrap().slice(2)
   });
 
@@ -229,7 +230,7 @@ export function generateAddress2(
   initCode: string
 ): Result<string, string> {
 
-  const initCodeHash = Ethereum_Module.generateCreate2Address({
+  const initCodeHash = EthersUtils_Module.generateCreate2Address({
     address,
     initCode,
     salt,

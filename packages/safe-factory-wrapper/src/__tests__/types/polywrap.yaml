@@ -7,3 +7,5 @@ source:
   import_abis:
     - uri: "wrap://ens/factory.eth"
       abi: "../../../build/wrap.info"
+    - uri: "wrap://ens/wraps.eth:ethereum-utils@0.0.1"
+      abi: "../../../../../../ethereum/ethers-utils/build/wrap.info"
