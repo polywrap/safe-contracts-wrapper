@@ -53,6 +53,7 @@ export function getClientConfig(customConfig?: CustomizableConfig): CoreClientCo
   );
 
   const ethereumWrapperUri = `wrap://fs/${ethereumWrapperPath}/ethereum/wrapper/build`
+  const ethereumUtilsWrapperUri = `wrap://fs/${ethereumWrapperPath}/ethereum/ethers-utils/build`
   const safeWrapperUri = `wrap://fs/${safeContractsPath}/build`
 
   const envs: Record<string, Record<string, unknown>> = {
@@ -91,13 +92,17 @@ export function getClientConfig(customConfig?: CustomizableConfig): CoreClientCo
           defaultNetwork: "testnet",
         }),
       }),
-      "wrap://ens/datetime.polywrap.eth": dateTimePlugin({}),
+      "wrap://ens/datetime.polywrap.eth": dateTimePlugin({}) as IWrapPackage,
     })
     .addInterfaceImplementation(
       "wrap://ens/wraps.eth:ethereum-provider@1.1.0",
       "wrap://ens/wraps.eth:ethereum-provider@1.1.0"
     )
     // @TODO(cbrzn): Remove this once the ENS text record content hash has been updated
+    .addRedirect(
+      "ens/wraps.eth:ethereum-utils@0.0.1",
+      ethereumUtilsWrapperUri
+    )
     .addRedirect(
       "ens/wraps.eth:ethereum@1.1.0",
       ethereumWrapperUri

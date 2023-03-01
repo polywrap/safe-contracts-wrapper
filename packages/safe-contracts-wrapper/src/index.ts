@@ -281,7 +281,7 @@ export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt 
   };
 
   const method =
-    "function execTransaction(address,uint256,bytes calldata,uint8,uint256,uint256,uint256,address,address,bytes memory)()";
+    "function execTransaction(address,uint256,bytes calldata,uint8,uint256,uint256,uint256,address,address,bytes memory)";
 
   const encodedSignatures = encodeSignatures(txSignatures);
   if (!txOptions.gasLimit) {

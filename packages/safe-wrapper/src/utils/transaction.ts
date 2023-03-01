@@ -1,5 +1,5 @@
 import { BigInt, wrap_debug_log } from "@polywrap/wasm-as";
-import { Ethereum_Module, SafeTransactionData, SafeTransactionOptionalProps } from "../wrap";
+import { EthersUtils_Module, SafeTransactionData, SafeTransactionOptionalProps } from "../wrap";
 import { ZERO_ADDRESS } from "./constants";
 
 export function getTransactionHashArgs(tx: SafeTransactionData): string[] {
@@ -89,11 +89,7 @@ export const encodeMultiSendData = (transactionDataArr: SafeTransactionData[]): 
 
   for (let i = 0; i < transactionDataArr.length; i++) {
     const standardized = createTransactionFromPartial(transactionDataArr[i], null);
-    wrap_debug_log("to: " + standardized.to);
-    wrap_debug_log("value: " + standardized.value.toString());
-    wrap_debug_log("data: " + standardized.data);
-    wrap_debug_log("operation: " + standardized.operation!.toString() || BigInt.from("0").toString());
-    const encodedData  = Ethereum_Module.encodeMetaTransaction({
+    const encodedData  = EthersUtils_Module.encodeMetaTransaction({
       to: standardized.to,
       value: standardized.value,
       data: standardized.data,
