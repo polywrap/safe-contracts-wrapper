@@ -9,9 +9,6 @@
       "./packages/safe-contracts-wrapper",
       "./packages/safe-factory-wrapper",
       "./packages/safe-wrapper"
-    ],
-    "nohoist": [
-      "**/polywrap-datetime-plugin"
     ]
   },
   "repository": {
@@ -19,10 +16,12 @@
     "url": "https://github.com/5afe/safe-contracts-wrapper"
   },
   "scripts": {
-    "patch": "yarn --cwd ./packages/safe-wrapper patch",
-    "build": "lerna run build --concurrency 1",
-    "build:order": "lerna run build --scope @consideritdone/safe-interface && lerna run build --scope @consideritdone/safe-contracts-wrapper && lerna run build --scope @consideritdone/safe-factory-wrapper && lerna run build --scope @consideritdone/safe-safe-wrapper",
-    "test:contracts": "lerna run test --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
+    "build": "yarn build:contracts && yarn build:factory && yarn build:safe",
+    "build:contracts": "lerna run build --scope @consideritdone/safe-contracts-wrapper",
+    "build:factory": "lerna run build --scope @consideritdone/safe-factory-wrapper",
+    "build:safe": "lerna run build --scope @consideritdone/safe-wrapper",
+    "test": "yarn test:contracts && yarn test:factory && yarn test:safe",
+    "test:contracts": "lerna run test:e2e --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
     "test:factory": "lerna run test --concurrency 1 --scope @consideritdone/safe-factory-wrapper",
     "test:safe": "lerna run test --concurrency 1 --scope @consideritdone/safe-wrapper"
   },
@@ -31,7 +30,6 @@
     "@typescript-eslint/parser": "^5.40.1",
     "eslint": "^8.25.0",
     "lerna": "5.5.2",
-    "patch-package": "^6.5.0",
     "polywrap": "~0.10.0-pre"
   }
 }

@@ -1,4 +1,4 @@
-- [ ] rename txOverrides to txOptions
-- [ ] clean up common schema
+- [x] rename txOverrides to txOptions
+- [x] clean up common schema
 - [ ] properly link together the wrappers (how? ipfs? wraps.eth? safe.eth?)
-- [ ] replace datetime
+- [ ] publish datetime plugin to @polywrap org
