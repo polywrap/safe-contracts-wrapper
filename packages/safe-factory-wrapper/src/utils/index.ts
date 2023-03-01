@@ -7,7 +7,7 @@ import {
   SafeContracts_Module,
   EthersUtils_Module,
 } from "../wrap";
-import { BigInt, Result, wrap_debug_log } from "@polywrap/wasm-as";
+import { BigInt, Result } from "@polywrap/wasm-as";
 import {
   getMultisendCallOnlyContractMap,
   getMultisendContractMap,

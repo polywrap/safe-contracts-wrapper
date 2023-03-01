@@ -397,7 +397,7 @@ describe("ProxyFactory", () => {
       expect(response.value).toEqual(true);
     });
 
-    it.skip("getModules", async () => {
+    it("getModules", async () => {
       const response = await App.ProxyFactory_Module.getModules(
         {
           address: proxyAddress,

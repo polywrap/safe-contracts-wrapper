@@ -13,7 +13,7 @@ import {
   Ethereum_TxReceipt,
   Ethereum_TxOptions,
 } from "./wrap";
-import { BigInt, Box } from "@polywrap/wasm-as";
+import { BigInt, Box, wrap_debug_log } from "@polywrap/wasm-as";
 import { JSON } from "assemblyscript-json";
 import {
   Args_approvedHashes,
@@ -239,8 +239,8 @@ export function approveHash(args: Args_approveHash): Ethereum_TxReceipt {
 export function getModules(args: Args_getModules): string[] {
   const resp = Ethereum_Module.callContractView({
     address: args.address,
-    method: "function getModulesPaginated(address start, uint256 pageSize) external view returns (address[] memory array, address next)",
-    args: ["0x0000000000000000000000000000000000000001", "0xa"],
+    method: "function getModulesPaginated(address,uint256) external view returns (address[] memory,address)",
+    args: ["0x0000000000000000000000000000000000000001", "15"],
     connection: args.connection,
   }).unwrap();
   // TODO; rewrite to json
