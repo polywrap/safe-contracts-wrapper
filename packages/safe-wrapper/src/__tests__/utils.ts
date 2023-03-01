@@ -4,8 +4,7 @@ import { Connection, Connections, ethereumProviderPlugin } from "ethereum-provid
 import { dateTimePlugin } from "@cbrazon/datetime-plugin-js";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
 import { ethers, Signer, Wallet } from "ethers";
-import { EthAdapter } from "@safe-global/safe-core-sdk-types";
-import EthersAdapter, { EthersAdapterConfig } from "@safe-global/safe-ethers-lib";
+import EthersAdapter from "@safe-global/safe-ethers-lib";
 import { ensAddresses, providers } from "@polywrap/test-env-js";
 
 import { abi as factoryAbi_1_2_0, bytecode as factoryBytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafeProxyFactory.json";
@@ -191,7 +190,7 @@ export const setupContractNetworks = async (
       },
       safeDeploymentConfig: version === "1.3.0" ? null : { version: "1.2.0", saltNonce: Date.now().toString(), isL1Safe: null },
       txOptions: {
-        gasLimit: "300000",
+        gasLimit: "400000",
       },
       customContractAdressess: {
         proxyFactoryContract: proxyContractAddress!,
@@ -203,6 +202,7 @@ export const setupContractNetworks = async (
   );
 
   if (!safeResponse.ok) throw safeResponse.error;
+  console.log(safeResponse)
   safeAddress = safeResponse.value!.safeAddress;
 
   const multisendAbi = version === "1.3.0" ? multisendAbi_1_3_0 : multisendAbi_1_2_0;

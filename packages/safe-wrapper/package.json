@@ -21,7 +21,7 @@
     "test:sdk_integration": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/integration --passWithNoTests --runInBand --verbose",
     "test:integration": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/integration/ --passWithNoTests --runInBand --verbose",
     "test:createTransaction": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e/createTransaction.spec --passWithNoTests --runInBand --verbose",
-    "test:execution": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e/execution.spec --passWithNoTests --runInBand --verbose",
+    "test:execution": "cross-env SAFE_VERSION=1.2.0 jest src/__tests__/e2e/execution.spec --passWithNoTests --runInBand --verbose",
     "test:onChainSignatures": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e/onChainSignatures.spec --passWithNoTests --runInBand --verbose",
     "test:offChainSignatures": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e/offChainSignatures.spec --passWithNoTests --runInBand --verbose",
     "test:integration:createTransaction": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/integration/createTransaction.integration --passWithNoTests --runInBand --verbose",
