@@ -280,7 +280,6 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
         wrapperUri
       );
 
-      // console.log(executionResult);
       if (!executionResult.ok) fail(executionResult.error);
 
       const balanceAfter = await App.Ethereum_Module.getBalance(
@@ -432,7 +431,6 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
         client2,
         wrapperUri
       );
-      console.log(approveRes);
       expect(approveRes.ok).toBeTruthy();
 
       const executionResult = await App.SafeWrapper_Module.executeTransaction(
@@ -442,7 +440,6 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       );
       expect(executionResult.ok).toBeTruthy();
 
-      console.log(executionResult);
       const balanceAfter = await App.Ethereum_Module.getBalance(
         { address: newSafeAddress, blockTag: null, connection: connection },
         client,
@@ -475,7 +472,6 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
         account1.signer
       );
 
-      console.log(ethAdapter);
       const txConfirmed = await ethAdapter.getTransaction(
         executionResult.value.transactionHash
       );

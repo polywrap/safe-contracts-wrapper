@@ -19,18 +19,19 @@
     "test:v:1_3": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e --passWithNoTests --runInBand --verbose",
     "test:v:1_2": "cross-env SAFE_VERSION=1.2.0 jest src/__tests__/e2e --passWithNoTests --runInBand --verbose",
     "test:sdk_integration": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/integration --passWithNoTests --runInBand --verbose",
-    "test:integration": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e/integration.spec --passWithNoTests --runInBand --verbose",
+    "test:integration": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/integration/ --passWithNoTests --runInBand --verbose",
     "test:createTransaction": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e/createTransaction.spec --passWithNoTests --runInBand --verbose",
     "test:execution": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e/execution.spec --passWithNoTests --runInBand --verbose",
     "test:onChainSignatures": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e/onChainSignatures.spec --passWithNoTests --runInBand --verbose",
     "test:offChainSignatures": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e/offChainSignatures.spec --passWithNoTests --runInBand --verbose",
-    "test:integration:createTransaction": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e/createTransaction.integration --passWithNoTests --runInBand --verbose",
-    "test:integration:signTransaction": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e/signTransaction.integration --passWithNoTests --runInBand --verbose"
+    "test:integration:createTransaction": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/integration/createTransaction.integration --passWithNoTests --runInBand --verbose",
+    "test:integration:signTransaction": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/integration/signTransaction.integration --passWithNoTests --runInBand --verbose",
+    "test:integration:typedData": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/integration/typedData.integration --passWithNoTests --runInBand --verbose"
   },
   "devDependencies": {
     "@gnosis.pm/safe-contracts_1.2.0": "npm:@gnosis.pm/safe-contracts@1.2.0",
     "@gnosis.pm/safe-contracts_1.3.0": "npm:@gnosis.pm/safe-contracts@1.3.0",
-    "@gnosis.pm/safe-core-sdk": "3.1.1",
+    "@safe-global/safe-core-sdk": "3.2.0",
     "@polywrap/core-js": "~0.10.0-pre",
     "@polywrap/wasm-as": "~0.10.0-pre",
     "@types/jest": "26.0.8",
@@ -42,8 +43,8 @@
     "ts-jest": "26.5.4"
   },
   "dependencies": {
-    "@gnosis.pm/safe-ethers-lib": "^1.6.1",
-    "ethers": "5.7.1",
+    "@safe-global/safe-ethers-lib": "1.7.0",
+    "ethers": "5.7.2",
     "@cbrazon/datetime-plugin-js": "1.0.0-pre.1"
   }
 }

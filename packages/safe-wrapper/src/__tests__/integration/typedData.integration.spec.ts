@@ -1,17 +1,17 @@
 import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
-import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } from "@polywrap/test-env-js";
+import { initTestEnvironment, stopTestEnvironment, providers } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getEthAdapter, getPlugins, setupContractNetworks, setupTests as setupTestsBase } from "../utils";
-import Safe from "@gnosis.pm/safe-core-sdk";
-import { Client } from "@polywrap/core-js";
+import { getClientConfig, getEthAdapter, setupContractNetworks, setupTests as setupTestsBase } from "../utils";
+import Safe from "@safe-global/safe-core-sdk";
+import { Uri } from "@polywrap/core-js";
 
 jest.setTimeout(1200000);
 
 describe("Safe Wrapper", () => {
   let safeAddress: string;
 
-  let client: Client;
+  let client: PolywrapClient;
   const wrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..");
   const wrapperUri = `fs/${wrapperPath}/build`;
 
@@ -21,34 +21,21 @@ describe("Safe Wrapper", () => {
   beforeAll(async () => {
     await initTestEnvironment();
 
-    const plugins = await getPlugins(
-      providers.ethereum,
-      providers.ipfs,
-      ensAddresses.ensAddress,
-      connection.networkNameOrChainId
-    );
-
-    client = new PolywrapClient({
-      ...plugins,
-    }) as unknown as Client;
+    client = new PolywrapClient(getClientConfig())
 
     const setupContractsResult = await setupContractNetworks(client);
     safeAddress = setupContractsResult[0];
 
-    setupTests = setupTestsBase.bind({}, connection.chainId, setupContractsResult[1]);
+    setupTests = setupTestsBase.bind({}, connection.chainId, setupContractsResult[1], '1.3.0');
 
-    client = new PolywrapClient({
-      ...plugins,
-      envs: [
-        {
-          uri: wrapperUri,
-          env: {
-            safeAddress: safeAddress,
-            connection: connection,
-          },
-        },
-      ],
-    }) as unknown as Client;
+    const env = {
+      uri: Uri.from(wrapperUri),
+      env: {
+        safeAddress: safeAddress,
+        connection: connection,
+      },
+    }
+    client = new PolywrapClient(getClientConfig({ safeEnv: env }));
   });
 
   afterAll(async () => {
@@ -63,6 +50,7 @@ describe("Safe Wrapper", () => {
       const ethAdapter = await getEthAdapter(providers.ethereum, account1.signer);
 
       const safeSdk = await Safe.create({
+        //@ts-ignore
         ethAdapter,
         safeAddress: safeAddress,
         //@ts-ignore

@@ -4,8 +4,8 @@ import { Connection, Connections, ethereumProviderPlugin } from "ethereum-provid
 import { dateTimePlugin } from "@cbrazon/datetime-plugin-js";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
 import { ethers, Signer, Wallet } from "ethers";
-import { EthAdapter } from "@gnosis.pm/safe-core-sdk-types";
-import EthersAdapter, { EthersAdapterConfig } from "@gnosis.pm/safe-ethers-lib";
+import { EthAdapter } from "@safe-global/safe-core-sdk-types";
+import EthersAdapter, { EthersAdapterConfig } from "@safe-global/safe-ethers-lib";
 import { ensAddresses, providers } from "@polywrap/test-env-js";
 
 import { abi as factoryAbi_1_2_0, bytecode as factoryBytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafeProxyFactory.json";
@@ -264,13 +264,10 @@ export const getERC20Mintable = async (signer: Wallet) => {
   return await contract.deployed();
 };
 
-export const getEthAdapter = async (providerUrl: string, signer: Signer): Promise<EthAdapter> => {
+export const getEthAdapter = (providerUrl: string, signer: Signer): EthersAdapter => {
   const ethersProvider = new ethers.providers.JsonRpcProvider(providerUrl);
-
   signer = signer.connect(ethersProvider);
-  //@ts-ignore
-  const ethersAdapterConfig: EthersAdapterConfig = { ethers, signer };
-  const ethAdapter = new EthersAdapter(ethersAdapterConfig);
+  const ethAdapter = new EthersAdapter({ ethers, signerOrProvider: signer });
   return ethAdapter;
 };
 
