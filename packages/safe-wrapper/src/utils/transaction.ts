@@ -1,4 +1,4 @@
-import { BigInt, wrap_debug_log } from "@polywrap/wasm-as";
+import { BigInt } from "@polywrap/wasm-as";
 import { EthersUtils_Module, SafeTransactionData, SafeTransactionOptionalProps } from "../wrap";
 import { ZERO_ADDRESS } from "./constants";
 
@@ -95,11 +95,8 @@ export const encodeMultiSendData = (transactionDataArr: SafeTransactionData[]): 
       data: standardized.data,
       operation: standardized.operation || BigInt.from("0"),
     }).unwrap();
-    wrap_debug_log("encodedData: " + encodedData);
     dataStr = dataStr.concat(encodedData.slice(2));
   }
-  wrap_debug_log("dataStr: " + dataStr);
-
   return "0x" + dataStr;
 };
 

@@ -1,9 +1,9 @@
 import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
-import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } from "@polywrap/test-env-js";
+import { initTestEnvironment, stopTestEnvironment } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getPlugins, safeContractsPath, setupAccounts, setupContractNetworks } from "../utils";
-import { Client } from "@polywrap/core-js";
+import { getClientConfig, safeContractsPath, setupAccounts, setupContractNetworks } from "../utils";
+import { Uri } from "@polywrap/core-js";
 import { Ethereum_TxReceipt } from "../types/wrap";
 import { Wallet } from "ethers";
 
@@ -16,7 +16,7 @@ console.log('safeVersion', safeVersion)
 describe(`On-chain signatures v${safeVersion}`, () => {
   let safeAddress: string;
 
-  let client: Client;
+  let client: PolywrapClient;
   const wrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..");
   const wrapperUri = `fs/${wrapperPath}/build`;
   const contractWrapperUri = `fs/${safeContractsPath}/build`;
@@ -26,26 +26,20 @@ describe(`On-chain signatures v${safeVersion}`, () => {
   beforeAll(async () => {
     await initTestEnvironment();
 
-    const plugins = await getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress, connection.networkNameOrChainId);
-
-    client = new PolywrapClient({
-      ...plugins,
-    }) as unknown as Client;
+    let config = await getClientConfig();
+    client = new PolywrapClient(config);
 
     [safeAddress] = await setupContractNetworks(client, {}, safeVersion);
+    const env = {
+      uri: Uri.from(wrapperUri),
+      env: {
+        safeAddress: safeAddress,
+        connection: connection,
+      },
+    };
+    config = await getClientConfig({ safeEnv: env });
 
-    client = new PolywrapClient({
-      ...plugins,
-      envs: [
-        {
-          uri: wrapperUri,
-          env: {
-            safeAddress: safeAddress,
-            connection: connection,
-          },
-        },
-      ],
-    }) as unknown as Client;
+    client = new PolywrapClient(config);
   });
 
   afterAll(async () => {
@@ -56,27 +50,19 @@ describe(`On-chain signatures v${safeVersion}`, () => {
     it("should fail if a transaction hash is approved by an account that is not an owner", async () => {
       const [account1] = setupAccounts();
       // Init client with different signer
-      const plugins = await getPlugins(
-        providers.ethereum,
-        providers.ipfs,
-        ensAddresses.ensAddress,
-        connection.networkNameOrChainId,
-        new Wallet("0x829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4")
-      );
 
-      const client2 = new PolywrapClient({
-        ...plugins,
-        envs: [
-          {
-            uri: wrapperUri,
-            env: {
-              safeAddress: safeAddress,
-              connection: connection,
-            },
-          },
-        ],
+      const env ={
+        uri: Uri.from(wrapperUri),
+        env: {
+          safeAddress: safeAddress,
+          connection: connection,
+        },
+      };
+      const config = getClientConfig({
+        signer: new Wallet("0x829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"),
+        safeEnv: env
       });
-
+  
       const transactionData = {
         to: account1.address,
         value: "500000000000000000", // 0.5 ETH
@@ -92,7 +78,7 @@ describe(`On-chain signatures v${safeVersion}`, () => {
         {
           hash: txHash,
         },
-        client2 as unknown as Client, // Using client with different signer to try to approve hash
+        new PolywrapClient(config), // Using client with different signer to try to approve hash
         wrapperUri
       );
 
@@ -220,34 +206,26 @@ describe(`On-chain signatures v${safeVersion}`, () => {
       const approvedHashes = approvedHashesResponse.value;
 
       expect(approvedHashes.length).toEqual(1);
-      expect(approvedHashes).toContain(account1.address);
+      expect(approvedHashes).toContain(account1.address.toLowerCase());
 
-      const plugins = await getPlugins(
-        providers.ethereum,
-        providers.ipfs,
-        ensAddresses.ensAddress,
-        connection.networkNameOrChainId,
-        new Wallet("0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1")
-      );
 
-      const client2 = new PolywrapClient({
-        ...plugins,
-        envs: [
-          {
-            uri: wrapperUri,
-            env: {
-              safeAddress: safeAddress,
-              connection: connection,
-            },
-          },
-        ],
+      const env ={
+        uri: Uri.from(wrapperUri),
+        env: {
+          safeAddress,
+          connection,
+        },
+      };
+      const config = getClientConfig({
+        signer: new Wallet("0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"),
+        safeEnv: env
       });
 
       await App.SafeWrapper_Module.approveTransactionHash(
         {
           hash: txHash,
         },
-        client2 as unknown as Client, // Using client with different signer to try to approve hash
+        new PolywrapClient(config), // Using client with different signer to try to approve hash
         wrapperUri
       );
 
@@ -256,7 +234,7 @@ describe(`On-chain signatures v${safeVersion}`, () => {
       const approvedHashes2 = approvedHashesResponse2.value;
 
       expect(approvedHashes2.length).toEqual(2);
-      expect(approvedHashes2).toContain("0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0");
+      expect(approvedHashes2).toContain("0xffcf8fdee72ac11b5c542428b35eef5769c409f0");
     });
   });
 });

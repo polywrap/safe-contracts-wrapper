@@ -1,9 +1,9 @@
 import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
-import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } from "@polywrap/test-env-js";
+import { initTestEnvironment, stopTestEnvironment } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getPlugins, setupAccounts, setupContractNetworks } from "../utils";
-import { Client } from "@polywrap/core-js";
+import { getClientConfig, setupAccounts, setupContractNetworks } from "../utils";
+import { Uri } from "@polywrap/core-js";
 
 jest.setTimeout(1200000);
 
@@ -13,7 +13,7 @@ console.log('safeVersion', safeVersion)
 describe(`Off-chain signatures v${safeVersion}`, () => {
   let safeAddress: string;
 
-  let client: Client;
+  let client: PolywrapClient;
   const wrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..");
   const wrapperUri = `fs/${wrapperPath}/build`;
 
@@ -21,27 +21,20 @@ describe(`Off-chain signatures v${safeVersion}`, () => {
 
   beforeAll(async () => {
     await initTestEnvironment();
-
-    const plugins = await getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress, connection.networkNameOrChainId);
-
-    client = new PolywrapClient({
-      ...plugins,
-    }) as unknown as Client;
+    let config = await getClientConfig();
+    client = new PolywrapClient(config);
 
     [safeAddress] = await setupContractNetworks(client, {}, safeVersion);
+    const env = {
+      uri: Uri.from(wrapperUri),
+      env: {
+        safeAddress: safeAddress,
+        connection: connection,
+      },
+    };
+    config = await getClientConfig({ safeEnv: env });
 
-    client = new PolywrapClient({
-      ...plugins,
-      envs: [
-        {
-          uri: wrapperUri,
-          env: {
-            safeAddress: safeAddress,
-            connection: connection,
-          },
-        },
-      ],
-    }) as unknown as Client;
+    client = new PolywrapClient(config);
   });
 
   afterAll(async () => {
@@ -163,18 +156,15 @@ describe(`Off-chain signatures v${safeVersion}`, () => {
     it("should fail if signature is added by an account that is not an owner", async () => {
       const [, , account3] = setupAccounts();
       //recreating client with new signer
-      client = new PolywrapClient({
-        ...(await getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress, connection.networkNameOrChainId, account3.signer)),
-        envs: [
-          {
-            uri: wrapperUri,
-            env: {
-              safeAddress: safeAddress,
-              connection: connection,
-            },
-          },
-        ],
-      }) as unknown as Client;
+      const env = {
+        uri: Uri.from(wrapperUri),
+        env: {
+          safeAddress: safeAddress,
+          connection: connection,
+        },
+      }
+      const config = getClientConfig({ signer: account3.signer, safeEnv: env })
+      client = new PolywrapClient(config);
 
       const [account1] = setupAccounts();
 

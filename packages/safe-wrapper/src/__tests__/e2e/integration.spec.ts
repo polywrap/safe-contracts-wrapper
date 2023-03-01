@@ -1,11 +1,10 @@
 import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
-import { initTestEnvironment, stopTestEnvironment, providers, ensAddresses } from "@polywrap/test-env-js";
+import { initTestEnvironment, stopTestEnvironment } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getPlugins, setupAccounts, setupContractNetworks } from "../utils";
-import { ethers } from "ethers";
+import { getClientConfig, setupAccounts, setupContractNetworks } from "../utils";
 
-import { Client } from "@polywrap/core-js";
+import { Uri } from "@polywrap/core-js";
 
 jest.setTimeout(1200000);
 
@@ -19,41 +18,28 @@ describe(`Safe Wrapper v${safeVersion}`, () => {
 
   let safeAddress: string;
 
-  let client: Client;
+  let client: PolywrapClient;
   const wrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..");
   const wrapperUri = `fs/${wrapperPath}/build`;
-
-  const ethersProvider = new ethers.providers.JsonRpcProvider(providers.ethereum);
 
   const [account1, account2] = setupAccounts();
 
   beforeAll(async () => {
     await initTestEnvironment();
-
-    const network = await ethersProvider.getNetwork();
-
-    connection.networkNameOrChainId = network.chainId.toString();
-
-    const plugins = await getPlugins(providers.ethereum, providers.ipfs, ensAddresses.ensAddress, connection.networkNameOrChainId);
-
-    client = new PolywrapClient({
-      ...plugins,
-    }) as unknown as Client;
+    let config = await getClientConfig();
+    client = new PolywrapClient(config);
 
     [safeAddress] = await setupContractNetworks(client, {}, safeVersion);
+    const env = {
+      uri: Uri.from(wrapperUri),
+      env: {
+        safeAddress: safeAddress,
+        connection: connection,
+      },
+    };
+    config = await getClientConfig({ safeEnv: env });
 
-    client = new PolywrapClient({
-      ...plugins,
-      envs: [
-        {
-          uri: wrapperUri,
-          env: {
-            safeAddress: safeAddress,
-            connection: connection,
-          },
-        },
-      ],
-    }) as unknown as Client;
+    client = new PolywrapClient(config);
   });
 
   afterAll(async () => {

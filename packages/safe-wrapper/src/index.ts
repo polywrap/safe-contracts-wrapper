@@ -22,7 +22,7 @@ import {
   Args_signTransactionHash,
   Args_signTypedData,
 } from "./wrap/Module/serialization";
-import { BigInt, Box, wrap_debug_log } from "@polywrap/wasm-as";
+import { BigInt, Box } from "@polywrap/wasm-as";
 import { generateTypedData, toJsonTypedData } from "./utils/typedData";
 
 import * as ownerManager from "./managers/ownerManager";
