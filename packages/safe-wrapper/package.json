@@ -14,7 +14,7 @@
     "deploy": "polywrap deploy -o deployments.json",
     "codegen": "polywrap codegen",
     "test": "yarn test:e2e",
-    "test:codegen": "cross-env SAFE_VERSION=1.3.0 polywrap codegen -m ./src/__tests__/types/polywrap.yaml -g ./src/__tests__/types/wrap",
+    "test:codegen": "cross-env SAFE_VERSION=1.3.0 polywrap codegen -m ./src/__tests__/types/polywrap.yaml -g ./src/__tests__/types/wrap -c ./client-config.ts",
     "test:e2e": "yarn test:codegen && cross-env SAFE_VERSION=1.3.0 yarn test:sdk_integration && cross-env SAFE_VERSION=1.2.0 yarn test:v:1_2 && cross-env SAFE_VERSION=1.3.0 yarn test:v:1_3",
     "test:v:1_3": "cross-env SAFE_VERSION=1.3.0 jest src/__tests__/e2e --passWithNoTests --runInBand --verbose",
     "test:v:1_2": "cross-env SAFE_VERSION=1.2.0 jest src/__tests__/e2e --passWithNoTests --runInBand --verbose",

@@ -4,8 +4,3 @@ project:
   type: app/typescript
 source:
   schema: ./schema.graphql
-  import_abis:
-    - uri: wrap://ens/wraps.eth:ethereum@1.1.0
-      abi: ../../../../../../ethereum/wrapper/build/wrap.info
-    - uri: wrap://ens/wraps.eth:ethereum-utils@0.0.1
-      abi: ../../../../../../ethereum/ethers-utils/build/wrap.info
