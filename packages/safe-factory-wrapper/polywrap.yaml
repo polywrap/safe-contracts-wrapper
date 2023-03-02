@@ -5,14 +5,5 @@ project:
 source:
   module: ./src/index.ts
   schema: ./src/schema.graphql
-  import_abis: 
-    - uri: "wrap://ens/datetime.polywrap.eth"
-      abi: ../../../datetime/interface/schema.graphql
-    - uri: wrap://ens/safe.contracts.polywrap.eth
-      abi: ../safe-contracts-wrapper/build/wrap.info
-    - uri: wrap://ens/wraps.eth:ethereum@1.1.0
-      abi: ../../../ethereum/wrapper/build/wrap.info
-    - uri: wrap://ens/wraps.eth:ethereum-utils@0.0.1
-      abi: ../../../ethereum/ethers-utils/build/wrap.info
 extensions:
   build: ./polywrap.build.yaml

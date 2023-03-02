@@ -1,11 +1,8 @@
 import path from "path";
-import { ensResolverPlugin } from "@polywrap/ens-resolver-plugin-js";
 import { Connection, Connections, ethereumProviderPlugin } from "ethereum-provider-js";
-import { dateTimePlugin } from "@cbrazon/datetime-plugin-js";
-import { loggerPlugin } from "@polywrap/logger-plugin-js";
 import { ethers, Signer, Wallet } from "ethers";
 import EthersAdapter from "@safe-global/safe-ethers-lib";
-import { ensAddresses, providers } from "@polywrap/test-env-js";
+import { providers } from "@polywrap/test-env-js";
 
 import { abi as factoryAbi_1_2_0, bytecode as factoryBytecode_1_2_0 } from "@gnosis.pm/safe-contracts_1.2.0/build/contracts/GnosisSafeProxyFactory.json";
 import {
@@ -31,10 +28,10 @@ import { abi as ERC20MintableAbi, bytecode as ERC20MintableBytecode } from "./ER
 import * as App from "./types/wrap";
 import { CoreClientConfig, PolywrapClient } from "@polywrap/client-js";
 import { defaultIpfsProviders, ClientConfigBuilder } from "@polywrap/client-config-builder-js";
-import { Env, IWrapPackage } from "@polywrap/core-js";
+import { Env } from "@polywrap/core-js";
+import { configure } from "../../client-config";
 
 export const safeContractsPath = path.resolve(path.join(__dirname, "../../../safe-contracts-wrapper"));
-
 
 interface CustomizableConfig {
   signer?: Wallet,
@@ -42,19 +39,6 @@ interface CustomizableConfig {
 }
 
 export function getClientConfig(customConfig?: CustomizableConfig): CoreClientConfig {
-  const ethereumWrapperPath: string = path.join(
-    path.resolve(__dirname),
-    "..",
-    "..",
-    "..",
-    "..",
-    ".."
-  );
-
-  const ethereumWrapperUri = `wrap://fs/${ethereumWrapperPath}/ethereum/wrapper/build`
-  const ethereumUtilsWrapperUri = `wrap://fs/${ethereumWrapperPath}/ethereum/ethers-utils/build`
-  const safeWrapperUri = `wrap://fs/${safeContractsPath}/build`
-
   const envs: Record<string, Record<string, unknown>> = {
     "wrap://package/ipfs-resolver": {
       provider: providers.ipfs,
@@ -65,52 +49,27 @@ export function getClientConfig(customConfig?: CustomizableConfig): CoreClientCo
   if (customConfig && customConfig.safeEnv) {
     envs[customConfig.safeEnv.uri.uri] = customConfig.safeEnv.env
   }
-  const defaultSigner = new Wallet("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d");
 
-  return new ClientConfigBuilder()
-    .addDefaults()
-    .addEnvs(envs)
-    .addPackages({
-      "wrap://ens/ens.polywrap.eth": ensResolverPlugin({
-        addresses: { testnet: ensAddresses.ensAddress },
-      }),
-      "wrap://ens/wraps.eth:logger@1.0.0": loggerPlugin({
-        logFunc: (level, message) => {
-          console.log(level, message);
-          return true;
-        },
-      }) as IWrapPackage,
-      "wrap://ens/wraps.eth:ethereum-provider@1.1.0": ethereumProviderPlugin({
+  const config = configure(new ClientConfigBuilder());
+  config.addEnvs(envs);
+  
+  if (customConfig && customConfig.signer) {
+    config.addPackage(
+      "wrap://ens/wraps.eth:ethereum-provider@1.1.0", ethereumProviderPlugin({
         connections: new Connections({
           networks: {
             testnet: new Connection({
               provider: providers.ethereum,
-              signer: customConfig?.signer ?? defaultSigner
+              signer: customConfig?.signer
             }),
           },
           defaultNetwork: "testnet",
-        }),
-      }),
-      "wrap://ens/datetime.polywrap.eth": dateTimePlugin({}) as IWrapPackage,
-    })
-    .addInterfaceImplementation(
-      "wrap://ens/wraps.eth:ethereum-provider@1.1.0",
-      "wrap://ens/wraps.eth:ethereum-provider@1.1.0"
+        }),  
+      })
     )
-    // @TODO(cbrzn): Remove this once the ENS text record content hash has been updated
-    .addRedirect(
-      "ens/wraps.eth:ethereum-utils@0.0.1",
-      ethereumUtilsWrapperUri
-    )
-    .addRedirect(
-      "ens/wraps.eth:ethereum@1.1.0",
-      ethereumWrapperUri
-    )
-    .addRedirect(
-      "wrap://ens/safe.contracts.polywrap.eth",
-      safeWrapperUri
-    )
-    .build();
+  }
+
+  return config.build()
 };
 
 const defaults = { owners: ["0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1", "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"], threshold: 1 };
@@ -202,7 +161,6 @@ export const setupContractNetworks = async (
   );
 
   if (!safeResponse.ok) throw safeResponse.error;
-  console.log(safeResponse)
   safeAddress = safeResponse.value!.safeAddress;
 
   const multisendAbi = version === "1.3.0" ? multisendAbi_1_3_0 : multisendAbi_1_2_0;

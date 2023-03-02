@@ -10,8 +10,8 @@
     "build"
   ],
   "scripts": {
-    "build": "polywrap build",
-    "deploy": "polywrap deploy",
+    "build": "polywrap build -c ./client-config.ts",
+    "deploy": "polywrap deploy -o deployments.json",
     "codegen": "polywrap codegen",
     "test": "yarn test:e2e",
     "test:codegen": "cross-env SAFE_VERSION=1.3.0 polywrap codegen -m ./src/__tests__/types/polywrap.yaml -g ./src/__tests__/types/wrap",

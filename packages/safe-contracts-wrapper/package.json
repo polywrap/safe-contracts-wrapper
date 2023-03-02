@@ -10,15 +10,15 @@
     "build"
   ],
   "scripts": {
-    "build": "polywrap build",
+    "build": "polywrap build -c client-config.ts",
     "codegen": "polywrap codegen",
-    "deploy": "polywrap deploy",
+    "deploy": "polywrap deploy -o deployments.json",
     "test": "yarn test:e2e && yarn test:workflow",
     "test:e2e": "yarn test:e2e:codegen && jest src/__tests__/e2e/integration.spec --passWithNoTests --runInBand --verbose",
     "test:e2e:codegen": "polywrap codegen -m ./src/__tests__/types/polywrap.yaml -g ./src/__tests__/types/wrap",
     "test:env:up": "polywrap infra up --modules=eth-ens-ipfs",
     "test:env:down": "polywrap infra down --modules=eth-ens-ipfs",
-    "test:workflow": "yarn test:env:up && sleep 60 && polywrap test -c ./workflows/config.ts && yarn test:env:down"
+    "test:workflow": "yarn test:env:up && sleep 60 && polywrap test -c ./client-config.ts && yarn test:env:down"
   },
   "devDependencies": {
     "@gnosis.pm/safe-contracts_1.2.0": "npm:@gnosis.pm/safe-contracts@1.2.0",
