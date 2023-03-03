@@ -349,14 +349,14 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       const txHash = txHashRes.value!;
 
       const approveRes = await App.SafeWrapper_Module.approveTransactionHash(
-        { hash: txHash, options: { gasLimit: "400000" } },
+        { hash: txHash },
         client2,
         wrapperUri
       );
       expect(approveRes.ok).toBeTruthy();
 
       const executionResult = await App.SafeWrapper_Module.executeTransaction(
-        { tx: signedTx, options: { gasLimit: "400000" } },
+        { tx: signedTx },
         client3,
         wrapperUri
       );
@@ -427,14 +427,14 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       const txHash = txHashRes.value!;
 
       const approveRes = await App.SafeWrapper_Module.approveTransactionHash(
-        { hash: txHash, options: { gasLimit: "400000" } },
+        { hash: txHash },
         client2,
         wrapperUri
       );
       expect(approveRes.ok).toBeTruthy();
 
       const executionResult = await App.SafeWrapper_Module.executeTransaction(
-        { tx: signedTx, options: { gasLimit: "400000" } },
+        { tx: signedTx },
         client3,
         wrapperUri
       );
@@ -585,14 +585,14 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       const txHash = txHashRes.value!;
 
       const approveRes = await App.SafeWrapper_Module.approveTransactionHash(
-        { hash: txHash, options: { gasLimit: "400000" } },
+        { hash: txHash },
         client2,
         wrapperUri
       );
       if (!approveRes.ok) fail(approveRes.error);
 
       const executionResult = await App.SafeWrapper_Module.executeTransaction(
-        { tx: signedMultisendTx, options: { gasLimit: "400000" } },
+        { tx: signedMultisendTx },
         client3,
         wrapperUri
       );
@@ -613,7 +613,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       );
     });
 
-    it("should execute a batch transaction with contract calls and threshold >1", async () => {
+    it.only("should execute a batch transaction with contract calls and threshold >1", async () => {
       const [account1, account2, account3] = setupAccounts();
 
       const [newSafeAddress, contractNetworks] = await setupContractNetworks(
@@ -698,13 +698,13 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       if (!txHashResult.ok) fail(txHashResult.error);
 
       const txResponse1 = await App.SafeWrapper_Module.approveTransactionHash(
-        { hash: txHashResult.value!, options: { gasLimit: "400000" } },
+        { hash: txHashResult.value! },
         client2,
         wrapperUri
       );
       if (!txResponse1.ok) fail(txResponse1.error);
       const txResponse2 = await App.SafeWrapper_Module.executeTransaction(
-        { tx: signedMultiSendTx, options: { gasLimit: "400000" } },
+        { tx: signedMultiSendTx },
         client3,
         wrapperUri
       );

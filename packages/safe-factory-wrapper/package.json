@@ -32,6 +32,6 @@
   },
   "dependencies": {
     "assemblyscript-json": "^1.1.0",
-    "@cbrazon/datetime-plugin-js": "1.0.0-pre.1"
+    "@polywrap/datetime-plugin-js": "1.0.0-pre.0"
   }
 }

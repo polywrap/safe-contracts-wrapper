@@ -61,11 +61,7 @@ describe("SafeFactory", () => {
           abi: JSON.stringify(factoryAbi_1_2_0),
           bytecode: factoryBytecode_1_2_0,
           args: null,
-          connection: CONNECTION,
-          options: {
-            maxPriorityFeePerGas: "40000000",
-            maxFeePerGas: "4000000000",
-          },
+          connection: CONNECTION
         },
         client,
         ethereumUri
@@ -81,10 +77,6 @@ describe("SafeFactory", () => {
           abi: JSON.stringify(safeAbi_1_2_0),
           bytecode: safeBytecode_1_2_0,
           args: null,
-          options: {
-            maxPriorityFeePerGas: "40000000",
-            maxFeePerGas: "4000000000",
-          },
           connection: CONNECTION,
         },
         client,
@@ -100,10 +92,6 @@ describe("SafeFactory", () => {
           abi: JSON.stringify(factoryAbi_1_3_0),
           bytecode: factoryBytecode_1_3_0,
           args: null,
-          options: {
-            maxPriorityFeePerGas: "40000000",
-            maxFeePerGas: "4000000000",
-          },
           connection: CONNECTION,
         },
         client,
@@ -120,10 +108,6 @@ describe("SafeFactory", () => {
           abi: JSON.stringify(safeAbi_1_3_0),
           bytecode: safeBytecode_1_3_0,
           args: null,
-          options: {
-            maxPriorityFeePerGas: "40000000",
-            maxFeePerGas: "4000000000",
-          },
           connection: CONNECTION,
         },
         client,
@@ -184,9 +168,6 @@ describe("SafeFactory", () => {
             proxyFactoryContract: proxyContractAddress_v120!,
             safeFactoryContract: safeContractAddress_v120!,
           },
-          txOptions: {
-            gasLimit: "280000",
-          },
         },
         client,
         wrapperUri
@@ -206,9 +187,6 @@ describe("SafeFactory", () => {
             threshold: -1,
           },
           connection: CONNECTION,
-          txOptions: {
-            gasLimit: "280000",
-          },
           customContractAdressess: {
             proxyFactoryContract: proxyContractAddress_v120!,
             safeFactoryContract: safeContractAddress_v120!,
@@ -232,9 +210,6 @@ describe("SafeFactory", () => {
             threshold: 2,
           },
           connection: CONNECTION,
-          txOptions: {
-            gasLimit: "280000",
-          },
           customContractAdressess: {
             proxyFactoryContract: proxyContractAddress_v120!,
             safeFactoryContract: safeContractAddress_v120!,
@@ -260,9 +235,6 @@ describe("SafeFactory", () => {
           safeDeploymentConfig: {
             saltNonce: "-2",
           },
-          txOptions: {
-            gasLimit: "280000",
-          },
           connection: CONNECTION,
           customContractAdressess: {
             proxyFactoryContract: proxyContractAddress_v120!,
@@ -285,9 +257,6 @@ describe("SafeFactory", () => {
           safeAccountConfig: {
             owners: owners,
             threshold: 1,
-          },
-          txOptions: {
-            gasLimit: "280000",
           },
           connection: CONNECTION,
           customContractAdressess: {
@@ -313,9 +282,6 @@ describe("SafeFactory", () => {
           },
           safeDeploymentConfig: {
             saltNonce: Date.now().toString(),
-          },
-          txOptions: {
-            gasLimit: "280000",
           },
           connection: CONNECTION,
           customContractAdressess: {
@@ -536,9 +502,6 @@ describe("SafeFactory", () => {
           },
           safeDeploymentConfig: {
             saltNonce: saltNonce,
-          },
-          txOptions: {
-            gasLimit: "280000",
           },
           connection: CONNECTION,
           customContractAdressess: {

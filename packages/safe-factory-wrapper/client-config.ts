@@ -11,7 +11,7 @@ import {
   IClientConfigBuilder,
 } from "@polywrap/client-config-builder-js";
 import { ensAddresses, providers } from "@polywrap/test-env-js";
-import { dateTimePlugin } from "@cbrazon/datetime-plugin-js";
+import { dateTimePlugin } from "@polywrap/datetime-plugin-js";
 
 export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
   return (

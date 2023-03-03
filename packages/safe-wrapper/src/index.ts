@@ -180,21 +180,30 @@ export function approveTransactionHash(args: Args_approveTransactionHash, env: E
     throw new Error("Transaction hashes can only be approved by Safe owners");
   }
 
-  if (args.options != null && args.options!.gasPrice && args.options!.gasLimit) {
-    throw new Error("Cannot specify gas and gasLimit together in transaction options");
-  }
+  const gasPrice = Ethereum_Module.getGasPrice({
+    connection: {
+      networkNameOrChainId: env.connection.networkNameOrChainId,
+      node: env.connection.node,
+    },
+  }).unwrap()
 
-  if (args.options != null && !args.options!.gasLimit) {
-    args.options!.gasLimit = SafeContracts_Module.estimateGas({
-      address: env.safeAddress,
-      method: "function approveHash(bytes32 hashToApprove)",
-      args: [args.hash],
-      connection: {
-        networkNameOrChainId: env.connection.networkNameOrChainId,
-        node: env.connection.node,
-      },
-    }).unwrap();
-  }
+  const gasLimit = Ethereum_Module.estimateContractCallGas({
+    method: "function approveHash(bytes32 hashToApprove)",
+    address: env.safeAddress,
+    args: [args.hash],
+    connection: {
+      networkNameOrChainId: env.connection.networkNameOrChainId,
+      node: env.connection.node,
+    },
+    options: {
+      gasLimit: null,
+      maxFeePerGas: null,
+      maxPriorityFeePerGas: null,
+      value: null,
+      gasPrice: gasPrice,
+      nonce: null
+    },
+  }).unwrap()
 
   const response = Ethereum_Module.callContractMethodAndWait({
     method: "function approveHash(bytes32 hashToApprove)",
@@ -202,12 +211,12 @@ export function approveTransactionHash(args: Args_approveTransactionHash, env: E
     args: [args.hash],
     connection: env.connection,
     options: {
-      gasLimit: null,
+      gasLimit,
+      gasPrice,
+      nonce: null,
+      value: null,
       maxFeePerGas: null,
       maxPriorityFeePerGas: null,
-      value: null,
-      gasPrice: null,
-      nonce: null
     },
   }).unwrap();
 
@@ -303,18 +312,6 @@ export function executeTransaction(args: Args_executeTransaction, env: Env): Eth
     maxPriorityFeePerGas: null,
     nonce: null
   };
-
-  if (args.options != null) {
-    if (args.options!.gas && args.options!.gasLimit) {
-      throw new Error("Cannot specify gas and gasLimit together in transaction options");
-    }
-    if (args.options!.gasLimit) {
-      txOptions.gasLimit = args.options!.gasLimit;
-    }
-    if (args.options!.gasPrice) {
-      txOptions.gasPrice = args.options!.gasPrice;
-    }
-  }
 
   const txReceipt = SafeContracts_Module.execTransaction({
     safeAddress: env.safeAddress,

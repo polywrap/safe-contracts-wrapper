@@ -434,16 +434,6 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@cbrazon/datetime-plugin-js@1.0.0-pre.1":
-  version "1.0.0-pre.1"
-  resolved "https://registry.yarnpkg.com/@cbrazon/datetime-plugin-js/-/datetime-plugin-js-1.0.0-pre.1.tgz#5d4391e362e38e55b9322fba0a6d0eea4f593208"
-  integrity sha512-AV/QQ8un7/FQbAo3yWbMlFMlIAOdOdJEHHUiy35ROtfCi677c0iDWDgyVAejohsv9RZfCNu29AdBJZSPuV53bg==
-  dependencies:
-    "@polywrap/core-js" "0.10.0-pre.8"
-    "@polywrap/plugin-js" "0.10.0-pre.8"
-    axios "0.21.4"
-    form-data "4.0.0"
-
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"
@@ -2640,6 +2630,16 @@
     "@polywrap/result" "0.10.0-pre.8"
     "@polywrap/tracing-js" "0.10.0-pre.8"
     "@polywrap/wrap-manifest-types-js" "0.10.0-pre.8"
+
+"@polywrap/datetime-plugin-js@1.0.0-pre.0":
+  version "1.0.0-pre.0"
+  resolved "https://registry.yarnpkg.com/@polywrap/datetime-plugin-js/-/datetime-plugin-js-1.0.0-pre.0.tgz#cdf5440a384eef2d6d749f74abf1f21305d3bcc2"
+  integrity sha512-CCybbmIfXvFVvkr5oH3tVtkJ4VHc4khWXosPHbuJfU5LekrVDAVYC4snnlRq8sFeK/SblES4eXlB26w8S7Q9NA==
+  dependencies:
+    "@polywrap/core-js" "0.10.0-pre.8"
+    "@polywrap/plugin-js" "0.10.0-pre.8"
+    axios "0.21.4"
+    form-data "4.0.0"
 
 "@polywrap/ens-resolver-plugin-js@0.10.0-pre.10":
   version "0.10.0-pre.10"

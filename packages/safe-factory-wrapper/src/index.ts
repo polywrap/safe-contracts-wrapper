@@ -84,12 +84,6 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
     if (args.txOptions!.value) {
       txOptions.value = args.txOptions!.value;
     }
-    if (args.txOptions!.gasLimit) {
-      txOptions.gasLimit = args.txOptions!.gasLimit;
-    }
-    if (args.txOptions!.gasPrice) {
-      txOptions.gasPrice = args.txOptions!.gasPrice;
-    }
   }
   const chainId = getChainId({ connection: args.connection });
 

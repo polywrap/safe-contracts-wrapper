@@ -63,15 +63,38 @@ export function proxyCreationCode(args: Args_proxyCreationCode): string {
 }
 
 export function createProxy(args: Args_createProxy): string | null {
+  let txOptions: Ethereum_TxOptions | null = null;
+
+  if (args.txOptions != null) {
+    txOptions = { value: null, gasLimit: null, gasPrice: null, maxFeePerGas: null, maxPriorityFeePerGas: null, nonce: null };
+
+    if (args.txOptions!.value) {
+      txOptions.value = args.txOptions!.value;
+    }
+    if (!args.txOptions!.gasPrice) {
+      txOptions.gasPrice = Ethereum_Module.getGasPrice({ connection: args.connection }).unwrap();
+    }
+
+    if (!args.txOptions!.gasLimit) {
+      txOptions.gasLimit = Ethereum_Module.estimateContractCallGas({
+        address: args.address,
+        method: "function createProxyWithNonce(address,bytes memory,uint256)",
+        args: [args.safeMasterCopyAddress, args.initializer, args.saltNonce.toString()],
+        connection: args.connection,
+        options: txOptions
+      }).unwrap();
+    }
+
+  }
+
   const tx = Ethereum_Module.callContractMethodAndWait({
     address: args.address,
     method: "function createProxyWithNonce(address,bytes memory,uint256)",
     args: [args.safeMasterCopyAddress, args.initializer, args.saltNonce.toString()],
     connection: args.connection,
-    options: args.txOptions,
+    options: txOptions,
   }).unwrap();
 
-  // wrap_debug_log("createProxy tx: " + tx.transactionHash);
   // ProxyCreation(address)
   const proxyCreation_1_2_0 = "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80";
   // ProxyCreation(address,address)
@@ -82,9 +105,6 @@ export function createProxy(args: Args_createProxy): string | null {
     return null;
   }
 
-  // wrap_debug_log("createProxy index: " + index.toString());
-  // wrap_debug_log("createProxy sliced: " + tx.logs[index].data.slice(32, 72));
-  // wrap_debug_log("createProxy data sliced: " + tx.logs[index].data.slice(26, 66));
   const address = "0x" + tx.logs[index].data.slice(32, 72);
 
   return address;

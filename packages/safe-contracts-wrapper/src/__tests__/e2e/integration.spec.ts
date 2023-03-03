@@ -53,10 +53,6 @@ describe("ProxyFactory", () => {
           abi: JSON.stringify(safeProxyFactoryAbi_1_2_0),
           bytecode: safeProxyFactoryBytecode_1_2_0,
           args: null,
-          options: {
-            maxPriorityFeePerGas: "40000000",
-            maxFeePerGas: "4000000000",
-          },
           connection: CONNECTION,
         },
         client,
@@ -76,11 +72,7 @@ describe("ProxyFactory", () => {
           safeMasterCopyAddress: contractAddress,
           initializer: initCode,
           saltNonce,
-          connection: CONNECTION,
-          txOptions: {
-            gasPrice: "4000000000",
-            gasLimit: "200000"
-          },
+          connection: CONNECTION
         },
         client,
         wrapperUri
@@ -94,17 +86,12 @@ describe("ProxyFactory", () => {
     });
 
     it("createProxy 1.3.0", async () => {
-
       const singletonResponse = await App.Ethereum_Module.deployContract(
         {
           abi: JSON.stringify(safeAbi_1_3_0),
           bytecode: safeBytecode_1_3_0,
           args: null,
           connection: CONNECTION,
-          options: {
-            maxPriorityFeePerGas: "40000000",
-            maxFeePerGas: "4000000000",
-          },
         },
         client,
         ethereumUri
@@ -119,10 +106,6 @@ describe("ProxyFactory", () => {
           bytecode: safeProxyFactoryBytecode_1_3_0,
           args: null,
           connection: CONNECTION,
-          options: {
-            maxPriorityFeePerGas: "40000000",
-            maxFeePerGas: "4000000000",
-          },
         },
         client,
         ethereumUri
@@ -130,8 +113,6 @@ describe("ProxyFactory", () => {
 
       if (!deployContractResponse.ok) throw deployContractResponse.error;
       expect(deployContractResponse.value).not.toBeNull();
-
-      // console.log("factory proxy deployed to: ", deployContractResponse.value);
 
       const contractAddress = deployContractResponse.value as string;
 
@@ -143,10 +124,7 @@ describe("ProxyFactory", () => {
           safeMasterCopyAddress: singletonAddress,
           initializer: initCode,
           saltNonce,
-          connection: CONNECTION,
-          txOptions: {
-            gasLimit: "2000000"
-          },
+          connection: CONNECTION
         },
         client,
         wrapperUri
@@ -168,11 +146,7 @@ describe("ProxyFactory", () => {
           abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
           bytecode: safeProxyFactoryBytecode_1_3_0,
           args: null,
-          connection: CONNECTION,
-          options: {
-            maxPriorityFeePerGas: "40000000",
-            maxFeePerGas: "4000000000",
-          },
+          connection: CONNECTION
         },
         client,
         ethereumUri
@@ -205,11 +179,7 @@ describe("ProxyFactory", () => {
           abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
           bytecode: safeProxyFactoryBytecode_1_3_0,
           args: null,
-          connection: CONNECTION,
-          options: {
-            maxPriorityFeePerGas: "40000000",
-            maxFeePerGas: "4000000000",
-          },
+          connection: CONNECTION
         },
         client,
         ethereumUri
@@ -271,11 +241,7 @@ describe("ProxyFactory", () => {
           abi: JSON.stringify(safeAbi_1_3_0),
           bytecode: safeBytecode_1_3_0,
           args: null,
-          connection: CONNECTION,
-          options: {
-            maxPriorityFeePerGas: "40000000",
-            maxFeePerGas: "4000000000",
-          },
+          connection: CONNECTION
         },
         client,
         ethereumUri
@@ -289,11 +255,7 @@ describe("ProxyFactory", () => {
             abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
             bytecode: safeProxyFactoryBytecode_1_3_0,
             args: null,
-            connection: CONNECTION,
-            options: {
-              maxPriorityFeePerGas: "40000000",
-              maxFeePerGas: "4000000000",
-            },
+            connection: CONNECTION
           },
           client,
           ethereumUri
@@ -309,10 +271,6 @@ describe("ProxyFactory", () => {
           safeMasterCopyAddress: singletonAddress,
           initializer: initCode,
           saltNonce,
-          txOptions: {
-            gasLimit: "114799",
-            gasPrice: "3199866735",
-          },
           connection: CONNECTION
         },
         client,
