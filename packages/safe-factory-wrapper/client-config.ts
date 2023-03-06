@@ -54,11 +54,11 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
       )
       .addRedirect(
         "ens/wraps.eth:ethereum@1.1.0",
-        "wrap://ipfs/QmW1kThCxuvpUCrSKpR7PFvaBhe4PK5sqbf4LWhb8uErKW"
+        "wrap://ipfs/QmbnAG8iCdVMPQK8tQ5qqFwLKjaLF8BUuuLYiozj7mLF8Y"
       )
       .addRedirect(
         "wrap://ens/safe.contracts.polywrap.eth",
-        "wrap://ipfs/QmRNCw1GdbuSvrzexXjpFiMaQ6WcuSNLTLXd2MuSsP6b7B"
+        "wrap://ipfs/QmVZo8xKbbx9aFJxGMfbmhLucBjJGKvT8LPuJTericEWou"
       )
   );
 }

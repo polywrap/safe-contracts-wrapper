@@ -485,7 +485,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
 
       const transaction = await createTransaction();
 
-      const execOptions = { gasLimit: "123456", gasPrice: "170000000" };
+      const execOptions = { gasLimit: "654321", gasPrice: "170000000" };
 
       const executionResult = await App.SafeWrapper_Module.executeTransaction(
         { tx: transaction, options: execOptions },
@@ -613,7 +613,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       );
     });
 
-    it.only("should execute a batch transaction with contract calls and threshold >1", async () => {
+    it("should execute a batch transaction with contract calls and threshold >1", async () => {
       const [account1, account2, account3] = setupAccounts();
 
       const [newSafeAddress, contractNetworks] = await setupContractNetworks(
