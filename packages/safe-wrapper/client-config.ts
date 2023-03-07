@@ -1,31 +1,15 @@
 import { IWrapPackage } from "@polywrap/client-js";
-import { ensResolverPlugin } from "@polywrap/ens-resolver-plugin-js";
 import {
   ethereumProviderPlugin,
   Connection,
   Connections,
-} from "ethereum-provider-js";
-import { loggerPlugin } from "@polywrap/logger-plugin-js";
+} from "@polywrap/ethereum-provider-js";
 import { IClientConfigBuilder } from "@polywrap/client-config-builder-js";
-import { ensAddresses, providers } from "@polywrap/test-env-js";
+import { providers } from "@polywrap/test-env-js";
 import { dateTimePlugin } from "@polywrap/datetime-plugin-js";
 import { Wallet } from "ethers";
-// import path from "path";
 
 export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
-  //   const safeContractsPath = path.resolve(path.join(__dirname, "../../../safe-contracts-wrapper"));
-  //   const ethereumWrapperPath: string = path.join(
-  //     path.resolve(__dirname),
-  //     "..",
-  //     "..",
-  //     "..",
-  //     "..",
-  //     ".."
-  //   );
-
-  //   const ethereumWrapperUri = `wrap://fs/${ethereumWrapperPath}/ethereum/wrapper/build`;
-  //   const ethereumUtilsWrapperUri = `wrap://fs/${ethereumWrapperPath}/ethereum/ethers-utils/build`;
-  //   const safeWrapperUri = `wrap://fs/${safeContractsPath}/build`;
   const defaultSigner = new Wallet(
     "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
   );
@@ -33,15 +17,6 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
     builder
       .addDefaults()
       .addPackages({
-        "wrap://ens/ens.polywrap.eth": ensResolverPlugin({
-          addresses: { testnet: ensAddresses.ensAddress },
-        }),
-        "wrap://ens/wraps.eth:logger@1.0.0": loggerPlugin({
-          logFunc: (level, message) => {
-            console.log(level, message);
-            return true;
-          },
-        }) as IWrapPackage,
         "wrap://ens/wraps.eth:ethereum-provider@1.1.0": ethereumProviderPlugin({
           connections: new Connections({
             networks: {

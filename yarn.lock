@@ -2652,6 +2652,17 @@
     "@polywrap/plugin-js" "0.10.0-pre.10"
     ethers "5.0.7"
 
+"@polywrap/ethereum-provider-js@0.2.4":
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/@polywrap/ethereum-provider-js/-/ethereum-provider-js-0.2.4.tgz#3df1a6548da191618bb5cae7928c7427e69e0030"
+  integrity sha512-64xRnniboxxHNZ4/gD6SS4T+QmJPUMbIYZ2hyLODb2QgH3qDBiU+i4gdiQ/BL3T8Sn/0iOxvTIgZalVDJRh2iw==
+  dependencies:
+    "@ethersproject/address" "5.7.0"
+    "@ethersproject/providers" "5.7.0"
+    "@polywrap/core-js" "0.10.0-pre.10"
+    "@polywrap/plugin-js" "0.10.0-pre.10"
+    ethers "5.7.0"
+
 "@polywrap/fs-plugin-js@~0.10.0-pre":
   version "0.10.0-pre.7"
   resolved "https://registry.yarnpkg.com/@polywrap/fs-plugin-js/-/fs-plugin-js-0.10.0-pre.7.tgz#d066fac96869363de512978bb66204b589ffa9a1"
@@ -6680,16 +6691,6 @@ ethereum-provider-js@0.1.7:
     "@ethersproject/address" "5.7.0"
     "@ethersproject/providers" "5.7.0"
     "@polywrap/core-js" "0.10.0-pre.7"
-    ethers "5.7.0"
-
-ethereum-provider-js@0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/ethereum-provider-js/-/ethereum-provider-js-0.2.1.tgz#57de837419863bb8f0cdc9846be0e181969329f9"
-  integrity sha512-t8i9Ye01fxcefSl5scg/C8DrALjodkRVYnX6Anmooc3dB55KJmo+S0Ptxz9q4dUOhr8875IjbA83IHZAVjAyJQ==
-  dependencies:
-    "@ethersproject/address" "5.7.0"
-    "@ethersproject/providers" "5.7.0"
-    "@polywrap/core-js" "0.10.0-pre.8"
     ethers "5.7.0"
 
 ethereumjs-abi@^0.6.8:

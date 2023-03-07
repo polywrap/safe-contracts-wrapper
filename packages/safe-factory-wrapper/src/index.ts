@@ -18,7 +18,6 @@ import {
   Args_predictSafeAddress,
   Datetime_Module,
   Ethereum_Module,
-  // Logger_Module,
   SafePayload,
   SafeContracts_Ethereum_Connection,
   SafeContracts_Ethereum_TxOptions,
@@ -41,8 +40,6 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
 
   const initializer = encodeSetupCallData(args.safeAccountConfig);
 
-  // Logger_Module.log({ level: 0, message: "initializer" + initializer });
-
   let saltNonce: string = "";
   let safeContractVersion: string = "1.3.0";
   let isL1Safe = false;
@@ -60,12 +57,10 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
     }
   } else {
     const timestamp = Datetime_Module.currentTimestamp({}).unwrap();
-    const res = timestamp.mul(1000); //.add(Math.floor(Math.random() * 1000)); // TODO Math.random()
-
-    /* saltNonce = (Date.now() * 1000 + Math.floor(Math.random() * 1000)).toString(); */
+    // TODO Add Math.random()
+    const res = timestamp.mul(1000);
     saltNonce = res.toString();
 
-    // Logger_Module.log({ level: 0, message: "saltNonce" + saltNonce });
     safeContractVersion = "1.3.0";
   }
 
@@ -86,8 +81,6 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
     }
   }
   const chainId = getChainId({ connection: args.connection });
-
-  // Logger_Module.log({ level: 0, message: "chainId: " + chainId.toString() });
 
   let safeContractAddress: string = "";
   let safeFactoryContractAddress: string = "";
@@ -124,16 +117,6 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
     );
   }
 
-  // Logger_Module.log({
-  //   level: 0,
-  //   message: "safeFactoryContractAddress" + safeFactoryContractAddress,
-  // });
-
-  // Logger_Module.log({
-  //   level: 0,
-  //   message: "safeContractAddress" + safeContractAddress,
-  // });
-
   const safeAddress = SafeContracts_Module.createProxy({
     safeMasterCopyAddress: safeContractAddress,
     address: safeFactoryContractAddress,
@@ -144,11 +127,6 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
   }).unwrap();
 
   if (safeAddress != null) {
-    // Logger_Module.log({
-    //   level: 0,
-    //   message: "safeAddress" + safeAddress!,
-    // });
-
     const contractDeployed = isContractDeployed(safeAddress!, args.connection);
 
     if (!contractDeployed) {
@@ -208,12 +186,10 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
     }
   } else {
     const timestamp = Datetime_Module.currentTimestamp({}).unwrap();
-    const res = timestamp.mul(1000); //.add(Math.floor(Math.random() * 1000)); // TODO Math.random()
-
-    /* saltNonce = (Date.now() * 1000 + Math.floor(Math.random() * 1000)).toString(); */
+    // TODO: Add Math.random() to the timestamp
+    const res = timestamp.mul(1000);
     saltNonce = res.toString();
 
-    // Logger_Module.log({ level: 0, message: "saltNonce" + saltNonce });
     safeContractVersion = "1.3.0";
   }
 
@@ -254,14 +230,10 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
     );
   }
 
-  // Logger_Module.log({ level: 0, message: "initializer " + initializer.slice(2) });
-
   const salt = generateSalt(saltNonce, initializer);
   if (salt.isErr) {
-    // Logger_Module.log({ level: 0, message: "salt error: " + salt.unwrapErr() });
     return "";
   }
-  // Logger_Module.log({ level: 0, message: "salt " + salt.unwrap() });
 
   const initCode = getInitCode(
     safeFactoryContractAddress,
@@ -269,13 +241,8 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
     connection
   );
   if (initCode.isErr) {
-    // Logger_Module.log({
-    // level: 0,
-    //   message: "initCode error: " + initCode.unwrapErr(),
-    // });
     return "";
   }
-  // Logger_Module.log({ level: 0, message: "initCode " + initCode.unwrap() });
 
   let address = generateAddress2(
     safeFactoryContractAddress,
@@ -283,13 +250,7 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
     initCode.unwrap()
   );
   if (address.isErr) {
-    // Logger_Module.log({
-    //   level: 0,
-    //   message: "address error: " + address.unwrapErr(),
-    // });
     return "";
   }
-  // Logger_Module.log({ level: 0, message: "address generate from create 2 " + address.unwrap() });
-
   return address.unwrap();
 }
