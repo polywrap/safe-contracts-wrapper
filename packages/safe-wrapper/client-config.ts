@@ -17,7 +17,7 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
     builder
       .addDefaults()
       .addPackages({
-        "wrap://ens/wraps.eth:ethereum-provider@1.1.0": ethereumProviderPlugin({
+       "wrap://plugin/ethereum-provider@1.1.0": ethereumProviderPlugin({
           connections: new Connections({
             networks: {
               testnet: new Connection({
@@ -32,7 +32,7 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
       })
       .addInterfaceImplementation(
         "wrap://ens/wraps.eth:ethereum-provider@1.1.0",
-        "wrap://ens/wraps.eth:ethereum-provider@1.1.0"
+       "wrap://plugin/ethereum-provider@1.1.0"
       )
       // @TODO(cbrzn): Remove this once the ENS text record content hash has been updated
       .addRedirect(
@@ -44,7 +44,7 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
         "wrap://ipfs/QmbnAG8iCdVMPQK8tQ5qqFwLKjaLF8BUuuLYiozj7mLF8Y"
       )
       .addRedirect(
-        "wrap://ens/safe.contracts.polywrap.eth",
+        "wrap://ens/safe.wraps.eth:contracts@0.0.1",
         "wrap://ipfs/QmRNCw1GdbuSvrzexXjpFiMaQ6WcuSNLTLXd2MuSsP6b7B"
       )
   );

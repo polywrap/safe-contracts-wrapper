@@ -1,5 +1,5 @@
 """
-import { Module } into SafeContracts from "wrap://ens/safe.contracts.polywrap.eth"
+import { Module } into SafeContracts from "wrap://ens/safe.wraps.eth:contracts@0.0.1"
 
 import {
     Module,

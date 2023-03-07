@@ -156,7 +156,7 @@ describe("Safe Wrapper", () => {
         gasPrice: 453,
         gasToken: zeroAddress,
         refundReceiver: zeroAddress,
-        safeTxGas: 0, //TODO find out why created from sdk transaction transforms this value to 0
+        safeTxGas: 21000,
         operation: 0,
       };
 
@@ -200,7 +200,7 @@ describe("Safe Wrapper", () => {
       expect(wrapperTxData.gasToken).toEqual(sdkTxData.gasToken);
       expect(wrapperTxData.refundReceiver).toEqual(sdkTxData.refundReceiver);
       expect(wrapperTxData.nonce).toEqual(sdkTxData.nonce.toString());
-      // expect(wrapperTxData.safeTxGas).toEqual(sdkTxData.safeTxGas.toString());
+      expect(wrapperTxData.safeTxGas).toEqual(sdkTxData.safeTxGas.toString());
     });
   });
 });

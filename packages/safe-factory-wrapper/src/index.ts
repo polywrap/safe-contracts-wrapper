@@ -57,7 +57,7 @@ export function deploySafe(args: Args_deploySafe): SafePayload | null {
     }
   } else {
     const timestamp = Datetime_Module.currentTimestamp({}).unwrap();
-    // TODO Add Math.random()
+    // TODO: Add Math.random() to the timestamp
     const res = timestamp.mul(1000);
     saltNonce = res.toString();
 

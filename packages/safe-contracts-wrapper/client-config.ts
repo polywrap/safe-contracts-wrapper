@@ -42,7 +42,7 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
       .addDefaults()
       .addPackages({
         "wrap://ens/abi.stub.eth": abiPlugin as IWrapPackage,
-        "wrap://ens/wraps.eth:ethereum-provider@1.1.0": ethereumProviderPlugin({
+        "wrap://plugin/ethereum-provider@1.1.0": ethereumProviderPlugin({
           connections: new Connections({
             networks: {
               testnet: new Connection({
@@ -56,7 +56,7 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
       })
       .addInterfaceImplementation(
         "wrap://ens/wraps.eth:ethereum-provider@1.1.0",
-        "wrap://ens/wraps.eth:ethereum-provider@1.1.0"
+        "wrap://plugin/ethereum-provider@1.1.0"
       )
       // @TODO(cbrzn): Remove this once the ENS text record content hash has been updated
       .addRedirect(
