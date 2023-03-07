@@ -1,5 +1,5 @@
 import path from "path";
-import { Connection, Connections, ethereumProviderPlugin } from "ethereum-provider-js";
+import { Connection, Connections, ethereumProviderPlugin } from "@polywrap/ethereum-provider-js";
 import { ethers, Signer, Wallet } from "ethers";
 import EthersAdapter from "@safe-global/safe-ethers-lib";
 import { providers } from "@polywrap/test-env-js";
@@ -26,9 +26,7 @@ import {
 
 import { abi as ERC20MintableAbi, bytecode as ERC20MintableBytecode } from "./ERC20Mock.json";
 import * as App from "./types/wrap";
-import { CoreClientConfig, PolywrapClient } from "@polywrap/client-js";
-import { defaultIpfsProviders, ClientConfigBuilder } from "@polywrap/client-config-builder-js";
-import { Env } from "@polywrap/core-js";
+import { CoreClientConfig, PolywrapClient, ClientConfigBuilder, Env, IWrapPackage } from "@polywrap/client-js";
 import { configure } from "../../client-config";
 
 export const safeContractsPath = path.resolve(path.join(__dirname, "../../../safe-contracts-wrapper"));
@@ -39,12 +37,7 @@ interface CustomizableConfig {
 }
 
 export function getClientConfig(customConfig?: CustomizableConfig): CoreClientConfig {
-  const envs: Record<string, Record<string, unknown>> = {
-    "wrap://package/ipfs-resolver": {
-      provider: providers.ipfs,
-      fallbackProviders: defaultIpfsProviders,
-    },
-  }
+  const envs: Record<string, Record<string, unknown>> = {};
 
   if (customConfig && customConfig.safeEnv) {
     envs[customConfig.safeEnv.uri.uri] = customConfig.safeEnv.env
@@ -65,7 +58,7 @@ export function getClientConfig(customConfig?: CustomizableConfig): CoreClientCo
           },
           defaultNetwork: "testnet",
         }),  
-      })
+      }) as IWrapPackage
     )
   }
 

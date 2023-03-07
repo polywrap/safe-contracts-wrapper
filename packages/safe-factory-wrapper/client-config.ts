@@ -1,37 +1,18 @@
-import { IWrapPackage } from "@polywrap/client-js";
-import { ensResolverPlugin } from "@polywrap/ens-resolver-plugin-js";
+import { IWrapPackage, IClientConfigBuilder } from "@polywrap/client-js";
 import {
   ethereumProviderPlugin,
   Connection,
   Connections,
-} from "ethereum-provider-js";
-import { loggerPlugin } from "@polywrap/logger-plugin-js";
-import {
-  defaultIpfsProviders,
-  IClientConfigBuilder,
-} from "@polywrap/client-config-builder-js";
-import { ensAddresses, providers } from "@polywrap/test-env-js";
+} from "@polywrap/ethereum-provider-js";
+import { providers } from "@polywrap/test-env-js";
 import { dateTimePlugin } from "@polywrap/datetime-plugin-js";
 
 export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
   return (
     builder
       .addDefaults()
-      .addEnv("wrap://package/ipfs-resolver", {
-        provider: providers.ipfs,
-        fallbackProviders: defaultIpfsProviders,
-      })
       .addPackages({
-        "wrap://ens/ens.polywrap.eth": ensResolverPlugin({
-          addresses: { testnet: ensAddresses.ensAddress },
-        }),
-        "wrap://ens/wraps.eth:logger@1.0.0": loggerPlugin({
-          logFunc: (level, message) => {
-            console.log(level, message);
-            return true;
-          },
-        }) as IWrapPackage,
-        "wrap://ens/wraps.eth:ethereum-provider@1.1.0": ethereumProviderPlugin({
+        "wrap://plugin/ethereum-provider@1.1.0": ethereumProviderPlugin({
           connections: new Connections({
             networks: {
               testnet: new Connection({
@@ -40,12 +21,12 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
             },
             defaultNetwork: "testnet",
           }),
-        }),
+        }) as IWrapPackage,
         "wrap://ens/datetime.polywrap.eth": dateTimePlugin({}) as IWrapPackage,
       })
       .addInterfaceImplementation(
         "wrap://ens/wraps.eth:ethereum-provider@1.1.0",
-        "wrap://ens/wraps.eth:ethereum-provider@1.1.0"
+        "wrap://plugin/ethereum-provider@1.1.0"
       )
       // @TODO(cbrzn): Remove this once the ENS text record content hash has been updated
       .addRedirect(
