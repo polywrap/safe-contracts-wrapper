@@ -1,9 +1,7 @@
-format: 0.2.0
-jobs:
-  http_deploy:
-    steps:
-      - name: httpDeploy
-        package: http
-        uri: fs/./build
-        config:
-          postUrl: http://localhost:3500/wrappers/local/safe/manager
+format: 0.1.0
+stages:
+  ipfs_deploy:
+    package: ipfs
+    uri: fs/./build
+    config:
+      gatewayUri: "https://ipfs.wrappers.io"
