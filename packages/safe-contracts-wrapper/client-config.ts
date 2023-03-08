@@ -4,7 +4,7 @@ import {
   ethereumProviderPlugin,
   Connection,
   Connections,
-} from "ethereum-provider-js";
+} from "@polywrap/ethereum-provider-js";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
 import {
   defaultIpfsProviders,
@@ -40,15 +40,6 @@ class AbiPlugin extends PluginModule<NoConfig> {
 let abiPlugin = PluginPackage.from(new AbiPlugin({}), {} as WrapManifest);
 
 export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
-  // const ethereumWrapperPath: string = path.join(
-  //   path.resolve(__dirname),
-  //   "..",
-  //   "..",
-  //   "..",
-  //   "..",
-  //   ".."
-  // );
-  // const ethereumWrapperUri = `wrap://fs/${ethereumWrapperPath}/ethereum/wrapper/build`
   return (
     builder
       .addDefaults()

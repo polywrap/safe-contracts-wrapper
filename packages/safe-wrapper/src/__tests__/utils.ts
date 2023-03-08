@@ -1,5 +1,5 @@
 import path from "path";
-import { Connection, Connections, ethereumProviderPlugin } from "ethereum-provider-js";
+import { Connection, Connections, ethereumProviderPlugin } from "@polywrap/ethereum-provider-js";
 import { ethers, Signer, Wallet } from "ethers";
 import EthersAdapter from "@safe-global/safe-ethers-lib";
 import { providers } from "@polywrap/test-env-js";

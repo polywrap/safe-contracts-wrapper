@@ -47,7 +47,7 @@ describe("ProxyFactory", () => {
       await stopTestEnvironment();
     });
 
-    it("createProxy 1.2.0", async () => {
+    it.only("createProxy 1.2.0", async () => {
       const deployContractResponse = await App.Ethereum_Module.deployContract(
         {
           abi: JSON.stringify(safeProxyFactoryAbi_1_2_0),

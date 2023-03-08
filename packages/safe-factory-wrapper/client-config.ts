@@ -4,7 +4,7 @@ import {
   ethereumProviderPlugin,
   Connection,
   Connections,
-} from "ethereum-provider-js";
+} from "@polywrap/ethereum-provider-js";
 import { loggerPlugin } from "@polywrap/logger-plugin-js";
 import {
   defaultIpfsProviders,
