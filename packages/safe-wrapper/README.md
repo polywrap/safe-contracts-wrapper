@@ -1,4 +1,6 @@
-# Safe Wrapper
+# Safe Manager
+
+Contains the logic to interact with safe managers: modules and owners. It allows to add/remove signatures, as well as executing transaction in the safe.
 
 ## Build
  

@@ -1,13 +1,11 @@
 import { IWrapPackage } from "@polywrap/client-js";
-import { ensResolverPlugin } from "@polywrap/ens-resolver-plugin-js";
 import {
   ethereumProviderPlugin,
   Connection,
   Connections,
 } from "@polywrap/ethereum-provider-js";
-import { loggerPlugin } from "@polywrap/logger-plugin-js";
 import { IClientConfigBuilder } from "@polywrap/client-config-builder-js";
-import { ensAddresses, providers } from "@polywrap/test-env-js";
+import { providers } from "@polywrap/test-env-js";
 import { dateTimePlugin } from "@polywrap/datetime-plugin-js";
 import { Wallet } from "ethers";
 
@@ -19,15 +17,6 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
     builder
       .addDefaults()
       .addPackages({
-        "wrap://ens/ens.polywrap.eth": ensResolverPlugin({
-          addresses: { testnet: ensAddresses.ensAddress },
-        }),
-        "wrap://ens/wraps.eth:logger@1.0.0": loggerPlugin({
-          logFunc: (level, message) => {
-            console.log(level, message);
-            return true;
-          },
-        }) as IWrapPackage,
         "wrap://ens/wraps.eth:ethereum-provider@1.1.0": ethereumProviderPlugin({
           connections: new Connections({
             networks: {
