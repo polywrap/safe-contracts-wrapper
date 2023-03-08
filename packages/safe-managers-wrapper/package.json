@@ -1,5 +1,5 @@
 {
-  "name": "@consideritdone/safe-wrapper",
+  "name": "@consideritdone/safe-managers",
   "version": "1.0.0",
   "description": "Gnosis safe wrappers",
   "files": [
