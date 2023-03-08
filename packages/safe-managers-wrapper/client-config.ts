@@ -44,8 +44,8 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
         "wrap://ipfs/QmbnAG8iCdVMPQK8tQ5qqFwLKjaLF8BUuuLYiozj7mLF8Y"
       )
       .addRedirect(
-        "wrap://ens/safe.contracts.polywrap.eth",
-        "wrap://ipfs/QmRNCw1GdbuSvrzexXjpFiMaQ6WcuSNLTLXd2MuSsP6b7B"
+        "wrap://ens/safe.wraps.eth:contracts@0.0.1",
+        "wrap://ipfs/QmVZo8xKbbx9aFJxGMfbmhLucBjJGKvT8LPuJTericEWou"
       )
   );
 }

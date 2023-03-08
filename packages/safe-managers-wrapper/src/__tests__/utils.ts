@@ -108,11 +108,7 @@ export const setupContractNetworks = async (
     {
       abi: JSON.stringify(factoryAbi),
       bytecode: factoryBytecode,
-      args: null,
-      options: {
-        maxPriorityFeePerGas: "40000000",
-        maxFeePerGas: "4000000000",
-      },
+      args: null
     },
     client,
     ethereumUri
@@ -128,11 +124,7 @@ export const setupContractNetworks = async (
     {
       abi: JSON.stringify(safeAbi),
       bytecode: safeBytecode,
-      args: null,
-      options: {
-        maxPriorityFeePerGas: "40000000",
-        maxFeePerGas: "4000000000",
-      },
+      args: null
     },
     client,
     ethereumUri
@@ -148,9 +140,6 @@ export const setupContractNetworks = async (
         threshold: safeOptions.threshold!,
       },
       safeDeploymentConfig: version === "1.3.0" ? null : { version: "1.2.0", saltNonce: Date.now().toString(), isL1Safe: null },
-      txOptions: {
-        gasLimit: "400000",
-      },
       customContractAdressess: {
         proxyFactoryContract: proxyContractAddress!,
         safeFactoryContract: safeContractAddress!,
@@ -171,10 +160,6 @@ export const setupContractNetworks = async (
       abi: JSON.stringify(multisendAbi),
       bytecode: multisendBytecode,
       args: null,
-      options: {
-        maxPriorityFeePerGas: "40000000",
-        maxFeePerGas: "4000000000",
-      },
     },
     client,
     ethereumUri
@@ -188,10 +173,6 @@ export const setupContractNetworks = async (
       abi: JSON.stringify(multisendCallOnlyAbi),
       bytecode: multisendCallOnlyBytecode,
       args: null,
-      options: {
-        maxPriorityFeePerGas: "40000000",
-        maxFeePerGas: "4000000000",
-      },
     },
     client,
     ethereumUri

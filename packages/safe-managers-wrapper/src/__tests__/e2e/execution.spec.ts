@@ -203,7 +203,6 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
 
       if (!signedTxRes.ok) fail(signedTxRes.error);
       const signedTx = signedTxRes.value;
-      // console.log()
       const executionResult = await client.invoke({
         uri: wrapperUri,
         method: "executeTransaction",
