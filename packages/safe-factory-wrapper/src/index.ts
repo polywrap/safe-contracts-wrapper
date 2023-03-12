@@ -31,12 +31,11 @@ export function getChainId(args: Args_getChainId): String {
 }
 
 export function deploySafe(args: Args_deploySafe): String {
-  const connection = args.connection;
   const payload = prepareSafeDeployPayload(
     args.safeAccountConfig,
     args.safeDeploymentConfig,
     args.customContractAdressess,
-    connection
+    args.connection
   );
 
   let txOptions: SafeContracts_Ethereum_TxOptions | null = null;
@@ -56,19 +55,23 @@ export function deploySafe(args: Args_deploySafe): String {
     }
   }
 
+  let connection: SafeContracts_Ethereum_Connection | null = null;
+  if (args.connection != null) {
+    connection = {
+      node: args.connection!.node,
+      networkNameOrChainId: args.connection!.networkNameOrChainId,
+    };
+  }
   const safeAddress = SafeContracts_Module.createProxy({
     safeMasterCopyAddress: payload.safeContractAddress,
     address: payload.safeFactoryContractAddress,
-    connection: {
-      node: connection!.node,
-      networkNameOrChainId: connection!.networkNameOrChainId,
-    },
+    connection,
     initializer: payload.initializer,
     saltNonce: <u32>BigInt.from(payload.saltNonce).toUInt64(),
     txOptions,
   }).unwrap();
 
-  const contractDeployed = isContractDeployed(safeAddress, connection);
+  const contractDeployed = isContractDeployed(safeAddress, args.connection);
   if (!contractDeployed) {
     throw new Error(
       "SafeProxy contract is not deployed on the current network"

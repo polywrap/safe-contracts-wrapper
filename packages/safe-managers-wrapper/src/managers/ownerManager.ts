@@ -7,7 +7,7 @@ import {
   Args_getThreshold,
   Args_isOwner,
   Env,
-  Ethereum_Module,
+  EthersUtils_Module,
   SafeContracts_Module,
 } from "../wrap";
 import { validateOwnerAddress, validateAddressIsNotOwner, validateThreshold, validateAddressIsOwnerAndGetPrev } from "../utils/validation";
@@ -57,7 +57,7 @@ export function encodeAddOwnerWithThresholdData(args: Args_encodeAddOwnerWithThr
     threshold = getThreshold({}, env);
   }
   validateThreshold(threshold, owners.length + 1);
-  const result = Ethereum_Module.encodeFunction({
+  const result = EthersUtils_Module.encodeFunction({
     method: "function addOwnerWithThreshold(address owner, uint256 _threshold) public",
     args: [args.ownerAddress, threshold.toString(16)],
   });
@@ -75,7 +75,7 @@ export function encodeRemoveOwnerData(args: Args_encodeRemoveOwnerData, env: Env
     threshold = getThreshold({}, env);
   }
   validateThreshold(threshold, owners.length - 1);
-  const result = Ethereum_Module.encodeFunction({
+  const result = EthersUtils_Module.encodeFunction({
     method: "function removeOwner(address prevOwner, address owner, uint256 _threshold) public",
     args: [prevOwnerAddress, args.ownerAddress, threshold.toString(16)],
   });
@@ -88,7 +88,7 @@ export function encodeSwapOwnerData(args: Args_encodeSwapOwnerData, env: Env): s
   const owners = getOwners({}, env);
   validateAddressIsNotOwner(args.newOwnerAddress, owners);
   const prevOwnerAddress = validateAddressIsOwnerAndGetPrev(args.oldOwnerAddress, owners);
-  const result = Ethereum_Module.encodeFunction({
+  const result = EthersUtils_Module.encodeFunction({
     method: "function swapOwner(address prevOwner, address oldOwner, address newOwner) public",
     args: [prevOwnerAddress, args.oldOwnerAddress, args.newOwnerAddress],
   });
@@ -97,7 +97,7 @@ export function encodeSwapOwnerData(args: Args_encodeSwapOwnerData, env: Env): s
 
 export function encodeChangeThresholdData(args: Args_encodeChangeThresholdData, env: Env): string {
   validateThreshold(args.threshold, getOwners({}, env).length);
-  const result = Ethereum_Module.encodeFunction({
+  const result = EthersUtils_Module.encodeFunction({
     method: "function changeThreshold(uint256 _threshold) public",
     args: [args.threshold.toString(16)],
   });

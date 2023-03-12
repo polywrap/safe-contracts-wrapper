@@ -10,6 +10,7 @@ import {
   SignSignature,
   SafeTransaction,
   Ethereum_TxOptions,
+  EthersUtils_Module,
 } from "./wrap";
 import { Args_getTransactionHash } from "./wrap/Module";
 import { adjustVInSignature, arrayify, createTransactionFromPartial, encodeMultiSendData, generatePreValidatedSignature } from "./utils";
@@ -52,7 +53,7 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
 
   const multiSendData = encodeMultiSendData(args.txs);
 
-  const data = Ethereum_Module.encodeFunction({
+  const data = EthersUtils_Module.encodeFunction({
     method: "function multiSend(bytes transactions)",
     args: [multiSendData],
   }).unwrap();

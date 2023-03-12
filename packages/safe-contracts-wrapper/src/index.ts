@@ -13,7 +13,7 @@ import {
   Ethereum_TxReceipt,
   Ethereum_TxOptions,
 } from "./wrap";
-import { BigInt, Box, wrap_debug_log } from "@polywrap/wasm-as";
+import { BigInt, Box } from "@polywrap/wasm-as";
 import { JSON } from "assemblyscript-json";
 import {
   Args_approvedHashes,
