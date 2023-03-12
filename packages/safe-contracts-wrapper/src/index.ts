@@ -29,6 +29,7 @@ import { ContractNetworksConfig } from "./wrap/ContractNetworksConfig";
 import {
   createTransactionFromPartial,
   encodeSignatures,
+  getFallbackHandlerCompability,
   getMultiSendCallOnlyContractAddress,
   getMultiSendContractAddress,
   getSafeContractAddress,
@@ -342,10 +343,38 @@ export function getSafeContractNetworks(args: Args_getSafeContractNetworks): Con
   const chainId = args.chainId;
   const isL1Safe: bool = args.isL1Safe != null ? args.isL1Safe!.unwrap() : false;
 
-  return {
-    multiSendAddress: getMultiSendContractAddress(safeContractVersion, chainId.toString()),
-    multiSendCallOnlyAddress: getMultiSendCallOnlyContractAddress(safeContractVersion, chainId.toString()),
-    safeMasterCopyAddress: getSafeContractAddress(safeContractVersion, chainId.toString(), !isL1Safe),
-    safeProxyFactoryAddress: getSafeFactoryContractAddress(safeContractVersion, chainId.toString()),
-  };
+  if (args.filter == null) {
+    return {
+      multiSendAddress: getMultiSendContractAddress(safeContractVersion, chainId.toString()),
+      multiSendCallOnlyAddress: getMultiSendCallOnlyContractAddress(safeContractVersion, chainId.toString()),
+      safeMasterCopyAddress: getSafeContractAddress(safeContractVersion, chainId.toString(), !isL1Safe),
+      safeProxyFactoryAddress: getSafeFactoryContractAddress(safeContractVersion, chainId.toString()),
+      fallbackHandlerAddress: getFallbackHandlerCompability(safeContractVersion, chainId.toString())
+    };
+  } else {
+    let safeContractNetworks: ContractNetworksConfig = {
+        multiSendAddress: null,
+        multiSendCallOnlyAddress: null,
+        safeMasterCopyAddress: null,
+        safeProxyFactoryAddress: null,
+        fallbackHandlerAddress: null,  
+    }
+
+    if (args.filter!.multiSendAddress != null && args.filter!.multiSendAddress!.unwrap()) {
+      safeContractNetworks.multiSendAddress = getMultiSendContractAddress(safeContractVersion, chainId.toString());
+    }
+    if (args.filter!.multiSendCallOnlyAddress != null && args.filter!.multiSendCallOnlyAddress!.unwrap()) {
+      safeContractNetworks.multiSendCallOnlyAddress = getMultiSendCallOnlyContractAddress(safeContractVersion, chainId.toString());
+    }
+    if (args.filter!.safeMasterCopyAddress != null && args.filter!.safeMasterCopyAddress!.unwrap()) {
+      safeContractNetworks.safeMasterCopyAddress = getSafeContractAddress(safeContractVersion, chainId.toString(), !isL1Safe);
+    }
+    if (args.filter!.safeProxyFactoryAddress != null && args.filter!.safeProxyFactoryAddress!.unwrap()) {
+      safeContractNetworks.safeProxyFactoryAddress = getSafeFactoryContractAddress(safeContractVersion, chainId.toString());
+    }
+    if (args.filter!.fallbackHandlerAddress != null && args.filter!.fallbackHandlerAddress!.unwrap()) {
+      safeContractNetworks.fallbackHandlerAddress = getFallbackHandlerCompability(safeContractVersion, chainId.toString());
+    }
+    return safeContractNetworks
+  }
 }

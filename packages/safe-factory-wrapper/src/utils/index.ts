@@ -7,14 +7,7 @@ import {
   SafeContracts_Module,
   EthersUtils_Module,
 } from "../wrap";
-import { BigInt, Result } from "@polywrap/wasm-as";
-import {
-  getMultisendCallOnlyContractMap,
-  getMultisendContractMap,
-  getSafeContractMap,
-  getSafeFactoryContractMap,
-} from "./contractAddresses";
-import { JSON } from "@polywrap/wasm-as";
+import { BigInt, Result, JSON } from "@polywrap/wasm-as";
 
 export const ZERO_ADDRESS = `0x${"0".repeat(40)}`;
 export const EMPTY_DATA = "0x";
@@ -80,68 +73,10 @@ export function encodeSetupCallData(accountConfig: SafeAccountConfig): string {
     args.push(ZERO_ADDRESS);
   }
 
-  return Ethereum_Module.encodeFunction({
+  return EthersUtils_Module.encodeFunction({
     method: "function setup(address[] _owners,uint256 _threshold,address to,bytes data,address fallbackHandler,address paymentToken,uint256 payment,address paymentReceiver)",
     args: args,
   }).unwrap();
-}
-
-export function getSafeContractAddress(
-  safeVersion: string,
-  chainId: string,
-  isL2: boolean = false
-): string {
-  const safeContractMap = getSafeContractMap(safeVersion, isL2);
-
-  const hasContractAddress = safeContractMap.has(chainId);
-
-  if (hasContractAddress) {
-    const contractAddress = safeContractMap.get(chainId);
-    return <string>contractAddress;
-  } else {
-    throw new Error("No safe contract for provided chainId");
-  }
-}
-
-export function getSafeFactoryContractAddress(
-  safeVersion: string,
-  chainId: string
-): string {
-  const safeFactoryContractMap = getSafeFactoryContractMap(safeVersion);
-
-  const hasContractAddress = safeFactoryContractMap.has(chainId);
-  if (hasContractAddress) {
-    const contractAddress = safeFactoryContractMap.get(chainId);
-    return <string>contractAddress;
-  } else {
-    throw new Error("No factory contract for provided chainId");
-  }
-}
-export function getMultiSendContractAddress(
-  safeVersion: string,
-  chainId: string
-): string | null {
-  const multiSendContractMap = getMultisendContractMap(safeVersion);
-
-  const hasMultisendContractAddress = multiSendContractMap.has(chainId);
-  if (hasMultisendContractAddress) {
-    return <string>multiSendContractMap.get(chainId);
-  } else {
-    return null;
-  }
-}
-export function getMultiSendCallOnlyContractAddress(
-  safeVersion: string,
-  chainId: string
-): string | null {
-  const multiSendContractMap = getMultisendCallOnlyContractMap(safeVersion);
-
-  const hasMultisendContractAddress = multiSendContractMap.has(chainId);
-  if (hasMultisendContractAddress) {
-    return <string>multiSendContractMap.get(chainId);
-  } else {
-    return null;
-  }
 }
 
 export function isContractDeployed(
@@ -173,7 +108,7 @@ export function getInitCode(
     return proxyCreationCode;
   }
 
-  const constructorData = Ethereum_Module.encodeParams({
+  const constructorData = EthersUtils_Module.encodeParams({
     types: ["address"],
     values: [gnosisSafeAddr],
   });
@@ -191,7 +126,7 @@ export function generateSalt(
   initializer: string
 ): Result<string, string> {
 
-  const saltNonce = Ethereum_Module.encodeParams({
+  const saltNonce = EthersUtils_Module.encodeParams({
     types: ["uint256"],
     values: [u32(parseInt(nonce)).toString()]
   }); 
@@ -199,7 +134,7 @@ export function generateSalt(
     return saltNonce;
   }
 
-  let initializerHash = EthersUtils_Module.keccak256Bytes({ bytes: initializer }); 
+  let initializerHash = EthersUtils_Module.keccak256({ value: initializer }); 
   if (initializerHash.isErr) {
     return Result.Err<string, string>(initializerHash.unwrapErr());
   }
@@ -207,7 +142,7 @@ export function generateSalt(
   let initHash = initializerHash.unwrap();
 
   let encodePacked = EthersUtils_Module.keccak256BytesEncodePacked({
-    bytes: initHash + saltNonce.unwrap().slice(2)
+    value: initHash + saltNonce.unwrap().slice(2)
   });
 
   if (encodePacked.isErr) {
@@ -224,7 +159,7 @@ export function generateSalt(
  * @salt [bytes32]
  * @initCode [bytes]
  */
-export function generateAddress2(
+export function calculateProxyAddress(
   address: string,
   salt: string,
   initCode: string

@@ -270,7 +270,7 @@ describe("SafeFactory", () => {
 
       if (!deploySafeResponse.ok) throw deploySafeResponse.error;
       expect(deploySafeResponse.value).not.toBeNull();
-      expect(deploySafeResponse.value?.safeAddress).toMatch("0x");
+      expect(deploySafeResponse.value).toMatch("0x");
     });
 
     it("should deploy a new Safe with saltNonce", async () => {
@@ -295,7 +295,7 @@ describe("SafeFactory", () => {
 
       if (!deploySafeResponse.ok) throw deploySafeResponse.error;
       expect(deploySafeResponse.value).not.toBeNull();
-      expect(deploySafeResponse.value?.safeAddress).toMatch("0x");
+      expect(deploySafeResponse.value).toMatch("0x");
     });
 
     // redundant ?
@@ -516,7 +516,7 @@ describe("SafeFactory", () => {
       if (!deploySafeResp.ok) throw deploySafeResp.error;
       expect(deploySafeResp.value).not.toBeNull();
 
-      expect(predictSafeResp.value).toEqual(deploySafeResp.value?.safeAddress);
+      expect(predictSafeResp.value).toEqual(deploySafeResp.value);
     });
   });
 });

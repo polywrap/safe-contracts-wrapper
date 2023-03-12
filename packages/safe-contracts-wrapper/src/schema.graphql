@@ -44,7 +44,12 @@ type Module {
     encode(method: String!, args: [String!]!): String!
     estimateGas(address: String!, method: String!, args: [String!]!, connection: Ethereum_Connection): BigInt!
 
-    getSafeContractNetworks(version: String!, chainId: String!, isL1Safe: Boolean): ContractNetworksConfig
+    getSafeContractNetworks(
+        version: String!,
+        chainId: String!,
+        isL1Safe: Boolean,
+        filter: ContractNetworksFilter
+    ): ContractNetworksConfig
 
 }
 
@@ -53,4 +58,13 @@ type ContractNetworksConfig {
     multiSendCallOnlyAddress: String
     safeMasterCopyAddress: String
     safeProxyFactoryAddress: String
+    fallbackHandlerAddress: String
+}
+
+type ContractNetworksFilter {
+    multiSendAddress: Boolean
+    multiSendCallOnlyAddress: Boolean
+    safeMasterCopyAddress: Boolean
+    safeProxyFactoryAddress: Boolean
+    fallbackHandlerAddress: Boolean
 }
