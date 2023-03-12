@@ -61,5 +61,9 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
         "ens/wraps.eth:ethereum@1.1.0",
         "wrap://ipfs/QmbnAG8iCdVMPQK8tQ5qqFwLKjaLF8BUuuLYiozj7mLF8Y"
       )
+      .addRedirect(
+        "wrap://ens/wraps.eth:ethereum-utils@0.0.1",
+        "wrap://ipfs/QmVNg4yFFngvtzxU49Hz1aujnwsxRbxhsGWf1iL1qwdtmN"
+      )
   );
 }

@@ -12,6 +12,8 @@ import {
   Args_isModuleEnabled,
   Ethereum_TxReceipt,
   Ethereum_TxOptions,
+  Args_encodeExecTransaction,
+  EthersUtils_Module
 } from "./wrap";
 import { BigInt, Box } from "@polywrap/wasm-as";
 import { JSON } from "assemblyscript-json";
@@ -459,3 +461,27 @@ export function getSafeContractNetworks(
     return safeContractNetworks;
   }
 }
+
+export function encodeExecTransaction(
+  args: Args_encodeExecTransaction
+): String {
+  const txData = args.safeTransaction.data;
+  const txSignatures = args.safeTransaction.signatures!;
+  const method = "function execTransaction(address,uint256,bytes calldata,uint8,uint256,uint256,uint256,address,address,bytes memory)";
+  const encodedSignatures = encodeSignatures(txSignatures);
+  return EthersUtils_Module.encodeFunction({
+    method,
+    args: [
+      txData.to,
+      txData.value.toString(),
+      txData.data,
+      txData.operation!.toString(),
+      txData.safeTxGas!.toString(),
+      txData.baseGas!.toString(),
+      txData.gasPrice!.toString(),
+      txData.gasToken!,
+      txData.refundReceiver!,
+      encodedSignatures,
+    ]
+  }).unwrap();
+} 

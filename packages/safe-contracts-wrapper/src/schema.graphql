@@ -4,7 +4,7 @@ import {
     Connection,
     TxOptions
 } into Ethereum from "wrap://ens/wraps.eth:ethereum@1.1.0"
-
+import { Module } into EthersUtils from "wrap://ens/wraps.eth:ethereum-utils@0.0.1"
 import {
     SignSignature,
     SafeTransaction,
@@ -50,6 +50,11 @@ type Module {
         isL1Safe: Boolean,
         filter: ContractNetworksFilter
     ): ContractNetworksConfig!
+
+    encodeExecTransaction(
+        safeAddress: String!,
+        safeTransaction: SafeTransaction!
+    ): String!
 
 }
 

@@ -13,7 +13,7 @@ import {
   Args_deploySafe,
   SafeContracts_Ethereum_Connection,
   EthersUtils_Module,
-  Args_deploySafeEncodedTransaction,
+  Args_encodeDeploySafe,
   Args_safeIsDeployed,
 } from "./wrap";
 
@@ -116,8 +116,8 @@ export function safeIsDeployed(args: Args_safeIsDeployed): bool {
   return isContractDeployed(args.safeAddress, args.connection);
 }
 
-export function deploySafeEncodedTransaction(
-  args: Args_deploySafeEncodedTransaction
+export function encodeDeploySafe(
+  args: Args_encodeDeploySafe
 ): String {
   const payload = prepareSafeDeployPayload(
     args.input.safeAccountConfig,
