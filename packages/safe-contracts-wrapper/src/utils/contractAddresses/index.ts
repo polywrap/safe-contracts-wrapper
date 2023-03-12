@@ -81,6 +81,6 @@ export function getFallbackHandlerCompabilityMap(
   if (version == "1.3.0") {
     return generateMap(compatibility_fallback_handler);
   } else {
-    throw new Error("Fallback handler only accepted in v1.3");
+    return new Map()
   }
 }

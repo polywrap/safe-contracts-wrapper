@@ -50,7 +50,7 @@ enum OperationType {
 }
 
 type CustomContract {
-    proxyFactoryContract: String!
+    proxyFactoryContract: String
     safeFactoryContract: String
 }
 

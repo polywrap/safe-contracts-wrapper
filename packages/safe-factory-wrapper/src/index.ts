@@ -162,7 +162,7 @@ function prepareSafeDeployPayload(
   if (customContractAdressess != null) {
     if (customContractAdressess.proxyFactoryContract != null) {
       safeFactoryContractAddress =
-        customContractAdressess.proxyFactoryContract;
+        customContractAdressess.proxyFactoryContract!;
     }
     if (customContractAdressess.safeFactoryContract != null) {
       safeContractAddress = customContractAdressess.safeFactoryContract!;
