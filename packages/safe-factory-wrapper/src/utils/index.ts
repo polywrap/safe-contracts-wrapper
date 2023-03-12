@@ -6,8 +6,11 @@ import {
   SafeContracts_Ethereum_Connection,
   SafeContracts_Module,
   EthersUtils_Module,
+  CustomContract,
+  Datetime_Module,
+  DeploymentPayload,
 } from "../wrap";
-import { BigInt, Result, JSON } from "@polywrap/wasm-as";
+import { BigInt, Result, JSON, Box } from "@polywrap/wasm-as";
 
 export const ZERO_ADDRESS = `0x${"0".repeat(40)}`;
 export const EMPTY_DATA = "0x";
@@ -176,4 +179,109 @@ export function calculateProxyAddress(
   }
 
   return initCodeHash
+}
+
+export function prepareSafeDeployPayload(
+  safeAccountConfig: SafeAccountConfig,
+  safeDeploymentConfig: SafeDeploymentConfig | null,
+  customContractAdressess: CustomContract | null,
+  connection: Ethereum_Connection | null
+): DeploymentPayload {
+  validateSafeAccountConfig(safeAccountConfig);
+  if (safeDeploymentConfig != null) {
+    validateSafeDeploymentConfig(safeDeploymentConfig);
+  }
+
+  let saltNonce: string = "";
+  let safeContractVersion: string = "1.3.0";
+  let isL1Safe = false;
+
+  // TODO: handle partial config, fallback on each option separately
+  if (safeDeploymentConfig != null) {
+    if (safeDeploymentConfig.saltNonce != null) {
+      saltNonce = safeDeploymentConfig.saltNonce;
+    }
+    if (safeDeploymentConfig.version != null) {
+      safeContractVersion = safeDeploymentConfig.version!;
+    }
+    if (safeDeploymentConfig.isL1Safe) {
+      isL1Safe = true;
+    }
+  } else {
+    const timestamp = Datetime_Module.currentTimestamp({}).unwrap();
+    // TODO: Add Math.random() to timestamp
+    const res = timestamp.mul(1000);
+    saltNonce = res.toString();
+    safeContractVersion = "1.3.0";
+  }
+
+  const chainId = Ethereum_Module.getChainId({ connection: connection }).unwrap();
+
+  let safeContractAddress: string = "";
+  let safeFactoryContractAddress: string = "";
+
+  if (customContractAdressess != null) {
+    if (customContractAdressess.proxyFactoryContract != null) {
+      safeFactoryContractAddress =
+        customContractAdressess.proxyFactoryContract!;
+    }
+    if (customContractAdressess.safeFactoryContract != null) {
+      safeContractAddress = customContractAdressess.safeFactoryContract!;
+    }
+  }
+
+  if (safeContractAddress == "") {
+    const contracts = SafeContracts_Module.getSafeContractNetworks({
+      version: safeContractVersion,
+      chainId: chainId.toString(),
+      isL1Safe: Box.from(isL1Safe),
+      filter: {
+        safeMasterCopyAddress: true,
+        safeProxyFactoryAddress: false,
+        multiSendAddress: false,
+        multiSendCallOnlyAddress: false,
+        fallbackHandlerAddress: false,
+      },
+    }).unwrap();
+    safeContractAddress = contracts.safeMasterCopyAddress!;
+  }
+
+  if (safeFactoryContractAddress == "") {
+    const contracts = SafeContracts_Module.getSafeContractNetworks({
+      version: safeContractVersion,
+      chainId: chainId.toString(),
+      isL1Safe: Box.from(isL1Safe),
+      filter: {
+        safeMasterCopyAddress: false,
+        safeProxyFactoryAddress: true,
+        multiSendAddress: false,
+        multiSendCallOnlyAddress: false,
+        fallbackHandlerAddress: false,
+      },
+    }).unwrap();
+    safeFactoryContractAddress = contracts.safeProxyFactoryAddress!;
+  }
+  if (safeAccountConfig.fallbackHandler == null) {
+    const contracts = SafeContracts_Module.getSafeContractNetworks({
+      version: safeContractVersion,
+      chainId: chainId.toString(),
+      isL1Safe: Box.from(isL1Safe),
+      filter: {
+        safeMasterCopyAddress: false,
+        safeProxyFactoryAddress: false,
+        multiSendAddress: false,
+        multiSendCallOnlyAddress: false,
+        fallbackHandlerAddress: true,
+      },
+    }).unwrap()
+    safeAccountConfig.fallbackHandler = contracts.fallbackHandlerAddress;
+  }
+
+  const initializer = encodeSetupCallData(safeAccountConfig);
+  return {
+    initializer,
+    saltNonce,
+    safeFactoryContractAddress,
+    safeContractAddress,
+  };
 }

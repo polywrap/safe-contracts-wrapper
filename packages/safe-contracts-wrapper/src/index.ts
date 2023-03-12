@@ -40,7 +40,7 @@ import {
 export function encode(args: Args_encode): string {
   return Ethereum_Module.encodeFunction({
     method: args.method,
-    args: args.args
+    args: args.args,
   }).unwrap();
 }
 
@@ -67,43 +67,68 @@ export function createProxy(args: Args_createProxy): string {
   let txOptions: Ethereum_TxOptions | null = null;
 
   if (args.txOptions != null) {
-    txOptions = { value: null, gasLimit: null, gasPrice: null, maxFeePerGas: null, maxPriorityFeePerGas: null, nonce: null };
+    txOptions = {
+      value: null,
+      gasLimit: null,
+      gasPrice: null,
+      maxFeePerGas: null,
+      maxPriorityFeePerGas: null,
+      nonce: null,
+    };
 
     if (args.txOptions!.value) {
       txOptions.value = args.txOptions!.value;
     }
     if (!args.txOptions!.gasPrice) {
-      txOptions.gasPrice = Ethereum_Module.getGasPrice({ connection: args.connection }).unwrap();
+      txOptions.gasPrice = Ethereum_Module.getGasPrice({
+        connection: args.connection,
+      }).unwrap();
     }
 
     if (!args.txOptions!.gasLimit) {
       txOptions.gasLimit = Ethereum_Module.estimateContractCallGas({
         address: args.address,
         method: "function createProxyWithNonce(address,bytes memory,uint256)",
-        args: [args.safeMasterCopyAddress, args.initializer, args.saltNonce.toString()],
+        args: [
+          args.safeMasterCopyAddress,
+          args.initializer,
+          args.saltNonce.toString(),
+        ],
         connection: args.connection,
-        options: txOptions
+        options: txOptions,
       }).unwrap();
     }
-
   }
 
   const tx = Ethereum_Module.callContractMethodAndWait({
     address: args.address,
     method: "function createProxyWithNonce(address,bytes memory,uint256)",
-    args: [args.safeMasterCopyAddress, args.initializer, args.saltNonce.toString()],
+    args: [
+      args.safeMasterCopyAddress,
+      args.initializer,
+      args.saltNonce.toString(),
+    ],
     connection: args.connection,
     options: txOptions,
   }).unwrap();
 
   // ProxyCreation(address)
-  const proxyCreation_1_2_0 = "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80";
+  const proxyCreation_1_2_0 =
+    "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80";
   // ProxyCreation(address,address)
-  const proxyCreation_1_3_0 = "0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235";
-  const index = tx.logs.findIndex((log: Ethereum_Log) => log.topics[0] == proxyCreation_1_2_0 || log.topics[0] == proxyCreation_1_3_0);
+  const proxyCreation_1_3_0 =
+    "0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235";
+  const index = tx.logs.findIndex(
+    (log: Ethereum_Log) =>
+      log.topics[0] == proxyCreation_1_2_0 ||
+      log.topics[0] == proxyCreation_1_3_0
+  );
 
   if (index == -1) {
-    throw new Error("Couldn't fetch address from event logs from transaction " + tx.transactionHash)
+    throw new Error(
+      "Couldn't fetch address from event logs from transaction " +
+        tx.transactionHash
+    );
   }
 
   const address = "0x" + tx.logs[index].data.slice(32, 72);
@@ -190,7 +215,10 @@ export function isOwner(args: Args_isOwner): bool {
 }
 
 export function getTransactionHash(args: Args_getTransactionHash): string {
-  const recreatedTx = createTransactionFromPartial(args.safeTransactionData, null);
+  const recreatedTx = createTransactionFromPartial(
+    args.safeTransactionData,
+    null
+  );
 
   const contractArgs = getTransactionHashArgs(recreatedTx);
 
@@ -208,7 +236,8 @@ export function getTransactionHash(args: Args_getTransactionHash): string {
 export function approvedHashes(args: Args_approvedHashes): BigInt {
   const result = Ethereum_Module.callContractView({
     address: args.address,
-    method: "function approvedHashes(address owner, bytes32 hash) public view returns (uint256)",
+    method:
+      "function approvedHashes(address owner, bytes32 hash) public view returns (uint256)",
     args: [args.ownerAddress, args.hash],
     connection: args.connection,
   }).unwrap();
@@ -216,16 +245,28 @@ export function approvedHashes(args: Args_approvedHashes): BigInt {
 }
 
 export function approveHash(args: Args_approveHash): Ethereum_TxReceipt {
-  const signerAddress = Ethereum_Module.getSignerAddress({ connection: args.connection }).unwrap();
+  const signerAddress = Ethereum_Module.getSignerAddress({
+    connection: args.connection,
+  }).unwrap();
 
-  const addressIsOwner = isOwner({ address: args.safeAddress, ownerAddress: signerAddress, connection: args.connection });
+  const addressIsOwner = isOwner({
+    address: args.safeAddress,
+    ownerAddress: signerAddress,
+    connection: args.connection,
+  });
 
   if (!addressIsOwner) {
     throw new Error("Transaction hashes can only be approved by Safe owners");
   }
 
-  if (args.options != null && args.options!.gasPrice && args.options!.gasLimit) {
-    throw new Error("Cannot specify gas and gasLimit together in transaction options");
+  if (
+    args.options != null &&
+    args.options!.gasPrice &&
+    args.options!.gasLimit
+  ) {
+    throw new Error(
+      "Cannot specify gas and gasLimit together in transaction options"
+    );
   }
 
   if (args.options != null && !args.options!.gasLimit) {
@@ -249,8 +290,10 @@ export function approveHash(args: Args_approveHash): Ethereum_TxReceipt {
       gasPrice: args.options ? args.options!.gasPrice : null,
       value: null,
       maxFeePerGas: args.options ? args.options!.maxFeePerGas : null,
-      maxPriorityFeePerGas: args.options ? BigInt.from(args.options!.maxPriorityFeePerGas) : null,
-      nonce: nonce ? Box.from(nonce.toUInt32()) : null
+      maxPriorityFeePerGas: args.options
+        ? BigInt.from(args.options!.maxPriorityFeePerGas)
+        : null,
+      nonce: nonce ? Box.from(nonce.toUInt32()) : null,
     },
   }).unwrap();
 
@@ -260,7 +303,8 @@ export function approveHash(args: Args_approveHash): Ethereum_TxReceipt {
 export function getModules(args: Args_getModules): string[] {
   const resp = Ethereum_Module.callContractView({
     address: args.address,
-    method: "function getModulesPaginated(address,uint256) external view returns (address[] memory,address)",
+    method:
+      "function getModulesPaginated(address,uint256) external view returns (address[] memory,address)",
     args: ["0x0000000000000000000000000000000000000001", "15"],
     connection: args.connection,
   }).unwrap();
@@ -277,7 +321,8 @@ export function getModules(args: Args_getModules): string[] {
 export function isModuleEnabled(args: Args_isModuleEnabled): bool {
   const resp = Ethereum_Module.callContractView({
     address: args.address,
-    method: "function isModuleEnabled(address module) public view returns (bool)",
+    method:
+      "function isModuleEnabled(address module) public view returns (bool)",
     args: [args.moduleAddress],
     connection: args.connection,
   }).unwrap();
@@ -288,7 +333,9 @@ export function isModuleEnabled(args: Args_isModuleEnabled): bool {
   }
 }
 
-export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt {
+export function execTransaction(
+  args: Args_execTransaction
+): Ethereum_TxReceipt {
   const txData = args.safeTransaction.data;
   const txSignatures = args.safeTransaction.signatures!;
 
@@ -297,8 +344,10 @@ export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt 
     gasPrice: args.txOptions != null ? args.txOptions!.gasPrice : null,
     value: args.txOptions != null ? args.txOptions!.value : null,
     maxFeePerGas: args.txOptions ? args.txOptions!.maxFeePerGas : null,
-    maxPriorityFeePerGas: args.txOptions ? args.txOptions!.maxPriorityFeePerGas : null,
-    nonce: args.txOptions ? args.txOptions!.nonce : null
+    maxPriorityFeePerGas: args.txOptions
+      ? args.txOptions!.maxPriorityFeePerGas
+      : null,
+    nonce: args.txOptions ? args.txOptions!.nonce : null,
   };
 
   const method =
@@ -338,43 +387,75 @@ export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt 
   }).unwrap();
 }
 
-export function getSafeContractNetworks(args: Args_getSafeContractNetworks): ContractNetworksConfig {
+export function getSafeContractNetworks(
+  args: Args_getSafeContractNetworks
+): ContractNetworksConfig {
   const safeContractVersion = args.version;
   const chainId = args.chainId;
-  const isL1Safe: bool = args.isL1Safe != null ? args.isL1Safe!.unwrap() : false;
+  const isL1Safe: bool =
+    args.isL1Safe != null ? args.isL1Safe!.unwrap() : false;
 
   if (args.filter == null) {
     return {
-      multiSendAddress: getMultiSendContractAddress(safeContractVersion, chainId.toString()),
-      multiSendCallOnlyAddress: getMultiSendCallOnlyContractAddress(safeContractVersion, chainId.toString()),
-      safeMasterCopyAddress: getSafeContractAddress(safeContractVersion, chainId.toString(), !isL1Safe),
-      safeProxyFactoryAddress: getSafeFactoryContractAddress(safeContractVersion, chainId.toString()),
-      fallbackHandlerAddress: getFallbackHandlerCompability(safeContractVersion, chainId.toString())
+      multiSendAddress: getMultiSendContractAddress(
+        safeContractVersion,
+        chainId.toString()
+      ),
+      multiSendCallOnlyAddress: getMultiSendCallOnlyContractAddress(
+        safeContractVersion,
+        chainId.toString()
+      ),
+      safeMasterCopyAddress: getSafeContractAddress(
+        safeContractVersion,
+        chainId.toString(),
+        !isL1Safe
+      ),
+      safeProxyFactoryAddress: getSafeFactoryContractAddress(
+        safeContractVersion,
+        chainId.toString()
+      ),
+      fallbackHandlerAddress: getFallbackHandlerCompability(
+        safeContractVersion,
+        chainId.toString()
+      ),
     };
   } else {
     let safeContractNetworks: ContractNetworksConfig = {
-        multiSendAddress: null,
-        multiSendCallOnlyAddress: null,
-        safeMasterCopyAddress: null,
-        safeProxyFactoryAddress: null,
-        fallbackHandlerAddress: null,  
-    }
+      multiSendAddress: null,
+      multiSendCallOnlyAddress: null,
+      safeMasterCopyAddress: null,
+      safeProxyFactoryAddress: null,
+      fallbackHandlerAddress: null,
+    };
 
     if (args.filter!.multiSendAddress) {
-      safeContractNetworks.multiSendAddress = getMultiSendContractAddress(safeContractVersion, chainId.toString());
+      safeContractNetworks.multiSendAddress = getMultiSendContractAddress(
+        safeContractVersion,
+        chainId.toString()
+      );
     }
     if (args.filter!.multiSendCallOnlyAddress) {
-      safeContractNetworks.multiSendCallOnlyAddress = getMultiSendCallOnlyContractAddress(safeContractVersion, chainId.toString());
+      safeContractNetworks.multiSendCallOnlyAddress =
+        getMultiSendCallOnlyContractAddress(
+          safeContractVersion,
+          chainId.toString()
+        );
     }
     if (args.filter!.safeMasterCopyAddress) {
-      safeContractNetworks.safeMasterCopyAddress = getSafeContractAddress(safeContractVersion, chainId.toString(), !isL1Safe);
+      safeContractNetworks.safeMasterCopyAddress = getSafeContractAddress(
+        safeContractVersion,
+        chainId.toString(),
+        !isL1Safe
+      );
     }
     if (args.filter!.safeProxyFactoryAddress) {
-      safeContractNetworks.safeProxyFactoryAddress = getSafeFactoryContractAddress(safeContractVersion, chainId.toString());
+      safeContractNetworks.safeProxyFactoryAddress =
+        getSafeFactoryContractAddress(safeContractVersion, chainId.toString());
     }
     if (args.filter!.fallbackHandlerAddress) {
-      safeContractNetworks.fallbackHandlerAddress = getFallbackHandlerCompability(safeContractVersion, chainId.toString());
+      safeContractNetworks.fallbackHandlerAddress =
+        getFallbackHandlerCompability(safeContractVersion, chainId.toString());
     }
-    return safeContractNetworks
+    return safeContractNetworks;
   }
 }

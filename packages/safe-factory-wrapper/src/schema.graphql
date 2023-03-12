@@ -17,27 +17,26 @@ import * into Logger from "wrap://ens/wraps.eth:logger@1.0.0"
 """
 
 type Module {
-    getChainId(
-        connection: Ethereum_Connection
-    ): String
-
     deploySafe(
-        safeAccountConfig: SafeAccountConfig!
-        safeDeploymentConfig: SafeDeploymentConfig
-        customContractAdressess: CustomContract
-        connection: Ethereum_Connection
+        input: DeploymentInput!
         txOptions: Ethereum_TxOptions
     ): String!
 
     predictSafeAddress(
-        safeAccountConfig: SafeAccountConfig!
-        safeDeploymentConfig: SafeDeploymentConfig
-        customContractAdressess: CustomContract
-        connection: Ethereum_Connection
+        input: DeploymentInput!
+    ): String!
+
+    safeIsDeployed(
+        safeAddress: String!
+        connection: Ethereum_Connection!
+    ): Boolean!
+
+    deploySafeEncodedTransaction(
+        input: DeploymentInput!
     ): String!
 }
 
-type DeploymentData {
+type DeploymentInput {
     safeAccountConfig: SafeAccountConfig!
     safeDeploymentConfig: SafeDeploymentConfig
     customContractAdressess: CustomContract
@@ -54,7 +53,7 @@ type CustomContract {
     safeFactoryContract: String
 }
 
-type SafePayload {
+type DeploymentPayload {
     safeContractAddress: String!
     safeFactoryContractAddress: String!
     initializer: String!

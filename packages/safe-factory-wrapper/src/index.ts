@@ -1,41 +1,28 @@
-import { BigInt, Box } from "@polywrap/wasm-as";
+import { BigInt } from "@polywrap/wasm-as";
 import {
-  encodeSetupCallData,
   calculateProxyAddress,
   generateSalt,
   getInitCode,
-  validateSafeAccountConfig,
-  validateSafeDeploymentConfig,
   isContractDeployed,
+  prepareSafeDeployPayload,
 } from "./utils";
 import {
-  Args_getChainId,
   Args_predictSafeAddress,
-  Datetime_Module,
-  Ethereum_Module,
-  SafePayload,
   SafeContracts_Ethereum_TxOptions,
   SafeContracts_Module,
-  SafeAccountConfig,
-  SafeDeploymentConfig,
-  CustomContract,
-  Ethereum_Connection,
   Args_deploySafe,
   SafeContracts_Ethereum_Connection,
+  EthersUtils_Module,
+  Args_deploySafeEncodedTransaction,
+  Args_safeIsDeployed,
 } from "./wrap";
-
-export function getChainId(args: Args_getChainId): String {
-  return Ethereum_Module.getChainId({
-    connection: args.connection,
-  }).unwrap();
-}
 
 export function deploySafe(args: Args_deploySafe): String {
   const payload = prepareSafeDeployPayload(
-    args.safeAccountConfig,
-    args.safeDeploymentConfig,
-    args.customContractAdressess,
-    args.connection
+    args.input.safeAccountConfig,
+    args.input.safeDeploymentConfig,
+    args.input.customContractAdressess,
+    args.input.connection
   );
 
   let txOptions: SafeContracts_Ethereum_TxOptions | null = null;
@@ -56,10 +43,10 @@ export function deploySafe(args: Args_deploySafe): String {
   }
 
   let connection: SafeContracts_Ethereum_Connection | null = null;
-  if (args.connection != null) {
+  if (args.input.connection != null) {
     connection = {
-      node: args.connection!.node,
-      networkNameOrChainId: args.connection!.networkNameOrChainId,
+      node: args.input.connection!.node,
+      networkNameOrChainId: args.input.connection!.networkNameOrChainId,
     };
   }
   const safeAddress = SafeContracts_Module.createProxy({
@@ -71,7 +58,10 @@ export function deploySafe(args: Args_deploySafe): String {
     txOptions,
   }).unwrap();
 
-  const contractDeployed = isContractDeployed(safeAddress, args.connection);
+  const contractDeployed = isContractDeployed(
+    safeAddress,
+    args.input.connection
+  );
   if (!contractDeployed) {
     throw new Error(
       "SafeProxy contract is not deployed on the current network"
@@ -83,10 +73,10 @@ export function deploySafe(args: Args_deploySafe): String {
 
 export function predictSafeAddress(args: Args_predictSafeAddress): String {
   const payload = prepareSafeDeployPayload(
-    args.safeAccountConfig,
-    args.safeDeploymentConfig,
-    args.customContractAdressess,
-    args.connection
+    args.input.safeAccountConfig,
+    args.input.safeDeploymentConfig,
+    args.input.customContractAdressess,
+    args.input.connection
   );
 
   const salt = generateSalt(payload.saltNonce, payload.initializer);
@@ -94,17 +84,20 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
     throw salt.err().unwrap();
   }
 
-  const connection: SafeContracts_Ethereum_Connection | null = {
-    node: args.connection!.node,
-    networkNameOrChainId: args.connection!.networkNameOrChainId,
-  };
+  let connection: SafeContracts_Ethereum_Connection | null = null;
+  if (args.input.connection != null) {
+    connection = {
+      node: args.input.connection!.node,
+      networkNameOrChainId: args.input.connection!.networkNameOrChainId,
+    };
+  }
   const initCode = getInitCode(
     payload.safeFactoryContractAddress,
     payload.safeContractAddress,
     connection
   );
   if (initCode.isErr) {
-    throw initCode.err().unwrap()
+    throw initCode.err().unwrap();
   }
 
   let derivedAddress = calculateProxyAddress(
@@ -119,107 +112,26 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
   return derivedAddress.unwrap();
 }
 
-function prepareSafeDeployPayload(
-  safeAccountConfig: SafeAccountConfig,
-  safeDeploymentConfig: SafeDeploymentConfig | null,
-  customContractAdressess: CustomContract | null,
-  connection: Ethereum_Connection | null
-): SafePayload {
-  validateSafeAccountConfig(safeAccountConfig);
-  if (safeDeploymentConfig != null) {
-    validateSafeDeploymentConfig(safeDeploymentConfig);
-  }
+export function safeIsDeployed(args: Args_safeIsDeployed): bool {
+  return isContractDeployed(args.safeAddress, args.connection);
+}
 
-  let saltNonce: string = "";
-  let safeContractVersion: string = "1.3.0";
-  let isL1Safe = false;
+export function deploySafeEncodedTransaction(
+  args: Args_deploySafeEncodedTransaction
+): String {
+  const payload = prepareSafeDeployPayload(
+    args.input.safeAccountConfig,
+    args.input.safeDeploymentConfig,
+    args.input.customContractAdressess,
+    args.input.connection
+  );
 
-  // TODO: handle partial config, fallback on each option separately
-  if (safeDeploymentConfig != null) {
-    if (safeDeploymentConfig.saltNonce != null) {
-      saltNonce = safeDeploymentConfig.saltNonce;
-    }
-    if (safeDeploymentConfig.version != null) {
-      safeContractVersion = safeDeploymentConfig.version!;
-    }
-    if (safeDeploymentConfig.isL1Safe) {
-      isL1Safe = true;
-    }
-  } else {
-    const timestamp = Datetime_Module.currentTimestamp({}).unwrap();
-    // TODO: Add Math.random() to timestamp
-    const res = timestamp.mul(1000);
-    saltNonce = res.toString();
-    safeContractVersion = "1.3.0";
-  }
-
-  const chainId = getChainId({ connection: connection });
-
-  let safeContractAddress: string = "";
-  let safeFactoryContractAddress: string = "";
-
-  if (customContractAdressess != null) {
-    if (customContractAdressess.proxyFactoryContract != null) {
-      safeFactoryContractAddress =
-        customContractAdressess.proxyFactoryContract!;
-    }
-    if (customContractAdressess.safeFactoryContract != null) {
-      safeContractAddress = customContractAdressess.safeFactoryContract!;
-    }
-  }
-
-  if (safeContractAddress == "") {
-    const contracts = SafeContracts_Module.getSafeContractNetworks({
-      version: safeContractVersion,
-      chainId: chainId.toString(),
-      isL1Safe: Box.from(isL1Safe),
-      filter: {
-        safeMasterCopyAddress: true,
-        safeProxyFactoryAddress: false,
-        multiSendAddress: false,
-        multiSendCallOnlyAddress: false,
-        fallbackHandlerAddress: false,
-      },
-    }).unwrap();
-    safeContractAddress = contracts.safeMasterCopyAddress!;
-  }
-
-  if (safeFactoryContractAddress == "") {
-    const contracts = SafeContracts_Module.getSafeContractNetworks({
-      version: safeContractVersion,
-      chainId: chainId.toString(),
-      isL1Safe: Box.from(isL1Safe),
-      filter: {
-        safeMasterCopyAddress: false,
-        safeProxyFactoryAddress: true,
-        multiSendAddress: false,
-        multiSendCallOnlyAddress: false,
-        fallbackHandlerAddress: false,
-      },
-    }).unwrap();
-    safeFactoryContractAddress = contracts.safeProxyFactoryAddress!;
-  }
-  if (safeAccountConfig.fallbackHandler == null) {
-    const contracts = SafeContracts_Module.getSafeContractNetworks({
-      version: safeContractVersion,
-      chainId: chainId.toString(),
-      isL1Safe: Box.from(isL1Safe),
-      filter: {
-        safeMasterCopyAddress: false,
-        safeProxyFactoryAddress: false,
-        multiSendAddress: false,
-        multiSendCallOnlyAddress: false,
-        fallbackHandlerAddress: true,
-      },
-    }).unwrap()
-    safeAccountConfig.fallbackHandler = contracts.fallbackHandlerAddress;
-  }
-
-  const initializer = encodeSetupCallData(safeAccountConfig);
-  return {
-    initializer,
-    saltNonce,
-    safeFactoryContractAddress,
-    safeContractAddress,
-  };
+  return EthersUtils_Module.encodeFunction({
+    method: "function createProxyWithNonce(address,bytes memory,uint256)",
+    args: [
+      payload.safeContractAddress,
+      payload.initializer,
+      payload.saltNonce.toString(),
+    ],
+  }).unwrap();
 }

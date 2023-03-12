@@ -52,7 +52,7 @@ export function getMultiSendAddress(args: Args_getMultiSendAddress, env: Env): s
       safeProxyFactoryAddress: false,
       fallbackHandlerAddress: false
     }
-  }).unwrap()!;
+  }).unwrap();
 
   return contractNetworks.multiSendAddress!;
 }
@@ -71,7 +71,7 @@ export function getMultiSendCallOnlyAddress(args: Args_getMultiSendCallOnlyAddre
       safeProxyFactoryAddress: false,
       fallbackHandlerAddress: false
     }
-  }).unwrap()!;
+  }).unwrap();
 
   return contractNetworks.multiSendCallOnlyAddress!;
 }
