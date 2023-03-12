@@ -174,14 +174,14 @@ function prepareSafeDeployPayload(
       chainId: chainId.toString(),
       isL1Safe: Box.from(isL1Safe),
       filter: {
-        safeMasterCopyAddress: Box.from(true),
-        safeProxyFactoryAddress: Box.from(false),
-        multiSendAddress: Box.from(false),
-        multiSendCallOnlyAddress: Box.from(false),
-        fallbackHandlerAddress: Box.from(false),
+        safeMasterCopyAddress: true,
+        safeProxyFactoryAddress: false,
+        multiSendAddress: false,
+        multiSendCallOnlyAddress: false,
+        fallbackHandlerAddress: false,
       },
     }).unwrap();
-    safeContractAddress = contracts!.safeMasterCopyAddress!;
+    safeContractAddress = contracts.safeMasterCopyAddress!;
   }
 
   if (safeFactoryContractAddress == "") {
@@ -190,14 +190,14 @@ function prepareSafeDeployPayload(
       chainId: chainId.toString(),
       isL1Safe: Box.from(isL1Safe),
       filter: {
-        safeMasterCopyAddress: Box.from(false),
-        safeProxyFactoryAddress: Box.from(true),
-        multiSendAddress: Box.from(false),
-        multiSendCallOnlyAddress: Box.from(false),
-        fallbackHandlerAddress: Box.from(false),
+        safeMasterCopyAddress: false,
+        safeProxyFactoryAddress: true,
+        multiSendAddress: false,
+        multiSendCallOnlyAddress: false,
+        fallbackHandlerAddress: false,
       },
     }).unwrap();
-    safeFactoryContractAddress = contracts!.safeProxyFactoryAddress!;
+    safeFactoryContractAddress = contracts.safeProxyFactoryAddress!;
   }
   if (safeAccountConfig.fallbackHandler == null) {
     const contracts = SafeContracts_Module.getSafeContractNetworks({
@@ -205,14 +205,14 @@ function prepareSafeDeployPayload(
       chainId: chainId.toString(),
       isL1Safe: Box.from(isL1Safe),
       filter: {
-        safeMasterCopyAddress: Box.from(false),
-        safeProxyFactoryAddress: Box.from(false),
-        multiSendAddress: Box.from(false),
-        multiSendCallOnlyAddress: Box.from(false),
-        fallbackHandlerAddress: Box.from(true),
+        safeMasterCopyAddress: false,
+        safeProxyFactoryAddress: false,
+        multiSendAddress: false,
+        multiSendCallOnlyAddress: false,
+        fallbackHandlerAddress: true,
       },
     }).unwrap()
-    safeAccountConfig.fallbackHandler = contracts!.fallbackHandlerAddress;
+    safeAccountConfig.fallbackHandler = contracts.fallbackHandlerAddress;
   }
 
   const initializer = encodeSetupCallData(safeAccountConfig);

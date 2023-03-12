@@ -73,18 +73,18 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
       isL1Safe: Box.from(isL1Safe),
       version: version,
       filter: {
-        safeMasterCopyAddress: Box.from(false),
-        safeProxyFactoryAddress: Box.from(false),
-        multiSendAddress: Box.from(true),
-        multiSendCallOnlyAddress: Box.from(true),
-        fallbackHandlerAddress: Box.from(true),
+        safeMasterCopyAddress: false,
+        safeProxyFactoryAddress: false,
+        multiSendAddress: true,
+        multiSendCallOnlyAddress: true,
+        fallbackHandlerAddress: true,
       },
     }).unwrap();
 
     if (args.onlyCalls) {
-      multiSendAddress = contractNetworks!.multiSendCallOnlyAddress!;
+      multiSendAddress = contractNetworks.multiSendCallOnlyAddress!;
     } else {
-      multiSendAddress = contractNetworks!.multiSendAddress!;
+      multiSendAddress = contractNetworks.multiSendAddress!;
     }
   }
 

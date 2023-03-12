@@ -360,19 +360,19 @@ export function getSafeContractNetworks(args: Args_getSafeContractNetworks): Con
         fallbackHandlerAddress: null,  
     }
 
-    if (args.filter!.multiSendAddress != null && args.filter!.multiSendAddress!.unwrap()) {
+    if (args.filter!.multiSendAddress) {
       safeContractNetworks.multiSendAddress = getMultiSendContractAddress(safeContractVersion, chainId.toString());
     }
-    if (args.filter!.multiSendCallOnlyAddress != null && args.filter!.multiSendCallOnlyAddress!.unwrap()) {
+    if (args.filter!.multiSendCallOnlyAddress) {
       safeContractNetworks.multiSendCallOnlyAddress = getMultiSendCallOnlyContractAddress(safeContractVersion, chainId.toString());
     }
-    if (args.filter!.safeMasterCopyAddress != null && args.filter!.safeMasterCopyAddress!.unwrap()) {
+    if (args.filter!.safeMasterCopyAddress) {
       safeContractNetworks.safeMasterCopyAddress = getSafeContractAddress(safeContractVersion, chainId.toString(), !isL1Safe);
     }
-    if (args.filter!.safeProxyFactoryAddress != null && args.filter!.safeProxyFactoryAddress!.unwrap()) {
+    if (args.filter!.safeProxyFactoryAddress) {
       safeContractNetworks.safeProxyFactoryAddress = getSafeFactoryContractAddress(safeContractVersion, chainId.toString());
     }
-    if (args.filter!.fallbackHandlerAddress != null && args.filter!.fallbackHandlerAddress!.unwrap()) {
+    if (args.filter!.fallbackHandlerAddress) {
       safeContractNetworks.fallbackHandlerAddress = getFallbackHandlerCompability(safeContractVersion, chainId.toString());
     }
     return safeContractNetworks
