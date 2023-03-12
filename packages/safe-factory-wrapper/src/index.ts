@@ -1,6 +1,7 @@
 import { BigInt } from "@polywrap/wasm-as";
 import {
   calculateProxyAddress,
+  encodeSetupCallData,
   generateSalt,
   getInitCode,
   isContractDeployed,
@@ -15,13 +16,18 @@ import {
   EthersUtils_Module,
   Args_encodeDeploySafe,
   Args_safeIsDeployed,
+  Args_getSafeInitializer
 } from "./wrap";
+
+export function getSafeInitializer(args: Args_getSafeInitializer): String {
+    return encodeSetupCallData(args.config)
+};
 
 export function deploySafe(args: Args_deploySafe): String {
   const payload = prepareSafeDeployPayload(
     args.input.safeAccountConfig,
     args.input.safeDeploymentConfig,
-    args.input.customContractAdressess,
+    args.input.customContractAddresses,
     args.input.connection
   );
 
@@ -75,7 +81,7 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
   const payload = prepareSafeDeployPayload(
     args.input.safeAccountConfig,
     args.input.safeDeploymentConfig,
-    args.input.customContractAdressess,
+    args.input.customContractAddresses,
     args.input.connection
   );
 
@@ -122,7 +128,7 @@ export function encodeDeploySafe(
   const payload = prepareSafeDeployPayload(
     args.input.safeAccountConfig,
     args.input.safeDeploymentConfig,
-    args.input.customContractAdressess,
+    args.input.customContractAddresses,
     args.input.connection
   );
 

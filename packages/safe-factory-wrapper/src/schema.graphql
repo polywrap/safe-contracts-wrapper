@@ -34,12 +34,16 @@ type Module {
     encodeDeploySafe(
         input: DeploymentInput!
     ): String!
+
+    getSafeInitializer(
+        config: SafeAccountConfig!
+    ): String!
 }
 
 type DeploymentInput {
     safeAccountConfig: SafeAccountConfig!
     safeDeploymentConfig: SafeDeploymentConfig
-    customContractAdressess: CustomContract
+    customContractAddresses: CustomContract
     connection: Ethereum_Connection
 }
 

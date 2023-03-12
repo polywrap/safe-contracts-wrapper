@@ -184,7 +184,7 @@ export function calculateProxyAddress(
 export function prepareSafeDeployPayload(
   safeAccountConfig: SafeAccountConfig,
   safeDeploymentConfig: SafeDeploymentConfig | null,
-  customContractAdressess: CustomContract | null,
+  customContractAddresses: CustomContract | null,
   connection: Ethereum_Connection | null
 ): DeploymentPayload {
   validateSafeAccountConfig(safeAccountConfig);
@@ -220,13 +220,13 @@ export function prepareSafeDeployPayload(
   let safeContractAddress: string = "";
   let safeFactoryContractAddress: string = "";
 
-  if (customContractAdressess != null) {
-    if (customContractAdressess.proxyFactoryContract != null) {
+  if (customContractAddresses != null) {
+    if (customContractAddresses.proxyFactoryContract != null) {
       safeFactoryContractAddress =
-        customContractAdressess.proxyFactoryContract!;
+        customContractAddresses.proxyFactoryContract!;
     }
-    if (customContractAdressess.safeFactoryContract != null) {
-      safeContractAddress = customContractAdressess.safeFactoryContract!;
+    if (customContractAddresses.safeFactoryContract != null) {
+      safeContractAddress = customContractAddresses.safeFactoryContract!;
     }
   }
 

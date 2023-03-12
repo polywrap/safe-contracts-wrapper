@@ -190,7 +190,7 @@ export const setupContractNetworks = async (
                 saltNonce: Date.now().toString(),
                 isL1Safe: null,
               },
-        customContractAdressess: {
+        customContractAddresses: {
           proxyFactoryContract: proxyContractAddress!,
           safeFactoryContract: safeContractAddress!,
         },

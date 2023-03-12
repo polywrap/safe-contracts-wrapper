@@ -136,7 +136,7 @@ describe("SafeFactory", () => {
               threshold: 1,
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v120!,
               safeFactoryContract: safeContractAddress_v120!,
             },
@@ -163,7 +163,7 @@ describe("SafeFactory", () => {
               threshold: -1,
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v120!,
               safeFactoryContract: safeContractAddress_v120!,
             },
@@ -190,7 +190,7 @@ describe("SafeFactory", () => {
               threshold: 2,
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v120!,
               safeFactoryContract: safeContractAddress_v120!,
             },
@@ -220,7 +220,7 @@ describe("SafeFactory", () => {
               saltNonce: "-2",
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v120!,
               safeFactoryContract: safeContractAddress_v120!,
             },
@@ -247,7 +247,7 @@ describe("SafeFactory", () => {
               threshold: 1,
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v130!,
               safeFactoryContract: safeContractAddress_v130!,
             },
@@ -274,7 +274,7 @@ describe("SafeFactory", () => {
               saltNonce: Date.now().toString(),
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v120!,
               safeFactoryContract: safeContractAddress_v120!,
             },
@@ -298,7 +298,7 @@ describe("SafeFactory", () => {
             threshold: 1,
           },
           connection: CONNECTION,
-          customContractAdressess: {
+          customContractAddresses: {
             proxyFactoryContract: proxyContractAddress_v130!,
             safeFactoryContract: safeContractAddress_v130!,
           },
@@ -324,7 +324,7 @@ describe("SafeFactory", () => {
             version: "1.2.0",
           },
           connection: CONNECTION,
-          customContractAdressess: {
+          customContractAddresses: {
             proxyFactoryContract: proxyContractAddress_v120!,
             safeFactoryContract: safeContractAddress_v120!,
           },
@@ -350,7 +350,7 @@ describe("SafeFactory", () => {
             version: "1.3.0",
           },
           connection: CONNECTION,
-          customContractAdressess: {
+          customContractAddresses: {
             proxyFactoryContract: proxyContractAddress_v130!,
             safeFactoryContract: safeContractAddress_v130!,
           },
@@ -374,7 +374,7 @@ describe("SafeFactory", () => {
               threshold: 1,
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v120!,
               safeFactoryContract: safeContractAddress_v120!,
             },
@@ -401,7 +401,7 @@ describe("SafeFactory", () => {
               threshold: -1,
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v120!,
               safeFactoryContract: safeContractAddress_v120!,
             },
@@ -428,7 +428,7 @@ describe("SafeFactory", () => {
               threshold: 2,
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v120!,
               safeFactoryContract: safeContractAddress_v120!,
             },
@@ -458,7 +458,7 @@ describe("SafeFactory", () => {
               saltNonce: "-2",
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v120!,
               safeFactoryContract: safeContractAddress_v120!,
             },
@@ -489,7 +489,7 @@ describe("SafeFactory", () => {
               saltNonce: saltNonce,
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v120!,
               safeFactoryContract: safeContractAddress_v120!,
             },
@@ -513,7 +513,7 @@ describe("SafeFactory", () => {
               saltNonce: saltNonce,
             },
             connection: CONNECTION,
-            customContractAdressess: {
+            customContractAddresses: {
               proxyFactoryContract: proxyContractAddress_v120!,
               safeFactoryContract: safeContractAddress_v120!,
             },
