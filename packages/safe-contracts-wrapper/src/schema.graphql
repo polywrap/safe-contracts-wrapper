@@ -18,7 +18,7 @@ type Module {
     """
     Module to deploy and interact with the proxy factory smart-contract
     """
-    createProxy(address: String!, safeMasterCopyAddress: String!, initializer: String!, saltNonce: UInt32!, connection: Ethereum_Connection, txOptions: Ethereum_TxOptions): String
+    createProxy(address: String!, safeMasterCopyAddress: String!, initializer: String!, saltNonce: UInt32!, connection: Ethereum_Connection, txOptions: Ethereum_TxOptions): String!
     proxyCreationCode(address: String!, connection: Ethereum_Connection): String!
 
     """

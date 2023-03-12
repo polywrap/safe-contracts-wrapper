@@ -30,7 +30,7 @@ export function getChainId(args: Args_getChainId): String {
   }).unwrap();
 }
 
-export function deploySafe(args: Args_deploySafe): String | null {
+export function deploySafe(args: Args_deploySafe): String {
   const connection = args.connection;
   const payload = prepareSafeDeployPayload(
     args.safeAccountConfig,
@@ -68,18 +68,14 @@ export function deploySafe(args: Args_deploySafe): String | null {
     txOptions,
   }).unwrap();
 
-  if (safeAddress != null) {
-    const contractDeployed = isContractDeployed(safeAddress!, connection);
-    if (!contractDeployed) {
-      throw new Error(
-        "SafeProxy contract is not deployed on the current network"
-      );
-    }
-
-    return safeAddress;
+  const contractDeployed = isContractDeployed(safeAddress, connection);
+  if (!contractDeployed) {
+    throw new Error(
+      "SafeProxy contract is not deployed on the current network"
+    );
   }
 
-  return null;
+  return safeAddress;
 }
 
 export function predictSafeAddress(args: Args_predictSafeAddress): String {
@@ -92,7 +88,7 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
 
   const salt = generateSalt(payload.saltNonce, payload.initializer);
   if (salt.isErr) {
-    return "";
+    throw salt.err().unwrap();
   }
 
   const connection: SafeContracts_Ethereum_Connection | null = {
@@ -105,7 +101,7 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
     connection
   );
   if (initCode.isErr) {
-    return "";
+    throw initCode.err().unwrap()
   }
 
   let derivedAddress = calculateProxyAddress(
@@ -114,7 +110,7 @@ export function predictSafeAddress(args: Args_predictSafeAddress): String {
     initCode.unwrap()
   );
   if (derivedAddress.isErr) {
-    return "";
+    throw derivedAddress.err().unwrap();
   }
 
   return derivedAddress.unwrap();

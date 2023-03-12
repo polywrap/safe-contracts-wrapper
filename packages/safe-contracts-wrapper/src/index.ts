@@ -63,7 +63,7 @@ export function proxyCreationCode(args: Args_proxyCreationCode): string {
   }).unwrap();
 }
 
-export function createProxy(args: Args_createProxy): string | null {
+export function createProxy(args: Args_createProxy): string {
   let txOptions: Ethereum_TxOptions | null = null;
 
   if (args.txOptions != null) {
@@ -103,7 +103,7 @@ export function createProxy(args: Args_createProxy): string | null {
   const index = tx.logs.findIndex((log: Ethereum_Log) => log.topics[0] == proxyCreation_1_2_0 || log.topics[0] == proxyCreation_1_3_0);
 
   if (index == -1) {
-    return null;
+    throw new Error("Couldn't fetch address from event logs from transaction " + tx.transactionHash)
   }
 
   const address = "0x" + tx.logs[index].data.slice(32, 72);
