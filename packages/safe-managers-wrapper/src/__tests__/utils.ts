@@ -150,7 +150,7 @@ export const setupContractNetworks = async (
   );
 
   if (!safeResponse.ok) throw safeResponse.error;
-  safeAddress = safeResponse.value!.safeAddress;
+  safeAddress = safeResponse.value;
 
   const multisendAbi = version === "1.3.0" ? multisendAbi_1_3_0 : multisendAbi_1_2_0;
   const multisendBytecode = version === "1.3.0" ? multisendBytecode_1_3_0 : multisendBytecode_1_2_0;

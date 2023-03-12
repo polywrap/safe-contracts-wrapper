@@ -45,7 +45,7 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
       )
       .addRedirect(
         "wrap://ens/safe.wraps.eth:contracts@0.0.1",
-        "wrap://ipfs/QmVZo8xKbbx9aFJxGMfbmhLucBjJGKvT8LPuJTericEWou"
+        "wrap://fs/../safe-contracts-wrapper/build"
       )
   );
 }

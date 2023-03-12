@@ -71,6 +71,13 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
       chainId,
       isL1Safe: Box.from(isL1Safe),
       version: version,
+      filter: {
+        safeMasterCopyAddress: Box.from(false),
+        safeProxyFactoryAddress: Box.from(false),
+        multiSendAddress: Box.from(true),
+        multiSendCallOnlyAddress: Box.from(true),
+        fallbackHandlerAddress: Box.from(true),
+      },
     }).unwrap();
 
     if (args.onlyCalls) {

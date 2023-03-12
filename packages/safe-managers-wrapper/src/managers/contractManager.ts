@@ -45,6 +45,13 @@ export function getMultiSendAddress(args: Args_getMultiSendAddress, env: Env): s
     version: version,
     chainId: env.connection.networkNameOrChainId!,
     isL1Safe: Box.from(false),
+    filter: {
+      multiSendAddress: Box.from(true),
+      multiSendCallOnlyAddress: Box.from(false),
+      safeMasterCopyAddress: Box.from(false),
+      safeProxyFactoryAddress: Box.from(false),
+      fallbackHandlerAddress: Box.from(false)
+    }
   }).unwrap()!;
 
   return contractNetworks.multiSendAddress!;
@@ -57,6 +64,13 @@ export function getMultiSendCallOnlyAddress(args: Args_getMultiSendCallOnlyAddre
     version: version,
     chainId: env.connection.networkNameOrChainId!,
     isL1Safe: Box.from(false),
+    filter: {
+      multiSendAddress: Box.from(false),
+      multiSendCallOnlyAddress: Box.from(true),
+      safeMasterCopyAddress: Box.from(false),
+      safeProxyFactoryAddress: Box.from(false),
+      fallbackHandlerAddress: Box.from(false)
+    }
   }).unwrap()!;
 
   return contractNetworks.multiSendCallOnlyAddress!;
