@@ -66,4 +66,7 @@ type Module {
     getNonce: BigInt! @env(required: true)
     getMultiSendAddress: String! @env(required: true)
     getMultiSendCallOnlyAddress: String! @env(required: true)
+
+    """Utilities for transactions"""
+    encodeMultiSendData(txs: [SafeTransactionData!]!): String!
 }

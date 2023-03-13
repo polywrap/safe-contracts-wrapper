@@ -11,9 +11,16 @@ import {
   SafeTransaction,
   Ethereum_TxOptions,
   EthersUtils_Module,
+  Args_encodeMultiSendData
 } from "./wrap";
 import { Args_getTransactionHash } from "./wrap/Module";
-import { adjustVInSignature, arrayify, createTransactionFromPartial, encodeMultiSendData, generatePreValidatedSignature } from "./utils";
+import {
+  adjustVInSignature,
+  arrayify,
+  createTransactionFromPartial,
+  encodeMultiSendData as encodeMultiSendDataInternal,
+  generatePreValidatedSignature,
+} from "./utils";
 import {
   Args_approveTransactionHash,
   Args_createMultiSendTransaction,
@@ -33,7 +40,10 @@ import { toTransaction, toTransactionData, toTxReceipt } from "./utils/typeMap";
 
 export * from "./managers";
 
-export function createTransaction(args: Args_createTransaction, env: Env): SafeTransaction {
+export function createTransaction(
+  args: Args_createTransaction,
+  env: Env
+): SafeTransaction {
   const transactionData = createTransactionFromPartial(args.tx, args.options);
 
   return {
@@ -42,7 +52,10 @@ export function createTransaction(args: Args_createTransaction, env: Env): SafeT
   };
 }
 
-export function createMultiSendTransaction(args: Args_createMultiSendTransaction, env: Env): SafeTransaction {
+export function createMultiSendTransaction(
+  args: Args_createMultiSendTransaction,
+  env: Env
+): SafeTransaction {
   if (args.txs.length == 0) {
     throw new Error("Invalid empty array of transactions");
   }
@@ -51,21 +64,26 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
     return createTransaction({ tx: args.txs[0], options: args.options }, env);
   }
 
-  const multiSendData = encodeMultiSendData(args.txs);
+  const multiSendData = encodeMultiSendDataInternal(args.txs);
 
   const data = EthersUtils_Module.encodeFunction({
     method: "function multiSend(bytes transactions)",
     args: [multiSendData],
   }).unwrap();
 
-  const transactionData = createTransactionFromPartial({ data: "", to: "", value: BigInt.from("") } as SafeTransactionData, null);
+  const transactionData = createTransactionFromPartial(
+    { data: "", to: "", value: BigInt.from("") } as SafeTransactionData,
+    null
+  );
 
   let multiSendAddress: string = "";
 
   if (args.customMultiSendContractAddress != null) {
     multiSendAddress = args.customMultiSendContractAddress!;
   } else {
-    const chainId = Ethereum_Module.getChainId({ connection: env.connection }).unwrap();
+    const chainId = Ethereum_Module.getChainId({
+      connection: env.connection,
+    }).unwrap();
     const isL1Safe = true; // TODO figure out how get it from safe
     const version = contractManager.getContractVersion({}, env);
     const contractNetworks = SafeContracts_Module.getSafeContractNetworks({
@@ -93,12 +111,30 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
     value: BigInt.from("0"),
     data: data,
     operation: BigInt.from("1"), // OperationType.DelegateCall,
-    baseGas: args.options != null && args.options!.baseGas ? args.options!.baseGas : transactionData.baseGas,
-    gasPrice: args.options != null && args.options!.gasPrice ? args.options!.gasPrice : transactionData.gasPrice,
-    gasToken: args.options != null && args.options!.gasToken ? args.options!.gasToken : transactionData.gasToken,
-    nonce: args.options != null && args.options!.nonce ? args.options!.nonce : transactionData.nonce,
-    refundReceiver: args.options != null && args.options!.refundReceiver ? args.options!.refundReceiver : transactionData.refundReceiver,
-    safeTxGas: args.options != null && args.options!.safeTxGas ? args.options!.safeTxGas : transactionData.safeTxGas,
+    baseGas:
+      args.options != null && args.options!.baseGas
+        ? args.options!.baseGas
+        : transactionData.baseGas,
+    gasPrice:
+      args.options != null && args.options!.gasPrice
+        ? args.options!.gasPrice
+        : transactionData.gasPrice,
+    gasToken:
+      args.options != null && args.options!.gasToken
+        ? args.options!.gasToken
+        : transactionData.gasToken,
+    nonce:
+      args.options != null && args.options!.nonce
+        ? args.options!.nonce
+        : transactionData.nonce,
+    refundReceiver:
+      args.options != null && args.options!.refundReceiver
+        ? args.options!.refundReceiver
+        : transactionData.refundReceiver,
+    safeTxGas:
+      args.options != null && args.options!.safeTxGas
+        ? args.options!.safeTxGas
+        : transactionData.safeTxGas,
   };
 
   return {
@@ -107,7 +143,10 @@ export function createMultiSendTransaction(args: Args_createMultiSendTransaction
   };
 }
 
-export function addSignature(args: Args_addSignature, env: Env): SafeTransaction {
+export function addSignature(
+  args: Args_addSignature,
+  env: Env
+): SafeTransaction {
   const signerAddress = Ethereum_Module.getSignerAddress({
     connection: {
       node: env.connection.node,
@@ -115,7 +154,10 @@ export function addSignature(args: Args_addSignature, env: Env): SafeTransaction
     },
   }).unwrap();
 
-  const addressIsOwner = ownerManager.isOwner({ ownerAddress: signerAddress }, env);
+  const addressIsOwner = ownerManager.isOwner(
+    { ownerAddress: signerAddress },
+    env
+  );
 
   if (addressIsOwner == false) {
     throw new Error("Transactions can only be signed by Safe owners");
@@ -134,7 +176,10 @@ export function addSignature(args: Args_addSignature, env: Env): SafeTransaction
   if (signatures == null) {
     signatures = new Map<string, SignSignature>();
   }
-  if (args.signingMethod != null && args.signingMethod! == "eth_signTypedData") {
+  if (
+    args.signingMethod != null &&
+    args.signingMethod! == "eth_signTypedData"
+  ) {
     const signature = signTypedData({ tx: args.tx.data }, env);
     signatures.set(signerAddress, signature);
   } else {
@@ -148,7 +193,10 @@ export function addSignature(args: Args_addSignature, env: Env): SafeTransaction
   return args.tx;
 }
 
-export function getTransactionHash(args: Args_getTransactionHash, env: Env): string {
+export function getTransactionHash(
+  args: Args_getTransactionHash,
+  env: Env
+): string {
   return SafeContracts_Module.getTransactionHash({
     safeAddress: env.safeAddress,
     safeTransactionData: toTransactionData(args.tx),
@@ -159,7 +207,10 @@ export function getTransactionHash(args: Args_getTransactionHash, env: Env): str
   }).unwrap();
 }
 
-export function signTransactionHash(args: Args_signTransactionHash, env: Env): SignSignature {
+export function signTransactionHash(
+  args: Args_signTransactionHash,
+  env: Env
+): SignSignature {
   const signer = Ethereum_Module.getSignerAddress({
     connection: env.connection,
   }).unwrap();
@@ -175,15 +226,28 @@ export function signTransactionHash(args: Args_signTransactionHash, env: Env): S
     },
   }).unwrap();
 
-  const adjustedSignature = adjustVInSignature("eth_sign", signature, args.hash, signer);
+  const adjustedSignature = adjustVInSignature(
+    "eth_sign",
+    signature,
+    args.hash,
+    signer
+  );
 
   return { signer: signer, data: adjustedSignature };
 }
 
-export function approveTransactionHash(args: Args_approveTransactionHash, env: Env): Ethereum_TxReceipt {
-  const signerAddress = Ethereum_Module.getSignerAddress({ connection: env.connection }).unwrap();
+export function approveTransactionHash(
+  args: Args_approveTransactionHash,
+  env: Env
+): Ethereum_TxReceipt {
+  const signerAddress = Ethereum_Module.getSignerAddress({
+    connection: env.connection,
+  }).unwrap();
 
-  const addressIsOwner = ownerManager.isOwner({ ownerAddress: signerAddress }, env);
+  const addressIsOwner = ownerManager.isOwner(
+    { ownerAddress: signerAddress },
+    env
+  );
 
   if (!addressIsOwner) {
     throw new Error("Transaction hashes can only be approved by Safe owners");
@@ -196,7 +260,7 @@ export function approveTransactionHash(args: Args_approveTransactionHash, env: E
     maxFeePerGas: null,
     maxPriorityFeePerGas: null,
     gasLimit: null,
-  }
+  };
 
   if (args.options) {
     if (args.options!.gasPrice) {
@@ -229,7 +293,10 @@ export function approveTransactionHash(args: Args_approveTransactionHash, env: E
   return response;
 }
 
-export function getOwnersWhoApprovedTx(args: Args_getOwnersWhoApprovedTx, env: Env): string[] {
+export function getOwnersWhoApprovedTx(
+  args: Args_getOwnersWhoApprovedTx,
+  env: Env
+): string[] {
   const owners = ownerManager.getOwners({}, env);
   const ownersWhoApproved: string[] = [];
 
@@ -243,35 +310,59 @@ export function getOwnersWhoApprovedTx(args: Args_getOwnersWhoApprovedTx, env: E
   return ownersWhoApproved;
 }
 
-export function signTypedData(args: Args_signTypedData, env: Env): SignSignature {
+export function signTypedData(
+  args: Args_signTypedData,
+  env: Env
+): SignSignature {
   const recreatedTx = createTransactionFromPartial(args.tx, null);
 
   const safeVersion = contractManager.getContractVersion({}, env);
 
-  const chainId = Ethereum_Module.getChainId({ connection: env.connection }).unwrap();
+  const chainId = Ethereum_Module.getChainId({
+    connection: env.connection,
+  }).unwrap();
 
-  const typedData = generateTypedData(env.safeAddress, safeVersion, chainId, recreatedTx);
+  const typedData = generateTypedData(
+    env.safeAddress,
+    safeVersion,
+    chainId,
+    recreatedTx
+  );
   const jsonTypedData = toJsonTypedData(typedData);
 
-  const signature = Ethereum_Module.signTypedData({ payload: jsonTypedData, connection: env.connection }).unwrap();
+  const signature = Ethereum_Module.signTypedData({
+    payload: jsonTypedData,
+    connection: env.connection,
+  }).unwrap();
 
   return {
-    signer: Ethereum_Module.getSignerAddress({ connection: env.connection }).unwrap(),
+    signer: Ethereum_Module.getSignerAddress({
+      connection: env.connection,
+    }).unwrap(),
     data: adjustVInSignature("eth_signTypedData", signature, null, null),
   };
 }
 
-export function executeTransaction(args: Args_executeTransaction, env: Env): Ethereum_TxReceipt {
+export function executeTransaction(
+  args: Args_executeTransaction,
+  env: Env
+): Ethereum_TxReceipt {
   const transaction = args.tx;
 
-  const signedSafeTransaction = createTransaction({ tx: args.tx.data, options: null }, env);
+  const signedSafeTransaction = createTransaction(
+    { tx: args.tx.data, options: null },
+    env
+  );
 
   for (let i = 0; i < transaction.signatures!.keys().length; i++) {
     const key = transaction.signatures!.keys()[i];
 
     const signature = transaction.signatures!.get(key);
 
-    signedSafeTransaction.signatures!.set(signature.signer.toLowerCase(), signature);
+    signedSafeTransaction.signatures!.set(
+      signature.signer.toLowerCase(),
+      signature
+    );
   }
 
   const txHash = getTransactionHash({ tx: signedSafeTransaction.data }, env);
@@ -279,22 +370,37 @@ export function executeTransaction(args: Args_executeTransaction, env: Env): Eth
   const ownersWhoApprovedTx = getOwnersWhoApprovedTx({ hash: txHash }, env);
   for (let i = 0; i < ownersWhoApprovedTx.length; i++) {
     const owner = ownersWhoApprovedTx[i];
-    signedSafeTransaction.signatures!.set(owner.toLowerCase(), generatePreValidatedSignature(owner));
+    signedSafeTransaction.signatures!.set(
+      owner.toLowerCase(),
+      generatePreValidatedSignature(owner)
+    );
   }
 
   const owners = ownerManager.getOwners({}, env);
 
-  const signerAddress = Ethereum_Module.getSignerAddress({ connection: env.connection }).unwrap();
+  const signerAddress = Ethereum_Module.getSignerAddress({
+    connection: env.connection,
+  }).unwrap();
 
   if (owners.includes(signerAddress)) {
-    signedSafeTransaction.signatures!.set(signerAddress.toLowerCase(), generatePreValidatedSignature(signerAddress));
+    signedSafeTransaction.signatures!.set(
+      signerAddress.toLowerCase(),
+      generatePreValidatedSignature(signerAddress)
+    );
   }
 
   const threshold = ownerManager.getThreshold({}, env);
 
   if (threshold > <u32>signedSafeTransaction.signatures!.size) {
-    const signaturesMissing = threshold - signedSafeTransaction.signatures!.size;
-    throw new Error(`There ${signaturesMissing > 1 ? "are" : "is"} ${signaturesMissing} signature${signaturesMissing > 1 ? "s" : ""} missing`);
+    const signaturesMissing =
+      threshold - signedSafeTransaction.signatures!.size;
+    throw new Error(
+      `There ${
+        signaturesMissing > 1 ? "are" : "is"
+      } ${signaturesMissing} signature${
+        signaturesMissing > 1 ? "s" : ""
+      } missing`
+    );
   }
 
   const value = BigInt.from(signedSafeTransaction.data.value);
@@ -316,19 +422,21 @@ export function executeTransaction(args: Args_executeTransaction, env: Env): Eth
     value: null,
     maxFeePerGas: null,
     maxPriorityFeePerGas: null,
-    nonce: null
+    nonce: null,
   };
 
   if (args.options) {
     if (args.options!.gas && args.options!.gasLimit) {
-      throw new Error("Cannot specify gas and gasLimit together in transaction options");
+      throw new Error(
+        "Cannot specify gas and gasLimit together in transaction options"
+      );
     }
 
     if (args.options!.gasPrice) {
       txOptions.gasPrice = args.options!.gasPrice;
     }
 
-    if (args.options!.gasLimit){
+    if (args.options!.gasLimit) {
       txOptions.gasLimit = args.options!.gasLimit;
     }
   }
@@ -337,16 +445,32 @@ export function executeTransaction(args: Args_executeTransaction, env: Env): Eth
     safeAddress: env.safeAddress,
     safeTransaction: toTransaction(signedSafeTransaction),
     txOptions,
-    connection: { networkNameOrChainId: env.connection.networkNameOrChainId, node: env.connection.node },
+    connection: {
+      networkNameOrChainId: env.connection.networkNameOrChainId,
+      node: env.connection.node,
+    },
   }).unwrap();
 
   return toTxReceipt(txReceipt);
 }
 
 export function getBalance(args: Args_getBalance, env: Env): BigInt {
-  return Ethereum_Module.getBalance({ address: env.safeAddress, connection: env.connection, blockTag: null }).unwrap();
+  return Ethereum_Module.getBalance({
+    address: env.safeAddress,
+    connection: env.connection,
+    blockTag: null,
+  }).unwrap();
 }
 
 export function getChainId(args: Args_getChainId, env: Env): String {
   return Ethereum_Module.getChainId({ connection: env.connection }).unwrap();
+}
+
+export function encodeMultiSendData(args: Args_encodeMultiSendData): String {
+  const multiSendData = encodeMultiSendDataInternal(args.txs);
+
+  return EthersUtils_Module.encodeFunction({
+    method: "function multiSend(bytes transactions)",
+    args: [multiSendData],
+  }).unwrap();
 }
