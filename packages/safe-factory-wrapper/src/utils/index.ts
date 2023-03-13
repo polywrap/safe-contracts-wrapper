@@ -131,7 +131,7 @@ export function generateSalt(
 
   const saltNonce = EthersUtils_Module.encodeParams({
     types: ["uint256"],
-    values: [u32(parseInt(nonce)).toString()]
+    values: [(parseInt(nonce, 16) as i32).toString()]
   }); 
   if (saltNonce.isErr) {
     return saltNonce;
@@ -174,6 +174,7 @@ export function calculateProxyAddress(
     salt,
   });
 
+  
   if (initCodeHash.isErr) {
     return initCodeHash;
   }
@@ -215,8 +216,7 @@ export function prepareSafeDeployPayload(
     safeContractVersion = "1.3.0";
   }
 
-  const chainId = Ethereum_Module.getChainId({ connection: connection }).unwrap();
-
+  const chainId = Ethereum_Module.getChainId({ connection }).unwrap();
   let safeContractAddress: string = "";
   let safeFactoryContractAddress: string = "";
 

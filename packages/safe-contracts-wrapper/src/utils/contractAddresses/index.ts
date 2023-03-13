@@ -81,6 +81,6 @@ export function getFallbackHandlerCompabilityMap(
   if (version == "1.3.0") {
     return generateMap(compatibility_fallback_handler);
   } else {
-    return new Map()
+    throw new Error("Invalid Safe version");
   }
 }
