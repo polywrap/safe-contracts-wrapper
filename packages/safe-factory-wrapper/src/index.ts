@@ -137,7 +137,7 @@ export function encodeDeploySafe(
     args: [
       payload.safeContractAddress,
       payload.initializer,
-      payload.saltNonce.toString(),
+      BigInt.fromString(payload.saltNonce).toString(),
     ],
   }).unwrap();
 }

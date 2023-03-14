@@ -11,7 +11,8 @@ import {
   SafeTransaction,
   Ethereum_TxOptions,
   EthersUtils_Module,
-  Args_encodeMultiSendData
+  Args_encodeMultiSendData,
+  Args_getSignature
 } from "./wrap";
 import { Args_getTransactionHash } from "./wrap/Module";
 import {
@@ -31,7 +32,7 @@ import {
   Args_signTransactionHash,
   Args_signTypedData,
 } from "./wrap/Module/serialization";
-import { BigInt, Box } from "@polywrap/wasm-as";
+import { BigInt, Box, JSON } from "@polywrap/wasm-as";
 import { generateTypedData, toJsonTypedData } from "./utils/typedData";
 
 import * as ownerManager from "./managers/ownerManager";
@@ -187,6 +188,59 @@ export function addSignature(
     const signature = signTransactionHash({ hash: transactionHash }, env);
     signatures.set(signerAddress, signature);
   }
+  //Add signature of current signer
+  args.tx.signatures = signatures;
+
+  return args.tx;
+}
+
+export function getSignature(
+  args: Args_getSignature,
+): SafeTransaction {
+  const signerAddress = Ethereum_Module.getSignerAddress({
+    connection: {
+      node: args.connection.node,
+      networkNameOrChainId: args.connection.networkNameOrChainId,
+    },
+  }).unwrap();
+
+  let signatures = args.tx.signatures;
+
+  //If signature of current signer is already present - return transaction
+  if (signatures != null) {
+    if (signatures.has(signerAddress)) {
+      return args.tx;
+    }
+  }
+
+  const chainId = Ethereum_Module.getChainId({
+    connection: args.connection,
+  }).unwrap();
+  const recreatedTx = createTransactionFromPartial(args.tx.data, null);
+
+  //If no signatures - create signatures map
+  if (signatures == null) {
+    signatures = new Map<string, SignSignature>();
+  }
+
+  const typedData = generateTypedData(
+    args.safeAddress,
+    "1.3.0",
+    chainId,
+    recreatedTx
+  );
+  const jsonTypedData = toJsonTypedData(typedData) as JSON.Obj;
+
+  const signature = Ethereum_Module.signTypedData({
+    payload: jsonTypedData,
+    connection: args.connection,
+  }).unwrap();
+
+  signatures.set(signerAddress, {
+    signer: signerAddress,
+    data: adjustVInSignature("eth_signTypedData", signature, null, null)
+  });
+
   //Add signature of current signer
   args.tx.signatures = signatures;
 

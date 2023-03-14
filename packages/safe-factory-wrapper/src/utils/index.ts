@@ -128,15 +128,13 @@ export function generateSalt(
   nonce: string,
   initializer: string
 ): Result<string, string> {
-
   const saltNonce = EthersUtils_Module.encodeParams({
     types: ["uint256"],
-    values: [(parseInt(nonce, 16) as i32).toString()]
+    values: [BigInt.fromString(nonce).toString()]
   }); 
   if (saltNonce.isErr) {
     return saltNonce;
   }
-
   let initializerHash = EthersUtils_Module.keccak256({ value: initializer }); 
   if (initializerHash.isErr) {
     return Result.Err<string, string>(initializerHash.unwrapErr());

@@ -44,6 +44,7 @@ type Module {
     getOwnersWhoApprovedTx(hash: String!): [String!]! @env(required: true)
     getBalance: BigInt @env(required: true)
     getChainId: String @env(required: true)
+    getSignature(tx: SafeTransaction!, signingMethod: String, safeAddress: String!, connection: Ethereum_Connection!): SafeTransaction!
 
     """Owner manager methods"""
     getOwners: [String!]! @env(required: true)

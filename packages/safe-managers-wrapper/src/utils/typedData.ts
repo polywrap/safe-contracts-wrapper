@@ -1,4 +1,4 @@
-import { BigInt, JSON, JSONEncoder } from "@polywrap/wasm-as";
+import { JSON, JSONEncoder } from "@polywrap/wasm-as";
 import { SafeTransactionData } from "../wrap";
 
 export const EIP712_DOMAIN_BEFORE_V130: TypedDataField[] = [
