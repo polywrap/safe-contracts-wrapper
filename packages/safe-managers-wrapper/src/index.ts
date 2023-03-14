@@ -32,7 +32,7 @@ import {
   Args_signTransactionHash,
   Args_signTypedData,
 } from "./wrap/Module/serialization";
-import { BigInt, Box, JSON } from "@polywrap/wasm-as";
+import { BigInt, Box, JSON, JSONEncoder } from "@polywrap/wasm-as";
 import { generateTypedData, toJsonTypedData } from "./utils/typedData";
 
 import * as ownerManager from "./managers/ownerManager";
@@ -230,9 +230,20 @@ export function getSignature(
     recreatedTx
   );
   const jsonTypedData = toJsonTypedData(typedData) as JSON.Obj;
+  
+  let types: JSON.Obj = jsonTypedData.getObj("types")!;
+  let safeTxType = new JSON.Obj();
+  if (types.isObj) {
+    safeTxType.set("SafeTx", types.get("SafeTx"))
+  }
+  
+  const payload = new JSON.Obj();
+  payload.set("domain", jsonTypedData.get("domain"))
+  payload.set("types", safeTxType);
+  payload.set("message", jsonTypedData.get("message"))
 
   const signature = Ethereum_Module.signTypedData({
-    payload: jsonTypedData,
+    payload,
     connection: args.connection,
   }).unwrap();
 
