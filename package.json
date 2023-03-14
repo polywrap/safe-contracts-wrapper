@@ -30,6 +30,6 @@
     "@typescript-eslint/parser": "^5.40.1",
     "eslint": "^8.25.0",
     "lerna": "5.5.2",
-    "polywrap": "~0.10.0-pre"
+    "polywrap": "0.10.0-pre.10"
   }
 }
