@@ -45,7 +45,7 @@ import {
   bytecode as ERC20MintableBytecode,
 } from "./ERC20Mock.json";
 import * as App from "./types/wrap";
-import { CoreClientConfig, PolywrapClient } from "@polywrap/client-js";
+import { CoreClientConfig, PolywrapClient, IWrapPackage } from "@polywrap/client-js";
 import {
   defaultIpfsProviders,
   ClientConfigBuilder,
@@ -81,7 +81,7 @@ export function getClientConfig(
 
   if (customConfig && customConfig.signer) {
     config.addPackage(
-      "wrap://ens/wraps.eth:ethereum-provider@1.1.0",
+      "wrap://ens/wraps.eth:ethereum-provider@2.0.0",
       ethereumProviderPlugin({
         connections: new Connections({
           networks: {
@@ -92,7 +92,7 @@ export function getClientConfig(
           },
           defaultNetwork: "testnet",
         }),
-      })
+      }) as IWrapPackage
     );
   }
 
@@ -122,7 +122,7 @@ export const setupContractNetworks = async (
   ]
 > => {
   const safeOptions = { ...defaults, ...options };
-  const ethereumUri = "ens/wraps.eth:ethereum@1.1.0";
+  const ethereumUri = "ens/wraps.eth:ethereum@2.0.0";
 
   const safeWrapperPath: string = path.join(
     path.resolve(__dirname),

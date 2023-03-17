@@ -1,6 +1,4 @@
 """
-import { Module } into SafeContracts from "wrap://ens/safe.wraps.eth:contracts@0.0.1"
-
 import {
     Module,
     Connection,
@@ -10,7 +8,8 @@ import {
     TxResponse,
     TxOptions,
     StaticTxResult
-} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.1.0"
+} into Ethereum from "wrap://ens/wraps.eth:ethereum@2.0.0"
+import { Module } into SafeContracts from "wrap://ens/safe.wraps.eth:contracts@0.0.1"
 import { Module } into EthersUtils from "wrap://ens/wraps.eth:ethereum-utils@0.0.1"
 import * into Datetime from "wrap://ens/datetime.polywrap.eth"
 import * into Logger from "wrap://ens/wraps.eth:logger@1.0.0"

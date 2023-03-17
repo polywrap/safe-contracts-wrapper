@@ -16,7 +16,7 @@ jobs:
     - uri: ens/abi.stub.eth
       method: bytecode_1_3_0
       args: {}
-    - uri: ens/wraps.eth:ethereum@1.1.0
+    - uri: ens/wraps.eth:ethereum@2.0.0
       method: deployContract
       args:
         abi: $cases.0.data
@@ -26,7 +26,7 @@ jobs:
           maxFeePerGas: "4000000000"
         connection: 
           networkNameOrChainId: "testnet"
-    - uri: ens/wraps.eth:ethereum@1.1.0
+    - uri: ens/wraps.eth:ethereum@2.0.0
       method: deployContract
       args:
         abi: $cases.2.data

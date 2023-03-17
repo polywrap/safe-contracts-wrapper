@@ -44,7 +44,7 @@ describe("SafeFactory", () => {
     ".."
   );
   const wrapperUri = `fs/${wrapperPath}/build`;
-  const ethereumUri = "wrap://ens/wraps.eth:ethereum@1.1.0";
+  const ethereumUri = "wrap://ens/wraps.eth:ethereum@2.0.0";
 
   let proxyContractAddress_v120: string;
   let proxyContractAddress_v130: string;

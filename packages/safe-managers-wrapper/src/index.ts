@@ -229,18 +229,7 @@ export function getSignature(
     chainId,
     recreatedTx
   );
-  const jsonTypedData = toJsonTypedData(typedData) as JSON.Obj;
-  
-  let types: JSON.Obj = jsonTypedData.getObj("types")!;
-  let safeTxType = new JSON.Obj();
-  if (types.isObj) {
-    safeTxType.set("SafeTx", types.get("SafeTx"))
-  }
-  
-  const payload = new JSON.Obj();
-  payload.set("domain", jsonTypedData.get("domain"))
-  payload.set("types", safeTxType);
-  payload.set("message", jsonTypedData.get("message"))
+  const payload = toJsonTypedData(typedData) as JSON.Obj;
 
   const signature = Ethereum_Module.signTypedData({
     payload,

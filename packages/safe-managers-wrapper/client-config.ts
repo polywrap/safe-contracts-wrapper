@@ -17,7 +17,7 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
     builder
       .addDefaults()
       .addPackages({
-        "wrap://ens/wraps.eth:ethereum-provider@1.1.0": ethereumProviderPlugin({
+        "wrap://ens/wraps.eth:ethereum-provider@2.0.0": ethereumProviderPlugin({
           connections: new Connections({
             networks: {
               testnet: new Connection({
@@ -27,21 +27,17 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
             },
             defaultNetwork: "testnet",
           }),
-        }),
+        }) as IWrapPackage,
         "wrap://ens/datetime.polywrap.eth": dateTimePlugin({}) as IWrapPackage,
       })
       .addInterfaceImplementation(
-        "wrap://ens/wraps.eth:ethereum-provider@1.1.0",
-        "wrap://ens/wraps.eth:ethereum-provider@1.1.0"
+        "wrap://ens/wraps.eth:ethereum-provider@2.0.0",
+        "wrap://ens/wraps.eth:ethereum-provider@2.0.0"
       )
       // @TODO(cbrzn): Remove this once the ENS text record content hash has been updated
       .addRedirect(
         "wrap://ens/wraps.eth:ethereum-utils@0.0.1",
         "wrap://ipfs/QmVNg4yFFngvtzxU49Hz1aujnwsxRbxhsGWf1iL1qwdtmN"
-      )
-      .addRedirect(
-        "ens/wraps.eth:ethereum@1.1.0",
-        "wrap://ipfs/QmbnAG8iCdVMPQK8tQ5qqFwLKjaLF8BUuuLYiozj7mLF8Y"
       )
       .addRedirect(
         "wrap://ens/safe.wraps.eth:contracts@0.0.1",

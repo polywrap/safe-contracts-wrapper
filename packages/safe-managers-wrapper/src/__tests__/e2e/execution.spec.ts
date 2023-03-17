@@ -33,7 +33,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
     ".."
   );
   const wrapperUri = `fs/${wrapperPath}/build`;
-  const ethereumUri = "wrap://ens/wraps.eth:ethereum@1.1.0";
+  const ethereumUri = "wrap://ens/wraps.eth:ethereum@2.0.0";
 
   const connection = { networkNameOrChainId: "testnet" };
 
@@ -92,6 +92,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
         tx: {
           to: safe,
           value: amount,
+          data: "0x"
         },
         connection: connection,
       },

@@ -32,7 +32,7 @@
     "@types/jest": "26.0.8",
     "@types/node": "^14.14.21",
     "assemblyscript": "0.19.1",
-    "@polywrap/ethereum-provider-js": "0.2.4",
+    "@polywrap/ethereum-provider-js": "0.3.0",
     "jest": "26.6.3",
     "polywrap": "0.10.0-pre.10",
     "ts-jest": "26.5.4",
