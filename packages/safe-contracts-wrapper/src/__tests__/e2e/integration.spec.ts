@@ -2,13 +2,9 @@ import { PolywrapClient } from "@polywrap/client-js";
 import {
   initTestEnvironment,
   stopTestEnvironment,
-  providers,
-  ensAddresses,
 } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
 import path from "path";
-
-import { getPlugins } from "../utils";
 
 import {
   abi as safeProxyFactoryAbi_1_2_0,
@@ -23,15 +19,15 @@ import {
   abi as safeAbi_1_3_0,
   bytecode as safeBytecode_1_3_0,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
-import { Client } from "@polywrap/core-js";
+import { getClientConfig } from "../utils";
 
 jest.setTimeout(500000);
 
 describe("ProxyFactory", () => {
   const CONNECTION = { networkNameOrChainId: "testnet" };
 
-  let client: Client;
-  const signer = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
+  const client = new PolywrapClient(getClientConfig());
+  const signer = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1";
 
   const wrapperPath: string = path.join(
     path.resolve(__dirname),
@@ -40,18 +36,11 @@ describe("ProxyFactory", () => {
     ".."
   );
   const wrapperUri = `fs/${wrapperPath}/build`;
-  const ethereumUri = "ens/ethereum.polywrap.eth";
+  const ethereumUri = "wrap://ens/wraps.eth:ethereum@2.0.0";
 
   describe("proxies", () => {
     beforeEach(async () => {
       await initTestEnvironment();
-
-      const config = getPlugins(
-        providers.ethereum,
-        providers.ipfs,
-        ensAddresses.ensAddress
-      );
-      client = new PolywrapClient(config) as unknown as Client;
     });
 
     afterEach(async () => {
@@ -83,7 +72,7 @@ describe("ProxyFactory", () => {
           safeMasterCopyAddress: contractAddress,
           initializer: initCode,
           saltNonce,
-          connection: CONNECTION,
+          connection: CONNECTION
         },
         client,
         wrapperUri
@@ -97,6 +86,20 @@ describe("ProxyFactory", () => {
     });
 
     it("createProxy 1.3.0", async () => {
+      const singletonResponse = await App.Ethereum_Module.deployContract(
+        {
+          abi: JSON.stringify(safeAbi_1_3_0),
+          bytecode: safeBytecode_1_3_0,
+          args: null,
+          connection: CONNECTION,
+        },
+        client,
+        ethereumUri
+      );
+
+      if (!singletonResponse.ok) throw singletonResponse.error;
+      const singletonAddress = singletonResponse.value as string;
+
       const deployContractResponse = await App.Ethereum_Module.deployContract(
         {
           abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
@@ -118,21 +121,24 @@ describe("ProxyFactory", () => {
       const response = await App.ProxyFactory_Module.createProxy(
         {
           address: contractAddress,
-          safeMasterCopyAddress: contractAddress,
+          safeMasterCopyAddress: singletonAddress,
           initializer: initCode,
           saltNonce,
-          connection: CONNECTION,
+          connection: CONNECTION
         },
         client,
         wrapperUri
       );
 
+      // console.log("contract deployed to: ", response)
+
       if (!response.ok) throw response.error;
       expect(response.value).not.toBeNull();
       expect(response.value).toEqual(
-        "0x1b721366fc1837d57b5d40a82c546e665545c6bc"
+        "0x0abd1d8cfb1fb79268ea9d29df52d4daa5409842"
       );
     });
+
 
     it("proxyCreationCode", async () => {
       const deployContractResponse = await App.Ethereum_Module.deployContract(
@@ -140,7 +146,7 @@ describe("ProxyFactory", () => {
           abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
           bytecode: safeProxyFactoryBytecode_1_3_0,
           args: null,
-          connection: CONNECTION,
+          connection: CONNECTION
         },
         client,
         ethereumUri
@@ -173,7 +179,7 @@ describe("ProxyFactory", () => {
           abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
           bytecode: safeProxyFactoryBytecode_1_3_0,
           args: null,
-          connection: CONNECTION,
+          connection: CONNECTION
         },
         client,
         ethereumUri
@@ -200,7 +206,7 @@ describe("ProxyFactory", () => {
 
       if (!response.ok) throw response.error;
       expect(response.value).not.toBeNull();
-      expect(response.value).toEqual("113499");
+      expect(response.value).toEqual("114799");
     });
 
     it("encode", async () => {
@@ -230,41 +236,33 @@ describe("ProxyFactory", () => {
     beforeEach(async () => {
       await initTestEnvironment();
 
-      const config = getPlugins(
-        providers.ethereum,
-        providers.ipfs,
-        ensAddresses.ensAddress
-      );
-      client = new PolywrapClient(config) as unknown as Client;
-
       const singletonResponse = await App.Ethereum_Module.deployContract(
         {
           abi: JSON.stringify(safeAbi_1_3_0),
           bytecode: safeBytecode_1_3_0,
           args: null,
-          connection: CONNECTION,
+          connection: CONNECTION
         },
         client,
         ethereumUri
       );
 
+      
       if (!singletonResponse.ok) throw singletonResponse.error;
       const singletonAddress = singletonResponse.value as string;
-
       const safeProxyFactoryResponse = await App.Ethereum_Module.deployContract(
-        {
-          abi: JSON.stringify(safeProxyFactoryAbi_1_2_0),
-          bytecode: safeProxyFactoryBytecode_1_2_0,
-          args: null,
-          connection: CONNECTION,
-        },
-        client,
-        ethereumUri
-      );
-
-      if (!safeProxyFactoryResponse.ok) throw safeProxyFactoryResponse.error;
-      const safeProxyFactoryAddress = safeProxyFactoryResponse.value as string;
-
+          {
+            abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
+            bytecode: safeProxyFactoryBytecode_1_3_0,
+            args: null,
+            connection: CONNECTION
+          },
+          client,
+          ethereumUri
+        );
+        
+        if (!safeProxyFactoryResponse.ok) throw safeProxyFactoryResponse.error;
+        const safeProxyFactoryAddress = safeProxyFactoryResponse.value as string;
       const initCode = "0x";
       const saltNonce = 42;
       const proxyResponse = await App.ProxyFactory_Module.createProxy(
@@ -273,22 +271,21 @@ describe("ProxyFactory", () => {
           safeMasterCopyAddress: singletonAddress,
           initializer: initCode,
           saltNonce,
-          connection: CONNECTION,
+          connection: CONNECTION
         },
         client,
         wrapperUri
       );
-
+      
       if (!proxyResponse.ok) throw proxyResponse.error;
       proxyAddress = proxyResponse.value as string;
 
-      await App.Ethereum_Module.callContractMethod(
+      await App.Ethereum_Module.callContractMethodAndWait(
         {
           address: proxyAddress,
-          method:
-            "function setup( address[] calldata _owners, uint256 _threshold, address to, bytes calldata data, address fallbackHandler, address paymentToken, uint256 payment, address payable paymentReceiver ) external",
+          method: "function setup(address[] _owners,uint256 _threshold,address to,bytes data,address fallbackHandler,address paymentToken,uint256 payment,address paymentReceiver)",
           args: [
-            JSON.stringify([signer]),
+            "[" + signer + "]",
             "1",
             signer,
             "0x",
@@ -298,6 +295,10 @@ describe("ProxyFactory", () => {
             signer,
           ],
           connection: CONNECTION,
+          options: {
+            gasPrice: "4000000000",
+            gasLimit: "200000"
+          },
         },
         client,
         ethereumUri
@@ -312,9 +313,10 @@ describe("ProxyFactory", () => {
       const response = await App.ProxyFactory_Module.getThreshold(
         {
           address: proxyAddress,
+          connection: CONNECTION
         },
         client,
-        wrapperUri
+        wrapperUri,
       );
 
       if (!response.ok) throw response.error;
@@ -326,6 +328,7 @@ describe("ProxyFactory", () => {
       const response = await App.ProxyFactory_Module.getOwners(
         {
           address: proxyAddress,
+          connection: CONNECTION
         },
         client,
         wrapperUri
@@ -341,6 +344,7 @@ describe("ProxyFactory", () => {
         {
           address: proxyAddress,
           ownerAddress: signer,
+          connection: CONNECTION
         },
         client,
         wrapperUri
@@ -355,6 +359,7 @@ describe("ProxyFactory", () => {
       const response = await App.ProxyFactory_Module.getModules(
         {
           address: proxyAddress,
+          connection: CONNECTION
         },
         client,
         wrapperUri
@@ -370,6 +375,7 @@ describe("ProxyFactory", () => {
         {
           address: proxyAddress,
           moduleAddress: signer,
+          connection: CONNECTION
         },
         client,
         wrapperUri

@@ -5,14 +5,12 @@ module.exports = {
   testMatch: ["**/__tests__/**/?(*.)+(spec|test).[jt]s?(x)"],
   modulePathIgnorePatterns: [
     "./src/__tests__/utils",
+    "/.polywrap/"
   ],
   globals: {
     "ts-jest": {
       tsconfig: "tsconfig.json",
       diagnostics: false,
     },
-  },
-  testPathIgnorePatterns: [
-    ".polywrap"
-  ],
+  }
 };

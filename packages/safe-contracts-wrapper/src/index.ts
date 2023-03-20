@@ -1,7 +1,6 @@
 import {
   Ethereum_Module,
   Ethereum_Log,
-  Logger_Module,
   Args_createProxy,
   Args_proxyCreationCode,
   Args_estimateGas,
@@ -12,10 +11,11 @@ import {
   Args_getModules,
   Args_isModuleEnabled,
   Ethereum_TxReceipt,
-  Interface_SafeTransaction,
-  Ethereum_TxOverrides,
+  Ethereum_TxOptions,
+  Args_encodeExecTransaction,
+  EthersUtils_Module
 } from "./wrap";
-import { BigInt } from "@polywrap/wasm-as";
+import { BigInt, Box } from "@polywrap/wasm-as";
 import { JSON } from "assemblyscript-json";
 import {
   Args_approvedHashes,
@@ -31,6 +31,7 @@ import { ContractNetworksConfig } from "./wrap/ContractNetworksConfig";
 import {
   createTransactionFromPartial,
   encodeSignatures,
+  getFallbackHandlerCompability,
   getMultiSendCallOnlyContractAddress,
   getMultiSendContractAddress,
   getSafeContractAddress,
@@ -51,7 +52,7 @@ export function estimateGas(args: Args_estimateGas): BigInt {
     method: args.method,
     args: args.args,
     connection: args.connection,
-    txOverrides: null,
+    options: null,
   }).unwrap();
 }
 
@@ -64,25 +65,75 @@ export function proxyCreationCode(args: Args_proxyCreationCode): string {
   }).unwrap();
 }
 
-export function createProxy(args: Args_createProxy): string | null {
+export function createProxy(args: Args_createProxy): string {
+  let txOptions: Ethereum_TxOptions | null = null;
+
+  if (args.txOptions != null) {
+    txOptions = {
+      value: null,
+      gasLimit: null,
+      gasPrice: null,
+      maxFeePerGas: null,
+      maxPriorityFeePerGas: null,
+      nonce: null,
+    };
+
+    if (args.txOptions!.value) {
+      txOptions.value = args.txOptions!.value;
+    }
+    if (!args.txOptions!.gasPrice) {
+      txOptions.gasPrice = Ethereum_Module.getGasPrice({
+        connection: args.connection,
+      }).unwrap();
+    }
+
+    if (!args.txOptions!.gasLimit) {
+      txOptions.gasLimit = Ethereum_Module.estimateContractCallGas({
+        address: args.address,
+        method: "function createProxyWithNonce(address,bytes memory,uint256)",
+        args: [
+          args.safeMasterCopyAddress,
+          args.initializer,
+          args.saltNonce.toString(),
+        ],
+        connection: args.connection,
+        options: txOptions,
+      }).unwrap();
+    }
+  }
+
   const tx = Ethereum_Module.callContractMethodAndWait({
     address: args.address,
     method: "function createProxyWithNonce(address,bytes memory,uint256)",
-    args: [args.safeMasterCopyAddress, args.initializer, args.saltNonce.toString()],
+    args: [
+      args.safeMasterCopyAddress,
+      args.initializer,
+      args.saltNonce.toString(),
+    ],
     connection: args.connection,
-    txOverrides: args.txOverrides,
+    options: txOptions,
   }).unwrap();
 
   // ProxyCreation(address)
-  const proxyCreation_1_2_0 = "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80";
+  const proxyCreation_1_2_0 =
+    "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80";
   // ProxyCreation(address,address)
-  const proxyCreation_1_3_0 = "0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235";
-  const index = tx.logs.findIndex((log: Ethereum_Log) => log.topics[0] == proxyCreation_1_2_0 || log.topics[0] == proxyCreation_1_3_0);
+  const proxyCreation_1_3_0 =
+    "0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235";
+  const index = tx.logs.findIndex(
+    (log: Ethereum_Log) =>
+      log.topics[0] == proxyCreation_1_2_0 ||
+      log.topics[0] == proxyCreation_1_3_0
+  );
 
   if (index == -1) {
-    return null;
+    throw new Error(
+      "Couldn't fetch address from event logs from transaction " +
+        tx.transactionHash
+    );
   }
-  const address = "0x" + tx.logs[index].data.slice(26, 66);
+
+  const address = "0x" + tx.logs[index].data.slice(32, 72);
 
   return address;
 }
@@ -166,7 +217,10 @@ export function isOwner(args: Args_isOwner): bool {
 }
 
 export function getTransactionHash(args: Args_getTransactionHash): string {
-  const recreatedTx = createTransactionFromPartial(args.safeTransactionData, null);
+  const recreatedTx = createTransactionFromPartial(
+    args.safeTransactionData,
+    null
+  );
 
   const contractArgs = getTransactionHashArgs(recreatedTx);
 
@@ -184,7 +238,8 @@ export function getTransactionHash(args: Args_getTransactionHash): string {
 export function approvedHashes(args: Args_approvedHashes): BigInt {
   const result = Ethereum_Module.callContractView({
     address: args.address,
-    method: "function approvedHashes(address owner, bytes32 hash) public view returns (uint256)",
+    method:
+      "function approvedHashes(address owner, bytes32 hash) public view returns (uint256)",
     args: [args.ownerAddress, args.hash],
     connection: args.connection,
   }).unwrap();
@@ -192,16 +247,28 @@ export function approvedHashes(args: Args_approvedHashes): BigInt {
 }
 
 export function approveHash(args: Args_approveHash): Ethereum_TxReceipt {
-  const signerAddress = Ethereum_Module.getSignerAddress({ connection: args.connection }).unwrap();
+  const signerAddress = Ethereum_Module.getSignerAddress({
+    connection: args.connection,
+  }).unwrap();
 
-  const addressIsOwner = isOwner({ address: args.safeAddress, ownerAddress: signerAddress, connection: args.connection });
+  const addressIsOwner = isOwner({
+    address: args.safeAddress,
+    ownerAddress: signerAddress,
+    connection: args.connection,
+  });
 
   if (!addressIsOwner) {
     throw new Error("Transaction hashes can only be approved by Safe owners");
   }
 
-  if (args.options != null && args.options!.gasPrice && args.options!.gasLimit) {
-    throw new Error("Cannot specify gas and gasLimit together in transaction options");
+  if (
+    args.options != null &&
+    args.options!.gasPrice &&
+    args.options!.gasLimit
+  ) {
+    throw new Error(
+      "Cannot specify gas and gasLimit together in transaction options"
+    );
   }
 
   if (args.options != null && !args.options!.gasLimit) {
@@ -213,15 +280,22 @@ export function approveHash(args: Args_approveHash): Ethereum_TxReceipt {
     });
   }
 
+  const nonce = args.options ? args.options!.nonce : null;
+
   const response = Ethereum_Module.callContractMethodAndWait({
     method: "function approveHash(bytes32 hashToApprove) external",
     address: args.safeAddress,
     args: [args.hash],
     connection: args.connection,
-    txOverrides: {
+    options: {
       gasLimit: args.options ? args.options!.gasLimit : null,
       gasPrice: args.options ? args.options!.gasPrice : null,
       value: null,
+      maxFeePerGas: args.options ? args.options!.maxFeePerGas : null,
+      maxPriorityFeePerGas: args.options
+        ? BigInt.from(args.options!.maxPriorityFeePerGas)
+        : null,
+      nonce: nonce ? Box.from(nonce.toUInt32()) : null,
     },
   }).unwrap();
 
@@ -231,8 +305,9 @@ export function approveHash(args: Args_approveHash): Ethereum_TxReceipt {
 export function getModules(args: Args_getModules): string[] {
   const resp = Ethereum_Module.callContractView({
     address: args.address,
-    method: "function getModulesPaginated(address start, uint256 pageSize) external view returns (address[] memory array, address next)",
-    args: ["0x0000000000000000000000000000000000000001", "0xa"],
+    method:
+      "function getModulesPaginated(address,uint256) external view returns (address[] memory,address)",
+    args: ["0x0000000000000000000000000000000000000001", "15"],
     connection: args.connection,
   }).unwrap();
   // TODO; rewrite to json
@@ -248,7 +323,8 @@ export function getModules(args: Args_getModules): string[] {
 export function isModuleEnabled(args: Args_isModuleEnabled): bool {
   const resp = Ethereum_Module.callContractView({
     address: args.address,
-    method: "function isModuleEnabled(address module) public view returns (bool)",
+    method:
+      "function isModuleEnabled(address module) public view returns (bool)",
     args: [args.moduleAddress],
     connection: args.connection,
   }).unwrap();
@@ -259,29 +335,35 @@ export function isModuleEnabled(args: Args_isModuleEnabled): bool {
   }
 }
 
-export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt {
+export function execTransaction(
+  args: Args_execTransaction
+): Ethereum_TxReceipt {
   const txData = args.safeTransaction.data;
   const txSignatures = args.safeTransaction.signatures!;
 
-  const txOverrides: Ethereum_TxOverrides = {
-    gasLimit: args.txOverrides != null ? args.txOverrides!.gasLimit : null,
-    gasPrice: args.txOverrides != null ? args.txOverrides!.gasPrice : null,
-    value: args.txOverrides != null ? args.txOverrides!.value : null,
+  const txOptions: Ethereum_TxOptions = {
+    gasLimit: args.txOptions != null ? args.txOptions!.gasLimit : null,
+    gasPrice: args.txOptions != null ? args.txOptions!.gasPrice : null,
+    value: args.txOptions != null ? args.txOptions!.value : null,
+    maxFeePerGas: args.txOptions ? args.txOptions!.maxFeePerGas : null,
+    maxPriorityFeePerGas: args.txOptions
+      ? args.txOptions!.maxPriorityFeePerGas
+      : null,
+    nonce: args.txOptions ? args.txOptions!.nonce : null,
   };
 
   const method =
-    "function execTransaction(address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address payable refundReceiver, bytes memory signatures) external payable returns (bool success)";
+    "function execTransaction(address,uint256,bytes calldata,uint8,uint256,uint256,uint256,address,address,bytes memory)";
 
   const encodedSignatures = encodeSignatures(txSignatures);
-  if (!txOverrides.gasLimit) {
+  if (!txOptions.gasLimit) {
     const estimationArgs = getTransactionHashArgs(txData);
     estimationArgs.pop();
     estimationArgs.push(encodedSignatures);
 
-    txOverrides.gasLimit = estimateGas({
+    txOptions.gasLimit = estimateGas({
       address: args.safeAddress,
-      method:
-        "function execTransaction(address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address payable refundReceiver, bytes memory signatures)",
+      method,
       args: estimationArgs,
       connection: args.connection,
     });
@@ -289,7 +371,7 @@ export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt 
 
   return Ethereum_Module.callContractMethodAndWait({
     address: args.safeAddress,
-    method: method,
+    method,
     args: [
       txData.to,
       txData.value.toString(),
@@ -302,20 +384,104 @@ export function execTransaction(args: Args_execTransaction): Ethereum_TxReceipt 
       txData.refundReceiver!,
       encodedSignatures,
     ],
-    txOverrides: txOverrides,
+    options: txOptions,
     connection: args.connection,
   }).unwrap();
 }
 
-export function getSafeContractNetworks(args: Args_getSafeContractNetworks): ContractNetworksConfig {
+export function getSafeContractNetworks(
+  args: Args_getSafeContractNetworks
+): ContractNetworksConfig {
   const safeContractVersion = args.version;
   const chainId = args.chainId;
-  const isL1Safe: bool = args.isL1Safe != null ? args.isL1Safe!.unwrap() : false;
+  const isL1Safe: bool =
+    args.isL1Safe != null ? args.isL1Safe!.unwrap() : false;
 
-  return {
-    multiSendAddress: getMultiSendContractAddress(safeContractVersion, chainId.toString()),
-    multiSendCallOnlyAddress: getMultiSendCallOnlyContractAddress(safeContractVersion, chainId.toString()),
-    safeMasterCopyAddress: getSafeContractAddress(safeContractVersion, chainId.toString(), !isL1Safe),
-    safeProxyFactoryAddress: getSafeFactoryContractAddress(safeContractVersion, chainId.toString()),
-  };
+  if (args.filter == null) {
+    return {
+      multiSendAddress: getMultiSendContractAddress(
+        safeContractVersion,
+        chainId.toString()
+      ),
+      multiSendCallOnlyAddress: getMultiSendCallOnlyContractAddress(
+        safeContractVersion,
+        chainId.toString()
+      ),
+      safeMasterCopyAddress: getSafeContractAddress(
+        safeContractVersion,
+        chainId.toString(),
+        !isL1Safe
+      ),
+      safeProxyFactoryAddress: getSafeFactoryContractAddress(
+        safeContractVersion,
+        chainId.toString()
+      ),
+      fallbackHandlerAddress: getFallbackHandlerCompability(
+        safeContractVersion,
+        chainId.toString()
+      ),
+    };
+  } else {
+    let safeContractNetworks: ContractNetworksConfig = {
+      multiSendAddress: null,
+      multiSendCallOnlyAddress: null,
+      safeMasterCopyAddress: null,
+      safeProxyFactoryAddress: null,
+      fallbackHandlerAddress: null,
+    };
+
+    if (args.filter!.multiSendAddress) {
+      safeContractNetworks.multiSendAddress = getMultiSendContractAddress(
+        safeContractVersion,
+        chainId.toString()
+      );
+    }
+    if (args.filter!.multiSendCallOnlyAddress) {
+      safeContractNetworks.multiSendCallOnlyAddress =
+        getMultiSendCallOnlyContractAddress(
+          safeContractVersion,
+          chainId.toString()
+        );
+    }
+    if (args.filter!.safeMasterCopyAddress) {
+      safeContractNetworks.safeMasterCopyAddress = getSafeContractAddress(
+        safeContractVersion,
+        chainId.toString(),
+        !isL1Safe
+      );
+    }
+    if (args.filter!.safeProxyFactoryAddress) {
+      safeContractNetworks.safeProxyFactoryAddress =
+        getSafeFactoryContractAddress(safeContractVersion, chainId.toString());
+    }
+    if (args.filter!.fallbackHandlerAddress) {
+      safeContractNetworks.fallbackHandlerAddress =
+        getFallbackHandlerCompability(safeContractVersion, chainId.toString());
+    }
+    return safeContractNetworks;
+  }
 }
+
+export function encodeExecTransaction(
+  args: Args_encodeExecTransaction
+): String {
+  const txData = args.safeTransaction.data;
+  const txSignatures = args.safeTransaction.signatures!;
+  const method = "function execTransaction(address,uint256,bytes calldata,uint8,uint256,uint256,uint256,address,address,bytes memory)";
+  const encodedSignatures = encodeSignatures(txSignatures);
+  return EthersUtils_Module.encodeFunction({
+    method,
+    args: [
+      txData.to,
+      txData.value.toString(),
+      txData.data,
+      txData.operation!.toString(),
+      txData.safeTxGas!.toString(),
+      txData.baseGas!.toString(),
+      txData.gasPrice!.toString(),
+      txData.gasToken!,
+      txData.refundReceiver!,
+      encodedSignatures,
+    ]
+  }).unwrap();
+} 

@@ -1,37 +1,35 @@
 {
-  "name": "safe-wrapper",
+  "name": "safe-wrappers",
   "description": "",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "workspaces": {
     "packages": [
       "./packages/safe-contracts-wrapper",
       "./packages/safe-factory-wrapper",
-      "./packages/safe-wrapper"
-    ],
-    "nohoist": [
-      "**/polywrap-datetime-plugin"
+      "./packages/safe-managers-wrapper"
     ]
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ConsiderItDone/safe-contracts-wrapper"
+    "url": "https://github.com/5afe/safe-contracts-wrapper"
   },
   "scripts": {
-    "build:interface": "yarn --cwd ./packages/safe-interface build",
-    "patch": "yarn --cwd ./packages/safe-wrapper patch",
-    "build": "yarn build:interface && lerna run build --concurrency 1",
-    "build:order": "lerna run build --scope @consideritdone/safe-interface && lerna run build --scope @consideritdone/safe-contracts-wrapper && lerna run build --scope @consideritdone/safe-factory-wrapper && lerna run build --scope @consideritdone/safe-safe-wrapper",
-    "test:contracts": "lerna run test --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
+    "build": "yarn build:contracts && yarn build:factory && yarn build:managers",
+    "build:contracts": "lerna run build --scope @consideritdone/safe-contracts-wrapper",
+    "build:factory": "lerna run build --scope @consideritdone/safe-factory-wrapper",
+    "build:managers": "lerna run build --scope @consideritdone/safe-managers",
+    "test": "yarn test:contracts && yarn test:factory && yarn test:managers",
+    "test:contracts": "lerna run test:e2e --concurrency 1 --scope @consideritdone/safe-contracts-wrapper",
     "test:factory": "lerna run test --concurrency 1 --scope @consideritdone/safe-factory-wrapper",
-    "test:safe": "lerna run test --concurrency 1 --scope @consideritdone/safe-wrapper"
+    "test:managers": "lerna run test --concurrency 1 --scope @consideritdone/safe-managers"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.40.1",
     "@typescript-eslint/parser": "^5.40.1",
     "eslint": "^8.25.0",
     "lerna": "5.5.2",
-    "patch-package": "^6.5.0"
+    "polywrap": "0.10.0-pre.10"
   }
 }

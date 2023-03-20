@@ -1,5 +1,5 @@
-name: template-wasm-rs
-format: 0.1
+name: safe-wrapper-test
+format: "0.1"
 validation: "./workflows/validator.cue"
 jobs:
   cases: 
@@ -16,18 +16,24 @@ jobs:
     - uri: ens/abi.stub.eth
       method: bytecode_1_3_0
       args: {}
-    - uri: ens/ethereum.polywrap.eth
+    - uri: ens/wraps.eth:ethereum@2.0.0
       method: deployContract
       args:
         abi: $cases.0.data
         bytecode: $cases.1.data
+        options:
+          maxPriorityFeePerGas: "40000000"
+          maxFeePerGas: "4000000000"
         connection: 
           networkNameOrChainId: "testnet"
-    - uri: ens/ethereum.polywrap.eth
+    - uri: ens/wraps.eth:ethereum@2.0.0
       method: deployContract
       args:
         abi: $cases.2.data
         bytecode: $cases.3.data
+        options:
+          maxPriorityFeePerGas: "40000000"
+          maxFeePerGas: "4000000000"
         connection:
           networkNameOrChainId: "testnet"
     - uri: fs/build
@@ -37,6 +43,9 @@ jobs:
         safeMasterCopyAddress: $cases.4.data
         initializer: "0x"
         saltNonce: 0
+        txOptions:
+          gasPrice: "4000000000"
+          gasLimit: "200000"
         connection:
           networkNameOrChainId: "testnet"
     - uri: fs/build
@@ -46,6 +55,9 @@ jobs:
         safeMasterCopyAddress: $cases.5.data
         initializer: "0x"
         saltNonce: 1
+        txOptions:
+          gasPrice: "4000000000"
+          gasLimit: "200000"
         connection:
           networkNameOrChainId: "testnet"
     jobs:

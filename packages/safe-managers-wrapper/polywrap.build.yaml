@@ -1,0 +1,10 @@
+format: 0.1.0
+docker:
+  name: safe-managers-wasm-as
+config:
+  node_version: "16.13.0"
+  include:
+    - ./package.json
+    - ./src
+  exclude:
+    - ./src/__tests__

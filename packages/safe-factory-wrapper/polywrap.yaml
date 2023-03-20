@@ -1,15 +1,9 @@
-format: 0.2.0
+format: 0.3.0
 project:
   name: safe-factory-as
   type: wasm/assemblyscript
 source:
   module: ./src/index.ts
   schema: ./src/schema.graphql
-  import_abis: 
-    - uri: "wrap://ens/datetime.polywrap.eth"
-      abi: ./node_modules/polywrap-datetime-plugin/build/wrap.info
-    - uri: wrap://ens/safe.contracts.polywrap.eth
-      abi: ../safe-contracts-wrapper/build/wrap.info
 extensions:
   build: ./polywrap.build.yaml
-  deploy: ./polywrap.deploy.yaml

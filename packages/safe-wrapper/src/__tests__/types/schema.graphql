@@ -1,4 +1,0 @@
-#import * into Ethereum from "ens/ethereum.polywrap.eth"
-#import * into SafeContracts from "wrap://fs/../safe-contracts-wrapper/build"
-#import * into SafeFactory from "wrap://fs/../safe-factory-wrapper/build"
-#import * into SafeWrapper from "wrap://fs/./build"

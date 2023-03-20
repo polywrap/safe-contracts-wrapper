@@ -1,0 +1,72 @@
+"""
+import { Module } into SafeContracts from "wrap://ens/safe.wraps.eth:contracts@0.1.0"
+import { Module } into EthersUtils from "wrap://ens/ethers.wraps.eth:utils@0.1.0"
+import {
+    Module,
+    Connection,
+    TxReceipt,
+    TxOptions
+} into Ethereum from "wrap://ens/wraps.eth:ethereum@2.0.0"
+import * into Logger from "wrap://ens/wraps.eth:logger@1.0.0"
+
+import {
+    SignSignature,
+    SafeTransaction,
+    SafeTransactionData,
+    SafeTransactionOptionalProps,
+    TransactionOptions
+} from "../../safe-common-types/schema.graphql"
+"""
+
+type Env {
+    safeAddress: String!
+    connection: Ethereum_Connection!
+}
+
+type MetaTransactionData {
+    data: String!
+    to: String!
+    value: String!
+    operation: BigInt
+}
+
+type Module {
+    """Safe methods"""
+    createTransaction(tx: SafeTransactionData!, options: SafeTransactionOptionalProps): SafeTransaction! @env(required: true)
+    createMultiSendTransaction(txs: [SafeTransactionData!]!, options: SafeTransactionOptionalProps, onlyCalls: Boolean, customMultiSendContractAddress: String ): SafeTransaction! @env(required: true)
+    addSignature(tx: SafeTransaction!, signingMethod: String): SafeTransaction! @env(required: true)
+    getTransactionHash(tx: SafeTransactionData!): String @env(required: true)
+    signTransactionHash(hash: String!): SignSignature! @env(required: true)
+    signTypedData(tx: SafeTransactionData!): SignSignature! @env(required: true)
+    approveTransactionHash(hash: String!, options: TransactionOptions): Ethereum_TxReceipt! @env(required: true)
+    executeTransaction(tx: SafeTransaction!, options: TransactionOptions): Ethereum_TxReceipt! @env(required: true)
+    getOwnersWhoApprovedTx(hash: String!): [String!]! @env(required: true)
+    getBalance: BigInt @env(required: true)
+    getChainId: String @env(required: true)
+    getSignature(tx: SafeTransaction!, signingMethod: String, safeAddress: String!, connection: Ethereum_Connection!): SafeTransaction!
+
+    """Owner manager methods"""
+    getOwners: [String!]! @env(required: true)
+    getThreshold: UInt32! @env(required: true)
+    isOwner(ownerAddress: String!): Boolean! @env(required: true)
+    encodeAddOwnerWithThresholdData(ownerAddress: String!, threshold: UInt32): String! @env(required: true)
+    encodeRemoveOwnerData(ownerAddress: String!, threshold: UInt32): String! @env(required: true)
+    encodeSwapOwnerData(oldOwnerAddress: String!, newOwnerAddress: String!): String! @env(required: true)
+    encodeChangeThresholdData(threshold: UInt32!): String! @env(required: true)
+
+    """Module manager methods"""
+    getModules: [String!]! @env(required: true)
+    isModuleEnabled(moduleAddress: String!): Boolean! @env(required: true)
+    encodeEnableModuleData(moduleAddress: String!): String! @env(required: true)
+    encodeDisableModuleData(moduleAddress: String!): String! @env(required: true)
+
+    """Contract manager methods"""
+    getAddress: String! @env(required: true)
+    getContractVersion: String! @env(required: true)
+    getNonce: BigInt! @env(required: true)
+    getMultiSendAddress: String! @env(required: true)
+    getMultiSendCallOnlyAddress: String! @env(required: true)
+
+    """Utilities for transactions"""
+    encodeMultiSendData(txs: [SafeTransactionData!]!): String!
+}

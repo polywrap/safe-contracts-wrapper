@@ -1,11 +1,10 @@
 import { BigInt } from "@polywrap/wasm-as";
-import { Interface_SignSignature, Interface_SafeTransactionData } from "../wrap";
-import { Interface_SafeTransactionOptionalProps } from "../wrap/imported/Interface_SafeTransactionOptionalProps";
+import { SignSignature, SafeTransactionData, SafeTransactionOptionalProps } from "../wrap";
 
 export const ZERO_ADDRESS = `0x${"0".repeat(40)}`;
 export const SENTINEL_ADDRESS = "0x0000000000000000000000000000000000000001";
 
-export function getTransactionHashArgs(tx: Interface_SafeTransactionData): string[] {
+export function getTransactionHashArgs(tx: SafeTransactionData): string[] {
   return [
     tx.to,
     tx.value.toString(),
@@ -21,10 +20,10 @@ export function getTransactionHashArgs(tx: Interface_SafeTransactionData): strin
 }
 
 export function createTransactionFromPartial(
-  transactionData: Interface_SafeTransactionData,
-  options: Interface_SafeTransactionOptionalProps | null
-): Interface_SafeTransactionData {
-  let transaction: Interface_SafeTransactionData = {
+  transactionData: SafeTransactionData,
+  options: SafeTransactionOptionalProps | null
+): SafeTransactionData {
+  let transaction: SafeTransactionData = {
     data: transactionData.data,
     to: transactionData.to,
     value: transactionData.value,
@@ -87,7 +86,7 @@ export function createTransactionFromPartial(
   return transaction;
 }
 
-export function encodeSignatures(signatures: Map<string, Interface_SignSignature>): string {
+export function encodeSignatures(signatures: Map<string, SignSignature>): string {
   const signers = (<Array<string>>signatures.keys()).sort();
   const baseOffset = signers.length * 65;
   let staticParts = "";

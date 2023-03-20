@@ -8,6 +8,7 @@ import proxy_factory_v130 from "./1.3.0/proxy_factory";
 import multi_send_v111 from "./1.1.1/multi_send";
 import multi_send_v130 from "./1.3.0/multi_send";
 import multi_send_call_only_v130 from "./1.3.0/multi_send_call_only";
+import compatibility_fallback_handler from "./1.3.0/compatibility_fallback_handler";
 
 //https://github.com/safe-global/safe-deployments/tree/main/src/assets - contract adressess
 
@@ -71,5 +72,15 @@ export function getMultisendCallOnlyContractMap(
     return generateMap(multi_send_call_only_v130);
   } else {
     throw new Error("Invalid Safe version");
+  }
+}
+
+export function getFallbackHandlerCompabilityMap(
+  version: string
+): Map<string, string> {
+  if (version == "1.3.0") {
+    return generateMap(compatibility_fallback_handler);
+  } else {
+    return new Map()
   }
 }

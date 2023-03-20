@@ -1,4 +1,5 @@
 import {
+  getFallbackHandlerCompabilityMap,
   getMultisendCallOnlyContractMap,
   getMultisendContractMap,
   getSafeContractMap,
@@ -51,6 +52,20 @@ export function getMultiSendCallOnlyContractAddress(safeVersion: string, chainId
   const hasMultisendContractAddress = multiSendContractMap.has(chainId);
   if (hasMultisendContractAddress) {
     return <string>multiSendContractMap.get(chainId);
+  } else {
+    return null;
+  }
+}
+
+export function getFallbackHandlerCompability(
+  safeVersion: string,
+  chainId: string
+): string | null {
+  const fallbackHandlerMap = getFallbackHandlerCompabilityMap(safeVersion);
+
+  const hasFallbackHandler = fallbackHandlerMap.has(chainId);
+  if (hasFallbackHandler) {
+    return <string>fallbackHandlerMap.get(chainId);
   } else {
     return null;
   }
