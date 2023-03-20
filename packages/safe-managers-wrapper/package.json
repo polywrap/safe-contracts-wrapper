@@ -1,6 +1,6 @@
 {
   "name": "@consideritdone/safe-managers",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Gnosis safe wrappers",
   "files": [
     "contracts",

@@ -1,7 +1,7 @@
 {
   "name": "@consideritdone/safe-contracts-wrapper",
-  "version": "1.0.0",
-  "description": "Gnosis safe proxy factory wrapper",
+  "version": "0.1.0",
+  "description": "Gnosis safe contracts wrapper",
   "files": [
     "contracts",
     "dist",

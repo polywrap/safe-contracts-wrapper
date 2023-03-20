@@ -34,14 +34,5 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
         "wrap://ens/wraps.eth:ethereum-provider@2.0.0",
         "wrap://ens/wraps.eth:ethereum-provider@2.0.0"
       )
-      // @TODO(cbrzn): Remove this once the ENS text record content hash has been updated
-      .addRedirect(
-        "wrap://ens/wraps.eth:ethereum-utils@0.0.1",
-        "wrap://ipfs/QmVNg4yFFngvtzxU49Hz1aujnwsxRbxhsGWf1iL1qwdtmN"
-      )
-      .addRedirect(
-        "wrap://ens/safe.wraps.eth:contracts@0.0.1",
-        "wrap://fs/../safe-contracts-wrapper/build"
-      )
   );
 }

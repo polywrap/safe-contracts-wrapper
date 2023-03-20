@@ -44,7 +44,7 @@ To deploy a new Safe account invoke `deploySafe` method of `safe-factory-wrapper
 
 ```js
 const result = await client.invoke({
-  uri: 'ens/safe.wraps.eth@factory:0.0.1',
+  uri: 'ens/safe.wraps.eth@factory:0.1.0',
   method: "deploySafe",
   args: {
     safeAccountConfig: {
@@ -70,7 +70,7 @@ const safeTransactionData = {
 }
 
 const safeTransaction = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: "createTransaction",
   args: {
       tx: safeTransactionData,
@@ -93,7 +93,7 @@ The `owner1` account signs the transaction off-chain.
 
 ```js
 const signedSafeTransaction = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: "addSignature",
   args: {
       tx: safeTransactionData,
@@ -113,7 +113,7 @@ To sign transaction on-chain `owner2` should instantiate new PolywrapClient conn
 ```js
 // Get transaction hash
 const txHash = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: "getTransactionHash",
   args: {
       tx: signedSafeTransaction.data,
@@ -125,7 +125,7 @@ const txHash = await client.invoke({
 
 // Approve
 await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: "approveTransactionHash",
   args: {
       hash: txHash,
@@ -142,7 +142,7 @@ Lastly, `owner3` account is connected to the client as a signer and executor of 
 
 ```js
 const executeTxResponse = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: "executeTransaction",
   args: {
       tx: signedTransaction,
@@ -197,7 +197,7 @@ const safeDeploymentConfig = {
 }
 
 const safeDeploymentResponse = await client.invoke({
-  uri: 'ens/safe.wraps.eth@factory:0.0.1',
+  uri: 'ens/safe.wraps.eth@factory:0.1.0',
   method: 'deploySafe',
   args: { 
     safeAccountConfig, 
@@ -218,7 +218,7 @@ Returns the address of the current SafeProxy contract.
 
 ```js
 const address = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: 'getAddress',,
   env: {
     safeAddress: <SAFE_ADDRESS>
@@ -232,7 +232,7 @@ Returns the Safe Master Copy contract version.
 
 ```js
 const version = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: 'getContractVersion',,
   env: {
     safeAddress: <SAFE_ADDRESS>
@@ -246,7 +246,7 @@ Returns the list of Safe owner accounts.
 
 ```js
 const owners = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: 'getOwners',
   env: {
     safeAddress: <SAFE_ADDRESS>
@@ -260,7 +260,7 @@ Returns the Safe nonce.
 
 ```js
 const nonce = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: 'getNonce',
   env: {
     safeAddress: <SAFE_ADDRESS>
@@ -274,7 +274,7 @@ Returns the Safe threshold.
 
 ```js
 const threshold = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: 'getThreshold',
   env: {
     safeAddress: <SAFE_ADDRESS>
@@ -288,7 +288,7 @@ Returns the chainId of the connected network.
 
 ```js
 const chainId = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: 'getChainId',
   env: {
     safeAddress: <SAFE_ADDRESS>
@@ -302,7 +302,7 @@ Returns the ETH balance of the Safe.
 
 ```js
 const balance = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: 'getBalance',
   env: {
     safeAddress: <SAFE_ADDRESS>
@@ -316,7 +316,7 @@ Returns the list of addresses of all the enabled Safe modules.
 
 ```js
 const moduleAddresses = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: 'getModules',
   env: {
     safeAddress: <SAFE_ADDRESS>
@@ -330,7 +330,7 @@ Checks if a specific Safe module is enabled for the current Safe.
 
 ```js
 const isEnabled = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: 'isModuleEnabled',
   args: {
     moduleAddress: <address>
@@ -347,7 +347,7 @@ Checks if a specific address is an owner of the current Safe.
 
 ```js
 const isOwner = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.0.1',
+  uri: 'ens/safe.wraps.eth@manager:0.1.0',
   method: 'isOwner',
   args: {
     ownerAddress: <address>
@@ -382,7 +382,7 @@ Returns a Safe transaction ready to be signed by the owners and executed. The Sa
   }
   
   const safeTransaction = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'createTransaction',
     args: {
       tx: safeTransactionData
@@ -414,7 +414,7 @@ Returns a Safe transaction ready to be signed by the owners and executed. The Sa
     // ...
   ]
   const safeTransaction = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'createMultiSendTransaction',
     args: {
       txs: safeTransactionsData
@@ -452,7 +452,7 @@ Returns a Safe transaction ready to be signed by the owners and executed. The Sa
     nonce // Optional
   }
     const safeTransaction = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'createMultiSendTransaction',
     args: {
       txs: safeTransactionsData,
@@ -469,7 +469,7 @@ Returns a Safe transaction ready to be signed by the owners and executed. The Sa
   ```js
   const onlyCalls = true
   const safeTransaction = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'createMultiSendTransaction',
     args: {
       txs: safeTransactionsData,
@@ -503,7 +503,7 @@ const safeTransactionData: SafeTransactionDataPartial = {
   // ...
 }
 const safeTransaction =  await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'createTransaction',
     args: {
       tx: safeTransactionData
@@ -514,7 +514,7 @@ const safeTransaction =  await client.invoke({
   })
   
 const txHash = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'getTransactionHash',
     args: {
       tx: safeTransaction
@@ -531,7 +531,7 @@ Signs a hash using the current owner account.
 
 ```js
 const signature = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'signTransactionHash',
     args: {
       hash: txHash
@@ -548,7 +548,7 @@ Signs a transaction according to the EIP-712 using the current signer account.
 
 ```js
 const signature = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'signTypedData',
     args: {
       tx: safeTransaction
@@ -565,7 +565,7 @@ Returns a new `SafeTransaction` object that includes the signature of the curren
 
 ```js
 const signedSafeTransaction = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'addSignature',
     args: {
       tx: safeTransaction
@@ -580,7 +580,7 @@ Optionally, an additional parameter can be passed to specify a different way of 
 
 ```js
 const signedSafeTransaction = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'addSignature',
     args: {
       tx: safeTransaction
@@ -594,7 +594,7 @@ const signedSafeTransaction = await client.invoke({
 
 ```js
 const signedSafeTransaction = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'addSignature',
     args: {
       tx: safeTransaction
@@ -612,7 +612,7 @@ Approves a hash on-chain using the current owner account.
 
 ```js
 const txResponse = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'approveTransactionHash',
     args: {
       hash: txHash
@@ -637,7 +637,7 @@ const options = {
 ```
 ```js
 const txResponse = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'approveTransactionHash',
     args: {
       hash: txHash,
@@ -655,7 +655,7 @@ Returns a list of owners who have approved a specific Safe transaction.
 
 ```js
 const ownerAddresses = await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'getOwnersWhoApprovedTx',
     args: {
       hash: txHash
@@ -672,7 +672,7 @@ Executes a Safe transaction.
 
 ```js
 const txResponse  await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'executeTransaction',
     args: {
       tx: signedSafeTransaction
@@ -697,7 +697,7 @@ const options = {
 ```
 ```js
 const txResponse  await client.invoke({
-    uri: 'ens/safe.wraps.eth@manager:0.0.1',
+    uri: 'ens/safe.wraps.eth@manager:0.1.0',
     method: 'executeTransaction',
     args: {
       tx: signedSafeTransaction,

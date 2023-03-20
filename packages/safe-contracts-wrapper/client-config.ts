@@ -56,14 +56,5 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
         "wrap://ens/wraps.eth:ethereum-provider@2.0.0",
         "wrap://ens/wraps.eth:ethereum-provider@2.0.0"
       )
-      // @TODO(cbrzn): Remove this once the ENS text record content hash has been updated
-      // .addRedirect(
-      //   "ens/wraps.eth:ethereum@1.1.0",
-      //   "wrap://ipfs/QmbnAG8iCdVMPQK8tQ5qqFwLKjaLF8BUuuLYiozj7mLF8Y"
-      // )
-      .addRedirect(
-        "wrap://ens/wraps.eth:ethereum-utils@0.0.1",
-        "wrap://ipfs/QmVNg4yFFngvtzxU49Hz1aujnwsxRbxhsGWf1iL1qwdtmN"
-      )
   );
 }
