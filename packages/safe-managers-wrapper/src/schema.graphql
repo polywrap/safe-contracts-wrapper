@@ -1,13 +1,12 @@
 """
-import { Module } into SafeContracts from "wrap://ens/safe.wraps.eth:contracts@0.0.1"
-import { Module } into EthersUtils from "wrap://ens/wraps.eth:ethereum-utils@0.0.1"
-
+import { Module } into SafeContracts from "wrap://ens/safe.wraps.eth:contracts@0.1.0"
+import { Module } into EthersUtils from "wrap://ens/ethers.wraps.eth:utils@0.1.0"
 import {
     Module,
     Connection,
     TxReceipt,
     TxOptions
-} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.1.0"
+} into Ethereum from "wrap://ens/wraps.eth:ethereum@2.0.0"
 import * into Logger from "wrap://ens/wraps.eth:logger@1.0.0"
 
 import {
@@ -44,6 +43,7 @@ type Module {
     getOwnersWhoApprovedTx(hash: String!): [String!]! @env(required: true)
     getBalance: BigInt @env(required: true)
     getChainId: String @env(required: true)
+    getSignature(tx: SafeTransaction!, signingMethod: String, safeAddress: String!, connection: Ethereum_Connection!): SafeTransaction!
 
     """Owner manager methods"""
     getOwners: [String!]! @env(required: true)
@@ -66,4 +66,7 @@ type Module {
     getNonce: BigInt! @env(required: true)
     getMultiSendAddress: String! @env(required: true)
     getMultiSendCallOnlyAddress: String! @env(required: true)
+
+    """Utilities for transactions"""
+    encodeMultiSendData(txs: [SafeTransactionData!]!): String!
 }

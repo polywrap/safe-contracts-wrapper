@@ -4,7 +4,7 @@ import {
   Args_getModules,
   Args_isModuleEnabled,
   Env,
-  Ethereum_Module,
+  EthersUtils_Module,
   SafeContracts_Module,
 } from "../wrap";
 import {
@@ -40,7 +40,7 @@ export function isModuleEnabled(args: Args_isModuleEnabled, env: Env): bool {
 export function encodeEnableModuleData(args: Args_encodeEnableModuleData, env: Env): string {
   validateModuleAddress(args.moduleAddress);
   validateModuleIsNotEnabled(args.moduleAddress, getModules({}, env));
-  const result = Ethereum_Module.encodeFunction({
+  const result = EthersUtils_Module.encodeFunction({
     method: "function enableModule(address module) public",
     args: [args.moduleAddress],
   });
@@ -50,7 +50,7 @@ export function encodeEnableModuleData(args: Args_encodeEnableModuleData, env: E
 export function encodeDisableModuleData(args: Args_encodeDisableModuleData, env: Env): string {
   validateModuleAddress(args.moduleAddress);
   const prevModuleAddress = validateModuleIsEnabledAndGetPrev(args.moduleAddress, getModules({}, env));
-  const result = Ethereum_Module.encodeFunction({
+  const result = EthersUtils_Module.encodeFunction({
     method: "function disableModule(address prevModule, address module) public",
     args: [prevModuleAddress, args.moduleAddress],
   });

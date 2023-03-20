@@ -44,7 +44,7 @@ describe("SafeFactory", () => {
     ".."
   );
   const wrapperUri = `fs/${wrapperPath}/build`;
-  const ethereumUri = "wrap://ens/wraps.eth:ethereum@1.1.0";
+  const ethereumUri = "wrap://ens/wraps.eth:ethereum@2.0.0";
 
   let proxyContractAddress_v120: string;
   let proxyContractAddress_v130: string;
@@ -61,13 +61,14 @@ describe("SafeFactory", () => {
           abi: JSON.stringify(factoryAbi_1_2_0),
           bytecode: factoryBytecode_1_2_0,
           args: null,
-          connection: CONNECTION
+          connection: CONNECTION,
         },
         client,
         ethereumUri
       );
 
-    if (!proxyFactoryContractResponse_v120.ok) throw proxyFactoryContractResponse_v120.error;
+    if (!proxyFactoryContractResponse_v120.ok)
+      throw proxyFactoryContractResponse_v120.error;
     proxyContractAddress_v120 =
       proxyFactoryContractResponse_v120.value as string;
 
@@ -83,7 +84,8 @@ describe("SafeFactory", () => {
         ethereumUri
       );
 
-    if (!safeFactoryContractResponse_v120.ok) throw safeFactoryContractResponse_v120.error;
+    if (!safeFactoryContractResponse_v120.ok)
+      throw safeFactoryContractResponse_v120.error;
     safeContractAddress_v120 = safeFactoryContractResponse_v120.value as string;
 
     const proxyFactoryContractResponse_v130 =
@@ -98,7 +100,8 @@ describe("SafeFactory", () => {
         ethereumUri
       );
 
-    if (!proxyFactoryContractResponse_v130.ok) throw proxyFactoryContractResponse_v130.error;
+    if (!proxyFactoryContractResponse_v130.ok)
+      throw proxyFactoryContractResponse_v130.error;
     proxyContractAddress_v130 =
       proxyFactoryContractResponse_v130.value as string;
 
@@ -114,7 +117,8 @@ describe("SafeFactory", () => {
         ethereumUri
       );
 
-    if (!safeFactoryContractResponse_v130.ok) throw safeFactoryContractResponse_v130.error;
+    if (!safeFactoryContractResponse_v130.ok)
+      throw safeFactoryContractResponse_v130.error;
     safeContractAddress_v130 = safeFactoryContractResponse_v130.value as string;
   });
 
@@ -122,51 +126,20 @@ describe("SafeFactory", () => {
     await stopTestEnvironment();
   });
 
-  describe("getChainId", () => {
-    it("should return the chainId of the current network", async () => {
-      const chainIdResponse = await App.Factory_Module.getChainId(
-        {
-          connection: CONNECTION,
-        },
-        client,
-        wrapperUri
-      );
-
-      if (!chainIdResponse.ok) throw chainIdResponse.error;
-      expect(chainIdResponse.value).not.toBeNull();
-      expect(chainIdResponse.value).toEqual("1337");
-    });
-  });
-
-  describe("generateSalt", () => {
-    it("should return expected salt", async () => {
-      const chainIdResponse = await App.Factory_Module.getChainId(
-        {
-          connection: CONNECTION,
-        },
-        client,
-        wrapperUri
-      );
-
-      if (!chainIdResponse.ok) throw chainIdResponse.error;
-      expect(chainIdResponse.value).not.toBeNull();
-      expect(chainIdResponse.value).toEqual("1337");
-    });
-  });
-
-
   describe("deploySafe with custom contract adressess", () => {
     it("should fail if there are no owners", async () => {
       const deploySafeResponse = await App.Factory_Module.deploySafe(
         {
-          safeAccountConfig: {
-            owners: [],
-            threshold: 1,
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v120!,
-            safeFactoryContract: safeContractAddress_v120!,
+          input: {
+            safeAccountConfig: {
+              owners: [],
+              threshold: 1,
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v120!,
+              safeFactoryContract: safeContractAddress_v120!,
+            },
           },
         },
         client,
@@ -175,21 +148,25 @@ describe("SafeFactory", () => {
 
       expect(deploySafeResponse.ok).toEqual(false);
       if (!deploySafeResponse.ok) {
-        expect(deploySafeResponse.error?.toString()).toMatch("Owner list must have at least one owner");
+        expect(deploySafeResponse.error?.toString()).toMatch(
+          "Owner list must have at least one owner"
+        );
       }
     });
 
     it("should fail if the threshold is lower than 0", async () => {
       const deploySafeResponse = await App.Factory_Module.deploySafe(
         {
-          safeAccountConfig: {
-            owners: owners,
-            threshold: -1,
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v120!,
-            safeFactoryContract: safeContractAddress_v120!,
+          input: {
+            safeAccountConfig: {
+              owners: owners,
+              threshold: -1,
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v120!,
+              safeFactoryContract: safeContractAddress_v120!,
+            },
           },
         },
         client,
@@ -198,21 +175,25 @@ describe("SafeFactory", () => {
 
       expect(deploySafeResponse.ok).toEqual(false);
       if (!deploySafeResponse.ok) {
-        expect(deploySafeResponse.error?.toString()).toMatch("unsigned integer cannot be negative");
+        expect(deploySafeResponse.error?.toString()).toMatch(
+          "unsigned integer cannot be negative"
+        );
       }
     });
 
     it("should fail if the threshold is higher than the owners length", async () => {
       const deploySafeResponse = await App.Factory_Module.deploySafe(
         {
-          safeAccountConfig: {
-            owners: owners,
-            threshold: 2,
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v120!,
-            safeFactoryContract: safeContractAddress_v120!,
+          input: {
+            safeAccountConfig: {
+              owners: owners,
+              threshold: 2,
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v120!,
+              safeFactoryContract: safeContractAddress_v120!,
+            },
           },
         },
         client,
@@ -221,24 +202,28 @@ describe("SafeFactory", () => {
 
       expect(deploySafeResponse.ok).toEqual(false);
       if (!deploySafeResponse.ok) {
-        expect(deploySafeResponse.error?.toString()).toMatch("Threshold must be lower than or equal to owners length");
+        expect(deploySafeResponse.error?.toString()).toMatch(
+          "Threshold must be lower than or equal to owners length"
+        );
       }
     });
 
     it("should fail if the saltNonce is lower than 0", async () => {
       const deploySafeResponse = await App.Factory_Module.deploySafe(
         {
-          safeAccountConfig: {
-            owners: owners,
-            threshold: 1,
-          },
-          safeDeploymentConfig: {
-            saltNonce: "-2",
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v120!,
-            safeFactoryContract: safeContractAddress_v120!,
+          input: {
+            safeAccountConfig: {
+              owners: owners,
+              threshold: 1,
+            },
+            safeDeploymentConfig: {
+              saltNonce: "-2",
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v120!,
+              safeFactoryContract: safeContractAddress_v120!,
+            },
           },
         },
         client,
@@ -247,21 +232,25 @@ describe("SafeFactory", () => {
 
       expect(deploySafeResponse.ok).toEqual(false);
       if (!deploySafeResponse.ok) {
-        expect(deploySafeResponse.error?.toString()).toMatch("saltNonce must be greater than or equal to 0");
+        expect(deploySafeResponse.error?.toString()).toMatch(
+          "saltNonce must be greater than or equal to 0"
+        );
       }
     });
 
     it("should deploy a new Safe without saltNonce", async () => {
       const deploySafeResponse = await App.Factory_Module.deploySafe(
         {
-          safeAccountConfig: {
-            owners: owners,
-            threshold: 1,
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v130!,
-            safeFactoryContract: safeContractAddress_v130!,
+          input: {
+            safeAccountConfig: {
+              owners: owners,
+              threshold: 1,
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v130!,
+              safeFactoryContract: safeContractAddress_v130!,
+            },
           },
         },
         client,
@@ -270,23 +259,25 @@ describe("SafeFactory", () => {
 
       if (!deploySafeResponse.ok) throw deploySafeResponse.error;
       expect(deploySafeResponse.value).not.toBeNull();
-      expect(deploySafeResponse.value?.safeAddress).toMatch("0x");
+      expect(deploySafeResponse.value).toMatch("0x");
     });
 
     it("should deploy a new Safe with saltNonce", async () => {
       const deploySafeResponse = await App.Factory_Module.deploySafe(
         {
-          safeAccountConfig: {
-            owners: owners,
-            threshold: 1,
-          },
-          safeDeploymentConfig: {
-            saltNonce: Date.now().toString(),
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v120!,
-            safeFactoryContract: safeContractAddress_v120!,
+          input: {
+            safeAccountConfig: {
+              owners: owners,
+              threshold: 1,
+            },
+            safeDeploymentConfig: {
+              saltNonce: Date.now().toString(),
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v120!,
+              safeFactoryContract: safeContractAddress_v120!,
+            },
           },
         },
         client,
@@ -295,7 +286,7 @@ describe("SafeFactory", () => {
 
       if (!deploySafeResponse.ok) throw deploySafeResponse.error;
       expect(deploySafeResponse.value).not.toBeNull();
-      expect(deploySafeResponse.value?.safeAddress).toMatch("0x");
+      expect(deploySafeResponse.value).toMatch("0x");
     });
 
     // redundant ?
@@ -307,7 +298,7 @@ describe("SafeFactory", () => {
             threshold: 1,
           },
           connection: CONNECTION,
-          customContractAdressess: {
+          customContractAddresses: {
             proxyFactoryContract: proxyContractAddress_v130!,
             safeFactoryContract: safeContractAddress_v130!,
           },
@@ -333,7 +324,7 @@ describe("SafeFactory", () => {
             version: "1.2.0",
           },
           connection: CONNECTION,
-          customContractAdressess: {
+          customContractAddresses: {
             proxyFactoryContract: proxyContractAddress_v120!,
             safeFactoryContract: safeContractAddress_v120!,
           },
@@ -359,7 +350,7 @@ describe("SafeFactory", () => {
             version: "1.3.0",
           },
           connection: CONNECTION,
-          customContractAdressess: {
+          customContractAddresses: {
             proxyFactoryContract: proxyContractAddress_v130!,
             safeFactoryContract: safeContractAddress_v130!,
           },
@@ -377,14 +368,16 @@ describe("SafeFactory", () => {
     it("should fail if there are no owners", async () => {
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
-          safeAccountConfig: {
-            owners: [],
-            threshold: 1,
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v120!,
-            safeFactoryContract: safeContractAddress_v120!,
+          input: {
+            safeAccountConfig: {
+              owners: [],
+              threshold: 1,
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v120!,
+              safeFactoryContract: safeContractAddress_v120!,
+            },
           },
         },
         client,
@@ -393,21 +386,25 @@ describe("SafeFactory", () => {
 
       expect(predictSafeResp.ok).toEqual(false);
       if (!predictSafeResp.ok) {
-        expect(predictSafeResp.error?.toString()).toMatch("Owner list must have at least one owner");
+        expect(predictSafeResp.error?.toString()).toMatch(
+          "Owner list must have at least one owner"
+        );
       }
     });
 
     it("should fail if the threshold is lower than 0", async () => {
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
-          safeAccountConfig: {
-            owners: owners,
-            threshold: -1,
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v120!,
-            safeFactoryContract: safeContractAddress_v120!,
+          input: {
+            safeAccountConfig: {
+              owners: owners,
+              threshold: -1,
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v120!,
+              safeFactoryContract: safeContractAddress_v120!,
+            },
           },
         },
         client,
@@ -416,21 +413,25 @@ describe("SafeFactory", () => {
 
       expect(predictSafeResp.ok).toEqual(false);
       if (!predictSafeResp.ok) {
-        expect(predictSafeResp.error?.toString()).toMatch("unsigned integer cannot be negative");
+        expect(predictSafeResp.error?.toString()).toMatch(
+          "unsigned integer cannot be negative"
+        );
       }
     });
 
     it("should fail if the threshold is higher than the threshold", async () => {
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
-          safeAccountConfig: {
-            owners: owners,
-            threshold: 2,
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v120!,
-            safeFactoryContract: safeContractAddress_v120!,
+          input: {
+            safeAccountConfig: {
+              owners: owners,
+              threshold: 2,
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v120!,
+              safeFactoryContract: safeContractAddress_v120!,
+            },
           },
         },
         client,
@@ -439,24 +440,28 @@ describe("SafeFactory", () => {
 
       expect(predictSafeResp.ok).toEqual(false);
       if (!predictSafeResp.ok) {
-        expect(predictSafeResp.error?.toString()).toMatch("Threshold must be lower than or equal to owners length");
+        expect(predictSafeResp.error?.toString()).toMatch(
+          "Threshold must be lower than or equal to owners length"
+        );
       }
     });
 
     it("should fail if the saltNonce is lower than 0", async () => {
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
-          safeAccountConfig: {
-            owners: owners,
-            threshold: 1,
-          },
-          safeDeploymentConfig: {
-            saltNonce: "-2",
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v120!,
-            safeFactoryContract: safeContractAddress_v120!,
+          input: {
+            safeAccountConfig: {
+              owners: owners,
+              threshold: 1,
+            },
+            safeDeploymentConfig: {
+              saltNonce: "-2",
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v120!,
+              safeFactoryContract: safeContractAddress_v120!,
+            },
           },
         },
         client,
@@ -465,7 +470,9 @@ describe("SafeFactory", () => {
 
       expect(predictSafeResp.ok).toEqual(false);
       if (!predictSafeResp.ok) {
-        expect(predictSafeResp.error?.toString()).toMatch("saltNonce must be greater than or equal to 0");
+        expect(predictSafeResp.error?.toString()).toMatch(
+          "saltNonce must be greater than or equal to 0"
+        );
       }
     });
 
@@ -473,40 +480,43 @@ describe("SafeFactory", () => {
       const saltNonce = "0x127";
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
-          safeAccountConfig: {
-            owners: owners,
-            threshold: 1,
-          },
-          safeDeploymentConfig: {
-            saltNonce: saltNonce,
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v120!,
-            safeFactoryContract: safeContractAddress_v120!,
+          input: {
+            safeAccountConfig: {
+              owners: owners,
+              threshold: 1,
+            },
+            safeDeploymentConfig: {
+              saltNonce: saltNonce,
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v120!,
+              safeFactoryContract: safeContractAddress_v120!,
+            },
           },
         },
         client,
         wrapperUri
       );
 
-      
       if (!predictSafeResp.ok) throw predictSafeResp.error;
       expect(predictSafeResp.value).not.toBeNull();
 
       const deploySafeResp = await App.Factory_Module.deploySafe(
         {
-          safeAccountConfig: {
-            owners: owners,
-            threshold: 1,
-          },
-          safeDeploymentConfig: {
-            saltNonce: saltNonce,
-          },
-          connection: CONNECTION,
-          customContractAdressess: {
-            proxyFactoryContract: proxyContractAddress_v120!,
-            safeFactoryContract: safeContractAddress_v120!,
+          input: {
+            safeAccountConfig: {
+              owners: owners,
+              threshold: 1,
+            },
+            safeDeploymentConfig: {
+              saltNonce: saltNonce,
+            },
+            connection: CONNECTION,
+            customContractAddresses: {
+              proxyFactoryContract: proxyContractAddress_v120!,
+              safeFactoryContract: safeContractAddress_v120!,
+            },
           },
         },
         client,
@@ -516,7 +526,7 @@ describe("SafeFactory", () => {
       if (!deploySafeResp.ok) throw deploySafeResp.error;
       expect(deploySafeResp.value).not.toBeNull();
 
-      expect(predictSafeResp.value).toEqual(deploySafeResp.value?.safeAddress);
+      expect(predictSafeResp.value).toEqual(deploySafeResp.value);
     });
   });
 });

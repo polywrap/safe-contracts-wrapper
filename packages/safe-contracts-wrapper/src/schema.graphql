@@ -3,8 +3,8 @@ import {
     Module,
     Connection,
     TxOptions
-} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.1.0"
-
+} into Ethereum from "wrap://ens/wraps.eth:ethereum@2.0.0"
+import { Module } into EthersUtils from "wrap://ens/ethers.wraps.eth:utils@0.1.0"
 import {
     SignSignature,
     SafeTransaction,
@@ -18,7 +18,7 @@ type Module {
     """
     Module to deploy and interact with the proxy factory smart-contract
     """
-    createProxy(address: String!, safeMasterCopyAddress: String!, initializer: String!, saltNonce: UInt32!, connection: Ethereum_Connection, txOptions: Ethereum_TxOptions): String
+    createProxy(address: String!, safeMasterCopyAddress: String!, initializer: String!, saltNonce: UInt32!, connection: Ethereum_Connection, txOptions: Ethereum_TxOptions): String!
     proxyCreationCode(address: String!, connection: Ethereum_Connection): String!
 
     """
@@ -44,7 +44,17 @@ type Module {
     encode(method: String!, args: [String!]!): String!
     estimateGas(address: String!, method: String!, args: [String!]!, connection: Ethereum_Connection): BigInt!
 
-    getSafeContractNetworks(version: String!, chainId: String!, isL1Safe: Boolean): ContractNetworksConfig
+    getSafeContractNetworks(
+        version: String!,
+        chainId: String!,
+        isL1Safe: Boolean,
+        filter: ContractNetworksFilter
+    ): ContractNetworksConfig!
+
+    encodeExecTransaction(
+        safeAddress: String!,
+        safeTransaction: SafeTransaction!
+    ): String!
 
 }
 
@@ -53,4 +63,13 @@ type ContractNetworksConfig {
     multiSendCallOnlyAddress: String
     safeMasterCopyAddress: String
     safeProxyFactoryAddress: String
+    fallbackHandlerAddress: String
+}
+
+type ContractNetworksFilter {
+    multiSendAddress: Boolean!
+    multiSendCallOnlyAddress: Boolean!
+    safeMasterCopyAddress: Boolean!
+    safeProxyFactoryAddress: Boolean!
+    fallbackHandlerAddress: Boolean!
 }

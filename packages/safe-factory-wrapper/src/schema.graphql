@@ -1,6 +1,4 @@
 """
-import { Module } into SafeContracts from "wrap://ens/safe.wraps.eth:contracts@0.0.1"
-
 import {
     Module,
     Connection,
@@ -10,32 +8,42 @@ import {
     TxResponse,
     TxOptions,
     StaticTxResult
-} into Ethereum from "wrap://ens/wraps.eth:ethereum@1.1.0"
-import { Module } into EthersUtils from "wrap://ens/wraps.eth:ethereum-utils@0.0.1"
+} into Ethereum from "wrap://ens/wraps.eth:ethereum@2.0.0"
+import { Module } into SafeContracts from "wrap://ens/safe.wraps.eth:contracts@0.1.0"
+import { Module } into EthersUtils from "wrap://ens/ethers.wraps.eth:utils@0.1.0"
 import * into Datetime from "wrap://ens/datetime.polywrap.eth"
 import * into Logger from "wrap://ens/wraps.eth:logger@1.0.0"
 """
 
 type Module {
-    getChainId(
-        connection: Ethereum_Connection
-    ):String
-
     deploySafe(
-        safeAccountConfig: SafeAccountConfig!,
-        safeDeploymentConfig: SafeDeploymentConfig,
-        #options: TransactionOptions,
-        connection: Ethereum_Connection,
-        txOptions: Ethereum_TxOptions,
-        customContractAdressess: CustomContract
-    ): SafePayload
+        input: DeploymentInput!
+        txOptions: Ethereum_TxOptions
+    ): String!
 
     predictSafeAddress(
-        safeAccountConfig: SafeAccountConfig!,
-        safeDeploymentConfig: SafeDeploymentConfig,
-        connection: Ethereum_Connection,
-        customContractAdressess: CustomContract
-    ): String
+        input: DeploymentInput!
+    ): String!
+
+    safeIsDeployed(
+        safeAddress: String!
+        connection: Ethereum_Connection!
+    ): Boolean!
+
+    encodeDeploySafe(
+        input: DeploymentInput!
+    ): String!
+
+    getSafeInitializer(
+        config: SafeAccountConfig!
+    ): String!
+}
+
+type DeploymentInput {
+    safeAccountConfig: SafeAccountConfig!
+    safeDeploymentConfig: SafeDeploymentConfig
+    customContractAddresses: CustomContract
+    connection: Ethereum_Connection
 }
 
 enum OperationType {
@@ -48,17 +56,11 @@ type CustomContract {
     safeFactoryContract: String
 }
 
-type SafePayload {
-    safeAddress: String!
-    contractNetworks: ContractNetworksConfig
-    isL1SafeMasterCopy: Boolean!
-}
-
-type ContractNetworksConfig {
-      multiSendAddress: String
-      multiSendCallOnlyAddress: String
-      safeMasterCopyAddress: String
-      safeProxyFactoryAddress: String
+type DeploymentPayload {
+    safeContractAddress: String!
+    safeFactoryContractAddress: String!
+    initializer: String!
+    saltNonce: String!
 }
 
 type SafeAccountConfig {
@@ -103,15 +105,6 @@ type SafeTransactionDataPartial implements MetaTransactionData {
     nonce: BigInt
 }
 
-type SafeSignature {
-    signer: String!
-    data: String!
-}
-
-type SafeTransaction {
-    data: SafeTransactionData!
-    signatures: [SafeSignature!]!
-}
 
 type BaseTransactionResult {
     hash: String!

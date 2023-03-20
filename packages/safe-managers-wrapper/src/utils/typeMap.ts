@@ -8,7 +8,6 @@ import {
   SafeTransaction,
   SafeTransactionData,
   SignSignature,
-
 } from "../wrap";
 
 export function toTransaction(tx: SafeTransaction): SafeContracts_SafeTransaction {

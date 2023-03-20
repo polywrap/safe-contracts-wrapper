@@ -36,7 +36,7 @@ describe("ProxyFactory", () => {
     ".."
   );
   const wrapperUri = `fs/${wrapperPath}/build`;
-  const ethereumUri = "wrap://ens/wraps.eth:ethereum@1.1.0";
+  const ethereumUri = "wrap://ens/wraps.eth:ethereum@2.0.0";
 
   describe("proxies", () => {
     beforeEach(async () => {

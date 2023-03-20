@@ -1,4 +1,4 @@
-import { BigInt, JSON, JSONEncoder } from "@polywrap/wasm-as";
+import { JSON, JSONEncoder } from "@polywrap/wasm-as";
 import { SafeTransactionData } from "../wrap";
 
 export const EIP712_DOMAIN_BEFORE_V130: TypedDataField[] = [
@@ -127,7 +127,7 @@ export function toJsonTypedData(typedData: TypedData): JSON.Value {
   encoder.setString("to", message.to);
   encoder.setString("data", message.data);
   encoder.setString("value", message.value.toString());
-  encoder.setInteger("baseGas", message.baseGas!.toUInt64());
+  encoder.setString("baseGas", message.baseGas!.toString());
   encoder.setInteger("gasPrice", message.gasPrice!.toUInt64());
   encoder.setString("gasToken", message.gasToken!);
   encoder.setInteger("nonce", message.nonce!.toUInt64());
