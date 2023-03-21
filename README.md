@@ -4,7 +4,7 @@
 * [Installation](#installation)
 * [Getting Started](#getting-started)
 * [Safe Factory Wrapper Reference](#safe-factory-wrapper)
-* [Safe Wrapper Reference](#safe-managers-wrapper)
+* [Safe Manager Wrapper Reference](#safe-managers-wrapper)
 ## <a name="installation">Installation</a>
 
 Install the package with yarn or npm:
@@ -209,7 +209,7 @@ const safeDeploymentResponse = await client.invoke({
 })
 ```
 
-## <a name="safe-managers-wrapper">Safe Wrapper Reference</a>
+## <a name="safe-managers-wrapper">Safe Manager Wrapper Reference</a>
 
 
 ### getAddress
@@ -360,7 +360,7 @@ const isOwner = await client.invoke({
 
 ### createTransaction
 
-Returns a Safe transaction ready to be signed by the owners and executed. The Safe Wrapper supports the creation of single Safe transactions but also MultiSend transactions.
+Returns a Safe transaction ready to be signed by the owners and executed. The Safe Manager Wrapper supports the creation of single Safe transactions but also MultiSend transactions.
 
 * **Single transactions**
 
