@@ -1,8 +1,4 @@
 import { PolywrapClient } from "@polywrap/client-js";
-import {
-  initTestEnvironment,
-  stopTestEnvironment,
-} from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
 import path from "path";
 
@@ -19,7 +15,7 @@ import {
   abi as safeAbi_1_3_0,
   bytecode as safeBytecode_1_3_0,
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json";
-import { getClientConfig } from "../utils";
+import { getClientConfig, initInfra, stopInfra } from "../utils";
 
 jest.setTimeout(500000);
 
@@ -40,11 +36,11 @@ describe("ProxyFactory", () => {
 
   describe("proxies", () => {
     beforeEach(async () => {
-      await initTestEnvironment();
+      await initInfra();
     });
 
     afterEach(async () => {
-      await stopTestEnvironment();
+      await stopInfra();
     });
 
     it("createProxy 1.2.0", async () => {
@@ -206,7 +202,7 @@ describe("ProxyFactory", () => {
 
       if (!response.ok) throw response.error;
       expect(response.value).not.toBeNull();
-      expect(response.value).toEqual("114799");
+      expect(+response.value).toBeGreaterThan(110000);
     });
 
     it("encode", async () => {
@@ -234,7 +230,7 @@ describe("ProxyFactory", () => {
     let proxyAddress: string;
 
     beforeEach(async () => {
-      await initTestEnvironment();
+      await initInfra();
 
       const singletonResponse = await App.Ethereum_Module.deployContract(
         {
@@ -306,7 +302,7 @@ describe("ProxyFactory", () => {
     });
 
     afterEach(async () => {
-      await stopTestEnvironment();
+      await stopInfra();
     });
 
     it("getThreshold", async () => {

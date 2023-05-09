@@ -3,7 +3,7 @@ import {
     Module,
     Connection,
     TxOptions
-} into Ethereum from "wrap://ens/wraps.eth:ethereum@2.0.0"
+} into Ethers from "wrap://ens/ethers.wraps.eth:0.1.0"
 import { Module } into EthersUtils from "wrap://ens/ethers.wraps.eth:utils@0.1.0"
 import {
     SignSignature,
@@ -18,31 +18,31 @@ type Module {
     """
     Module to deploy and interact with the proxy factory smart-contract
     """
-    createProxy(address: String!, safeMasterCopyAddress: String!, initializer: String!, saltNonce: UInt32!, connection: Ethereum_Connection, txOptions: Ethereum_TxOptions): String!
-    proxyCreationCode(address: String!, connection: Ethereum_Connection): String!
+    createProxy(address: String!, safeMasterCopyAddress: String!, initializer: String!, saltNonce: UInt32!, connection: Ethers_Connection, txOptions: Ethers_TxOptions): String!
+    proxyCreationCode(address: String!, connection: Ethers_Connection): String!
 
     """
     GnosisSafeContractEthers methods
     """
-    getVersion(address: String!, connection: Ethereum_Connection): String!
-    getAddress(address: String!, connection: Ethereum_Connection): String!
-    getNonce(address: String!, connection: Ethereum_Connection): BigInt!
+    getVersion(address: String!, connection: Ethers_Connection): String!
+    getAddress(address: String!, connection: Ethers_Connection): String!
+    getNonce(address: String!, connection: Ethers_Connection): BigInt!
     
-    getThreshold(address: String!, connection: Ethereum_Connection): UInt32!
-    getOwners(address: String!, connection: Ethereum_Connection): [String!]!
-    isOwner(address: String!, ownerAddress: String!, connection: Ethereum_Connection): Boolean!
+    getThreshold(address: String!, connection: Ethers_Connection): UInt32!
+    getOwners(address: String!, connection: Ethers_Connection): [String!]!
+    isOwner(address: String!, ownerAddress: String!, connection: Ethers_Connection): Boolean!
 
-    getTransactionHash(safeAddress: String!, safeTransactionData: SafeTransactionData!, connection: Ethereum_Connection): String!
-    approvedHashes(address: String!, ownerAddress: String!, hash: String!, connection: Ethereum_Connection): BigInt!
-    approveHash(safeAddress: String!, hash: String!, options: TransactionOptions, connection: Ethereum_Connection): Ethereum_TxReceipt!
+    getTransactionHash(safeAddress: String!, safeTransactionData: SafeTransactionData!, connection: Ethers_Connection): String!
+    approvedHashes(address: String!, ownerAddress: String!, hash: String!, connection: Ethers_Connection): BigInt!
+    approveHash(safeAddress: String!, hash: String!, options: TransactionOptions, connection: Ethers_Connection): Ethers_TxReceipt!
 
-    getModules(address: String!, connection: Ethereum_Connection): [String!]!
-    isModuleEnabled(address: String!, moduleAddress: String!, connection: Ethereum_Connection): Boolean!
+    getModules(address: String!, connection: Ethers_Connection): [String!]!
+    isModuleEnabled(address: String!, moduleAddress: String!, connection: Ethers_Connection): Boolean!
 
-    execTransaction(safeAddress: String!, safeTransaction: SafeTransaction!, txOptions: Ethereum_TxOptions, connection: Ethereum_Connection): Ethereum_TxReceipt!
+    execTransaction(safeAddress: String!, safeTransaction: SafeTransaction!, txOptions: Ethers_TxOptions, connection: Ethers_Connection): Ethers_TxReceipt!
 
     encode(method: String!, args: [String!]!): String!
-    estimateGas(address: String!, method: String!, args: [String!]!, connection: Ethereum_Connection): BigInt!
+    estimateGas(address: String!, method: String!, args: [String!]!, connection: Ethers_Connection): BigInt!
 
     getSafeContractNetworks(
         version: String!,

@@ -35,26 +35,18 @@ class AbiPlugin extends PluginModule<NoConfig> {
 let abiPlugin = PluginPackage.from(new AbiPlugin({}), {} as WrapManifest);
 
 export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
-  return (
-    builder
-      .addDefaults()
-      .addPackages({
-        "wrap://ens/abi.stub.eth": abiPlugin as IWrapPackage,
-        "wrap://ens/wraps.eth:ethereum-provider@2.0.0": ethereumProviderPlugin({
-          connections: new Connections({
-            networks: {
-              testnet: new Connection({
-                provider: providers.ethereum,
-                signer: "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
-              }),
-            },
-            defaultNetwork: "testnet",
+  return builder.addDefaults().addPackages({
+    "wrap://ens/abi.stub.eth": abiPlugin as IWrapPackage,
+    "wrap://ens/wraps.eth:ethereum-provider@2.0.0": ethereumProviderPlugin({
+      connections: new Connections({
+        networks: {
+          testnet: new Connection({
+            provider: providers.ethereum,
+            signer: "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
           }),
-        }) as IWrapPackage,
-      })
-      .addInterfaceImplementation(
-        "wrap://ens/wraps.eth:ethereum-provider@2.0.0",
-        "wrap://ens/wraps.eth:ethereum-provider@2.0.0"
-      )
-  );
+        },
+        defaultNetwork: "testnet",
+      }),
+    }) as IWrapPackage,
+  });
 }
