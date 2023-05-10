@@ -5,5 +5,5 @@ project:
 source:
   schema: ./schema.graphql
   import_abis:
-    - uri: "wrap://ens/factory.eth"
+    - uri: "wrap/factory"
       abi: "../../../build/wrap.info"

@@ -30,9 +30,6 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
         }) as IWrapPackage,
         "wrap://ens/datetime.polywrap.eth": dateTimePlugin({}) as IWrapPackage,
       })
-      .addInterfaceImplementation(
-        "wrap://ens/wraps.eth:ethereum-provider@2.0.0",
-        "wrap://ens/wraps.eth:ethereum-provider@2.0.0"
-      )
+      .addRedirect("wrap://ens/safe.wraps.eth:contracts@0.1.0", "fs/../safe-contracts-wrapper/build")
   );
 }

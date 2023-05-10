@@ -23,12 +23,10 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
             },
             defaultNetwork: "testnet",
           }),
-        }) as IWrapPackage,
-        "wrap://ens/datetime.polywrap.eth": dateTimePlugin({}) as IWrapPackage,
+        }),
+        "wrap://plugin/datetime": dateTimePlugin({}) as IWrapPackage,
       })
-      .addInterfaceImplementation(
-        "wrap://ens/wraps.eth:ethereum-provider@2.0.0",
-        "wrap://ens/wraps.eth:ethereum-provider@2.0.0"
-      )
+      .addRedirect("wrap://ens/safe.wraps.eth:contracts@0.1.0", "fs/../safe-contracts-wrapper/build")
+      .addRedirect("wrap://ens/ethers.wraps.eth:utils@0.1.1", "wrap://ipfs/QmfWzRC9RYRfaCyKNhzfKHqaUeeGod5isPqk6Eg4N9seaH")
   );
 }

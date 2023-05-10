@@ -144,7 +144,7 @@ export const setupContractNetworks = async (
   const factoryBytecode =
     version === "1.3.0" ? factoryBytecode_1_3_0 : factoryBytecode_1_2_0;
 
-  const proxyFactoryContractResponse = await App.Ethereum_Module.deployContract(
+  const proxyFactoryContractResponse = await App.Ethers_Module.deployContract(
     {
       abi: JSON.stringify(factoryAbi),
       bytecode: factoryBytecode,
@@ -162,7 +162,7 @@ export const setupContractNetworks = async (
   const safeBytecode =
     version === "1.3.0" ? safeBytecode_1_3_0 : safeBytecode_1_2_0;
 
-  const safeFactoryContractResponse = await App.Ethereum_Module.deployContract(
+  const safeFactoryContractResponse = await App.Ethers_Module.deployContract(
     {
       abi: JSON.stringify(safeAbi),
       bytecode: safeBytecode,
@@ -208,7 +208,7 @@ export const setupContractNetworks = async (
   const multisendBytecode =
     version === "1.3.0" ? multisendBytecode_1_3_0 : multisendBytecode_1_2_0;
 
-  const multisendResponse = await App.Ethereum_Module.deployContract(
+  const multisendResponse = await App.Ethers_Module.deployContract(
     {
       abi: JSON.stringify(multisendAbi),
       bytecode: multisendBytecode,
@@ -221,7 +221,7 @@ export const setupContractNetworks = async (
   if (!multisendResponse.ok) throw multisendResponse.error;
   multisendAddress = multisendResponse.value as string;
 
-  const multisendCallOnlyResponse = await App.Ethereum_Module.deployContract(
+  const multisendCallOnlyResponse = await App.Ethers_Module.deployContract(
     {
       abi: JSON.stringify(multisendCallOnlyAbi),
       bytecode: multisendCallOnlyBytecode,

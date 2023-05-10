@@ -1,9 +1,9 @@
 import {
-  Ethereum_Connection,
-  Ethereum_Module,
+  Ethers_Connection,
+  Ethers_Module,
   SafeAccountConfig,
   SafeDeploymentConfig,
-  SafeContracts_Ethereum_Connection,
+  SafeContracts_Ethers_Connection,
   SafeContracts_Module,
   EthersUtils_Module,
   CustomContract,
@@ -84,9 +84,9 @@ export function encodeSetupCallData(accountConfig: SafeAccountConfig): string {
 
 export function isContractDeployed(
   address: string,
-  connection: Ethereum_Connection | null
+  connection: Ethers_Connection | null
 ): boolean {
-  const code = Ethereum_Module.sendRpc({
+  const code = Ethers_Module.sendRpc({
     method: "eth_getCode",
     connection: connection,
     params: [address, "pending"],
@@ -101,7 +101,7 @@ export function isContractDeployed(
 export function getInitCode(
   safeProxyFactoryAddr: string,
   gnosisSafeAddr: string,
-  connection: SafeContracts_Ethereum_Connection | null
+  connection: SafeContracts_Ethers_Connection | null
 ): Result<string, string> {
   const proxyCreationCode = SafeContracts_Module.proxyCreationCode({
     address: safeProxyFactoryAddr,
@@ -184,7 +184,7 @@ export function prepareSafeDeployPayload(
   safeAccountConfig: SafeAccountConfig,
   safeDeploymentConfig: SafeDeploymentConfig | null,
   customContractAddresses: CustomContract | null,
-  connection: Ethereum_Connection | null
+  connection: Ethers_Connection | null
 ): DeploymentPayload {
   validateSafeAccountConfig(safeAccountConfig);
   if (safeDeploymentConfig != null) {
@@ -214,7 +214,7 @@ export function prepareSafeDeployPayload(
     safeContractVersion = "1.3.0";
   }
 
-  const chainId = Ethereum_Module.getChainId({ connection }).unwrap();
+  const chainId = Ethers_Module.getChainId({ connection }).unwrap();
   let safeContractAddress: string = "";
   let safeFactoryContractAddress: string = "";
 

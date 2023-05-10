@@ -2,9 +2,7 @@ import { Env, SafeContracts_Module } from "../wrap";
 import {
   Args_getAddress,
   Args_getNonce,
-  Args_getContractVersion,
-  Args_getMultiSendAddress,
-  Args_getMultiSendCallOnlyAddress,
+  Args_getContractVersion
 } from "../wrap/Module/serialization";
 import { BigInt, Box } from "@polywrap/wasm-as";
 
@@ -36,44 +34,6 @@ export function getNonce(args: Args_getNonce, env: Env): BigInt {
       node: env.connection.node,
     },
   }).unwrap();
-}
-
-export function getMultiSendAddress(args: Args_getMultiSendAddress, env: Env): string {
-  const version = getContractVersion({}, env);
-
-  const contractNetworks = SafeContracts_Module.getSafeContractNetworks({
-    version: version,
-    chainId: env.connection.networkNameOrChainId!,
-    isL1Safe: Box.from(false),
-    filter: {
-      multiSendAddress: true,
-      multiSendCallOnlyAddress: false,
-      safeMasterCopyAddress: false,
-      safeProxyFactoryAddress: false,
-      fallbackHandlerAddress: false
-    }
-  }).unwrap();
-
-  return contractNetworks.multiSendAddress!;
-}
-
-export function getMultiSendCallOnlyAddress(args: Args_getMultiSendCallOnlyAddress, env: Env): string {
-  const version = getContractVersion({}, env);
-
-  const contractNetworks = SafeContracts_Module.getSafeContractNetworks({
-    version: version,
-    chainId: env.connection.networkNameOrChainId!,
-    isL1Safe: Box.from(false),
-    filter: {
-      multiSendAddress: false,
-      multiSendCallOnlyAddress: true,
-      safeMasterCopyAddress: false,
-      safeProxyFactoryAddress: false,
-      fallbackHandlerAddress: false
-    }
-  }).unwrap();
-
-  return contractNetworks.multiSendCallOnlyAddress!;
 }
 
 export function approvedHashes(hash: string, owner: string, env: Env): BigInt {

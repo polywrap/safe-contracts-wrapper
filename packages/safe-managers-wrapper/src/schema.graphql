@@ -1,13 +1,12 @@
 """
 import { Module } into SafeContracts from "wrap://ens/safe.wraps.eth:contracts@0.1.0"
-import { Module } into EthersUtils from "wrap://ens/ethers.wraps.eth:utils@0.1.0"
+import { Module } into EthersUtils from "wrap://ens/ethers.wraps.eth:utils@0.1.1"
 import {
     Module,
     Connection,
     TxReceipt,
     TxOptions
-} into Ethereum from "wrap://ens/wraps.eth:ethereum@2.0.0"
-import * into Logger from "wrap://ens/wraps.eth:logger@1.0.0"
+} into Ethers from "wrap://ens/ethers.wraps.eth:0.1.0"
 
 import {
     SignSignature,
@@ -20,7 +19,7 @@ import {
 
 type Env {
     safeAddress: String!
-    connection: Ethereum_Connection!
+    connection: Ethers_Connection!
 }
 
 type MetaTransactionData {
@@ -38,12 +37,12 @@ type Module {
     getTransactionHash(tx: SafeTransactionData!): String @env(required: true)
     signTransactionHash(hash: String!): SignSignature! @env(required: true)
     signTypedData(tx: SafeTransactionData!): SignSignature! @env(required: true)
-    approveTransactionHash(hash: String!, options: TransactionOptions): Ethereum_TxReceipt! @env(required: true)
-    executeTransaction(tx: SafeTransaction!, options: TransactionOptions): Ethereum_TxReceipt! @env(required: true)
+    approveTransactionHash(hash: String!, options: TransactionOptions): Ethers_TxReceipt! @env(required: true)
+    executeTransaction(tx: SafeTransaction!, options: TransactionOptions): Ethers_TxReceipt! @env(required: true)
     getOwnersWhoApprovedTx(hash: String!): [String!]! @env(required: true)
     getBalance: BigInt @env(required: true)
     getChainId: String @env(required: true)
-    getSignature(tx: SafeTransaction!, signingMethod: String, safeAddress: String!, connection: Ethereum_Connection!): SafeTransaction!
+    getSignature(tx: SafeTransaction!, signingMethod: String, safeAddress: String!, connection: Ethers_Connection!): SafeTransaction!
 
     """Owner manager methods"""
     getOwners: [String!]! @env(required: true)
@@ -64,8 +63,6 @@ type Module {
     getAddress: String! @env(required: true)
     getContractVersion: String! @env(required: true)
     getNonce: BigInt! @env(required: true)
-    getMultiSendAddress: String! @env(required: true)
-    getMultiSendCallOnlyAddress: String! @env(required: true)
 
     """Utilities for transactions"""
     encodeMultiSendData(txs: [SafeTransactionData!]!): String!

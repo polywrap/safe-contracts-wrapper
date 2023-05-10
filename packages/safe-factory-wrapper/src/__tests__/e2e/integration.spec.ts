@@ -56,7 +56,7 @@ describe("SafeFactory", () => {
     /******* Contracts initialization *********/
 
     const proxyFactoryContractResponse_v120 =
-      await App.Ethereum_Module.deployContract(
+      await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(factoryAbi_1_2_0),
           bytecode: factoryBytecode_1_2_0,
@@ -73,7 +73,7 @@ describe("SafeFactory", () => {
       proxyFactoryContractResponse_v120.value as string;
 
     const safeFactoryContractResponse_v120 =
-      await App.Ethereum_Module.deployContract(
+      await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(safeAbi_1_2_0),
           bytecode: safeBytecode_1_2_0,
@@ -89,7 +89,7 @@ describe("SafeFactory", () => {
     safeContractAddress_v120 = safeFactoryContractResponse_v120.value as string;
 
     const proxyFactoryContractResponse_v130 =
-      await App.Ethereum_Module.deployContract(
+      await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(factoryAbi_1_3_0),
           bytecode: factoryBytecode_1_3_0,
@@ -106,7 +106,7 @@ describe("SafeFactory", () => {
       proxyFactoryContractResponse_v130.value as string;
 
     const safeFactoryContractResponse_v130 =
-      await App.Ethereum_Module.deployContract(
+      await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(safeAbi_1_3_0),
           bytecode: safeBytecode_1_3_0,
