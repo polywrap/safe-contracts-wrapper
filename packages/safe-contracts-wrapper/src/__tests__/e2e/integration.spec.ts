@@ -44,7 +44,7 @@ describe("ProxyFactory", () => {
     });
 
     it("createProxy 1.2.0", async () => {
-      const deployContractResponse = await App.Ethereum_Module.deployContract(
+      const deployContractResponse = await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(safeProxyFactoryAbi_1_2_0),
           bytecode: safeProxyFactoryBytecode_1_2_0,
@@ -82,7 +82,7 @@ describe("ProxyFactory", () => {
     });
 
     it("createProxy 1.3.0", async () => {
-      const singletonResponse = await App.Ethereum_Module.deployContract(
+      const singletonResponse = await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(safeAbi_1_3_0),
           bytecode: safeBytecode_1_3_0,
@@ -96,7 +96,7 @@ describe("ProxyFactory", () => {
       if (!singletonResponse.ok) throw singletonResponse.error;
       const singletonAddress = singletonResponse.value as string;
 
-      const deployContractResponse = await App.Ethereum_Module.deployContract(
+      const deployContractResponse = await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
           bytecode: safeProxyFactoryBytecode_1_3_0,
@@ -137,7 +137,7 @@ describe("ProxyFactory", () => {
 
 
     it("proxyCreationCode", async () => {
-      const deployContractResponse = await App.Ethereum_Module.deployContract(
+      const deployContractResponse = await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
           bytecode: safeProxyFactoryBytecode_1_3_0,
@@ -170,7 +170,7 @@ describe("ProxyFactory", () => {
     });
 
     it("estimateGas", async () => {
-      const deployContractResponse = await App.Ethereum_Module.deployContract(
+      const deployContractResponse = await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
           bytecode: safeProxyFactoryBytecode_1_3_0,
@@ -232,7 +232,7 @@ describe("ProxyFactory", () => {
     beforeEach(async () => {
       await initInfra();
 
-      const singletonResponse = await App.Ethereum_Module.deployContract(
+      const singletonResponse = await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(safeAbi_1_3_0),
           bytecode: safeBytecode_1_3_0,
@@ -246,7 +246,7 @@ describe("ProxyFactory", () => {
       
       if (!singletonResponse.ok) throw singletonResponse.error;
       const singletonAddress = singletonResponse.value as string;
-      const safeProxyFactoryResponse = await App.Ethereum_Module.deployContract(
+      const safeProxyFactoryResponse = await App.Ethers_Module.deployContract(
           {
             abi: JSON.stringify(safeProxyFactoryAbi_1_3_0),
             bytecode: safeProxyFactoryBytecode_1_3_0,
@@ -276,7 +276,7 @@ describe("ProxyFactory", () => {
       if (!proxyResponse.ok) throw proxyResponse.error;
       proxyAddress = proxyResponse.value as string;
 
-      await App.Ethereum_Module.callContractMethodAndWait(
+      await App.Ethers_Module.callContractMethodAndWait(
         {
           address: proxyAddress,
           method: "function setup(address[] _owners,uint256 _threshold,address to,bytes data,address fallbackHandler,address paymentToken,uint256 payment,address paymentReceiver)",
