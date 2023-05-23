@@ -1,6 +1,5 @@
 import { BigInt } from "@polywrap/wasm-as";
 import {
-  calculateProxyAddress,
   encodeSetupCallData,
   generateSalt,
   getInitCode,
@@ -104,11 +103,12 @@ export class Module extends ModuleBase {
       throw initCode.err().unwrap();
     }
 
-    let derivedAddress = calculateProxyAddress(
-      payload.safeFactoryContractAddress,
-      salt.unwrap(),
-      initCode.unwrap()
-    );
+    let derivedAddress = EthersUtils_Module.generateCreate2Address({
+      address: payload.safeFactoryContractAddress,
+      salt: salt.unwrap(),
+      initCode: initCode.unwrap(),
+    });
+
     if (derivedAddress.isErr) {
       throw derivedAddress.err().unwrap();
     }

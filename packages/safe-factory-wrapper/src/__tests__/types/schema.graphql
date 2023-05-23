@@ -1,3 +1,3 @@
 #import * into Factory from "wrap/factory"
 #import * into Ethers from "wrap://ens/ethers.wraps.eth:0.1.0"
-#import * into EthersUtils from "wrap://ens/ethers.wraps.eth:utils@0.1.0"
+#import * into EthersUtils from "wrap://ens/ethers.wraps.eth:utils@0.1.1"

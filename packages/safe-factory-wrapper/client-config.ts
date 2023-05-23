@@ -27,6 +27,6 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
         "wrap://plugin/datetime": dateTimePlugin({}) as IWrapPackage,
       })
       .addRedirect("wrap://ens/safe.wraps.eth:contracts@0.1.0", "fs/../safe-contracts-wrapper/build")
-      .addRedirect("wrap://ens/ethers.wraps.eth:utils@0.1.1", "wrap://ipfs/QmfWzRC9RYRfaCyKNhzfKHqaUeeGod5isPqk6Eg4N9seaH")
+      .addRedirect("wrap://ens/ethers.wraps.eth:utils@0.1.1", "wrap://ipfs/QmaHYcvpM3mWVY7KSi4kmEKP26JhE3SWYitKCUaLfJQguy")
   );
 }

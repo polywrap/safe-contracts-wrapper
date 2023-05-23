@@ -77,7 +77,8 @@ export function encodeSetupCallData(accountConfig: SafeAccountConfig): string {
   }
 
   return EthersUtils_Module.encodeFunction({
-    method: "function setup(address[] _owners,uint256 _threshold,address to,bytes data,address fallbackHandler,address paymentToken,uint256 payment,address paymentReceiver)",
+    method:
+      "function setup(address[] _owners,uint256 _threshold,address to,bytes data,address fallbackHandler,address paymentToken,uint256 payment,address paymentReceiver)",
     args: args,
   }).unwrap();
 }
@@ -130,54 +131,24 @@ export function generateSalt(
 ): Result<string, string> {
   const saltNonce = EthersUtils_Module.encodeParams({
     types: ["uint256"],
-    values: [BigInt.fromString(nonce).toString()]
-  }); 
+    values: [BigInt.fromString(nonce).toString()],
+  });
   if (saltNonce.isErr) {
     return saltNonce;
   }
-  let initializerHash = EthersUtils_Module.keccak256({ value: initializer }); 
+  let initializerHash = EthersUtils_Module.keccak256({ value: initializer });
   if (initializerHash.isErr) {
     return Result.Err<string, string>(initializerHash.unwrapErr());
   }
 
   let initHash = initializerHash.unwrap();
 
-  let encodePacked = EthersUtils_Module.keccak256BytesEncodePacked({
-    value: initHash + saltNonce.unwrap().slice(2)
+  return EthersUtils_Module.keccak256({
+    value: EthersUtils_Module.solidityPack({
+      values: [initHash + saltNonce.unwrap().slice(2)],
+      types: ["bytes"],
+    }).unwrap(),
   });
-
-  if (encodePacked.isErr) {
-    return Result.Err<string, string>(encodePacked.unwrapErr());
-  }
-
-  return Result.Ok<string, string>(encodePacked.unwrap());
-}
-
-/**
- * EIP-1014
- * keccak256(0xff ++ address ++ salt ++ keccak256(init_code))[12:]
- * @address [address]
- * @salt [bytes32]
- * @initCode [bytes]
- */
-export function calculateProxyAddress(
-  address: string,
-  salt: string,
-  initCode: string
-): Result<string, string> {
-
-  const initCodeHash = EthersUtils_Module.generateCreate2Address({
-    address,
-    initCode,
-    salt,
-  });
-
-  
-  if (initCodeHash.isErr) {
-    return initCodeHash;
-  }
-
-  return initCodeHash
 }
 
 export function prepareSafeDeployPayload(
@@ -271,7 +242,7 @@ export function prepareSafeDeployPayload(
         multiSendCallOnlyAddress: false,
         fallbackHandlerAddress: true,
       },
-    }).unwrap()
+    }).unwrap();
     safeAccountConfig.fallbackHandler = contracts.fallbackHandlerAddress;
   }
 
