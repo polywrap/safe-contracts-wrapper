@@ -1,21 +1,18 @@
 import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
-import {
-  initTestEnvironment,
-  stopTestEnvironment,
-  providers,
-} from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
 import {
   getClientConfig,
   getERC20Mintable,
   getEthAdapter,
+  initInfra,
   setupAccounts,
   setupContractNetworks,
+  stopInfra,
 } from "../utils";
 import { BigNumber, Wallet } from "ethers";
 import { SafeWrapper_SafeTransactionData } from "../types/wrap";
-import { Uri } from "@polywrap/core-js";
+import { ETH_ENS_IPFS_MODULE_CONSTANTS } from "@polywrap/cli-js";
 
 jest.setTimeout(1200000);
 
@@ -38,25 +35,18 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
   const connection = { networkNameOrChainId: "testnet" };
 
   beforeAll(async () => {
-    await initTestEnvironment();
+    await initInfra();
     let config = await getClientConfig();
     client = new PolywrapClient(config);
 
     [safeAddress] = await setupContractNetworks(client, {}, safeVersion);
-    const env = {
-      uri: Uri.from(wrapperUri),
-      env: {
-        safeAddress: safeAddress,
-        connection: connection,
-      },
-    };
-    config = await getClientConfig({ safeEnv: env });
+    config = await getClientConfig({ safeAddress });
 
     client = new PolywrapClient(config);
   });
 
   afterAll(async () => {
-    await stopTestEnvironment();
+    await stopInfra();
   });
 
   const createTransaction = async (
@@ -104,14 +94,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
     signer: Wallet,
     safeAddr = safeAddress
   ) => {
-    const safeEnv = {
-      uri: Uri.from(wrapperUri),
-      env: {
-        safeAddress: safeAddr,
-        connection: connection,
-      },
-    };
-    const config = await getClientConfig({ safeEnv, signer });
+    const config = await getClientConfig({ safeAddress: safeAddr, signer });
 
     return new PolywrapClient(config);
   };
@@ -467,7 +450,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       if (!executionResult.ok) fail(executionResult.error);
 
       const ethAdapter = await getEthAdapter(
-        providers.ethereum,
+        ETH_ENS_IPFS_MODULE_CONSTANTS.ethereumProvider,
         account1.signer
       );
 
@@ -494,7 +477,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       if (!executionResult.ok) fail(executionResult.error);
 
       const ethAdapter = await getEthAdapter(
-        providers.ethereum,
+        ETH_ENS_IPFS_MODULE_CONSTANTS.ethereumProvider,
         account1.signer
       );
       const txConfirmed = await ethAdapter.getTransaction(

@@ -1,12 +1,8 @@
 import { PolywrapClient } from "@polywrap/client-js";
-import {
-  initTestEnvironment,
-  stopTestEnvironment,
-} from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
 import path from "path";
 
-import { getClientConfig } from "../utils";
+import { getClientConfig, initInfra, stopInfra } from "../utils";
 
 import {
   abi as factoryAbi_1_2_0,
@@ -52,7 +48,7 @@ describe("SafeFactory", () => {
   let safeContractAddress_v130: string;
 
   beforeAll(async () => {
-    await initTestEnvironment();
+    await initInfra();
     /******* Contracts initialization *********/
 
     const proxyFactoryContractResponse_v120 =
@@ -123,7 +119,7 @@ describe("SafeFactory", () => {
   });
 
   afterAll(async () => {
-    await stopTestEnvironment();
+    await stopInfra();
   });
 
   describe("deploySafe with custom contract adressess", () => {

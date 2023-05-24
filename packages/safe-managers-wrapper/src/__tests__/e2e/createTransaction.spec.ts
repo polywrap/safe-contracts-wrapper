@@ -1,9 +1,13 @@
 import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
-import { initTestEnvironment, stopTestEnvironment } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getClientConfig, setupAccounts, setupContractNetworks } from "../utils";
-import { Uri } from "@polywrap/core-js";
+import {
+  getClientConfig,
+  initInfra,
+  setupAccounts,
+  setupContractNetworks,
+  stopInfra,
+} from "../utils";
 
 jest.setTimeout(1200000);
 
@@ -13,7 +17,12 @@ describe(`Transactions creation v${safeVersion}`, () => {
   let safeAddress: string;
 
   let client: PolywrapClient;
-  const wrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..");
+  const wrapperPath: string = path.join(
+    path.resolve(__dirname),
+    "..",
+    "..",
+    ".."
+  );
   const wrapperUri = `fs/${wrapperPath}/build`;
 
   let contractNetworksPart: {
@@ -23,28 +32,23 @@ describe(`Transactions creation v${safeVersion}`, () => {
     multisendCallOnlyAddress: string;
   };
 
-  const connection = { networkNameOrChainId: "testnet", chainId: 1337 };
-
   beforeAll(async () => {
-    await initTestEnvironment();
+    await initInfra();
     let config = await getClientConfig();
     client = new PolywrapClient(config);
 
-    [safeAddress, contractNetworksPart] = await setupContractNetworks(client, {}, safeVersion);
-    const env = {
-      uri: Uri.from(wrapperUri),
-      env: {
-        safeAddress: safeAddress,
-        connection: connection,
-      },
-    }
-    config = await getClientConfig({ safeEnv: env });
+    [safeAddress, contractNetworksPart] = await setupContractNetworks(
+      client,
+      {},
+      safeVersion
+    );
+    config = await getClientConfig({ safeAddress });
 
     client = new PolywrapClient(config);
   });
 
   afterAll(async () => {
-    await stopTestEnvironment();
+    await stopInfra();
   });
 
   it("should create a single transaction with gasPrice=0", async () => {
@@ -116,14 +120,15 @@ describe(`Transactions creation v${safeVersion}`, () => {
 
     const safeTxArray = [safeTransactionData];
 
-    const wrapperResult = await App.SafeWrapper_Module.createMultiSendTransaction(
-      {
-        txs: safeTxArray,
-        customMultiSendContractAddress: contractNetworksPart.multisendAddress,
-      },
-      client,
-      wrapperUri
-    );
+    const wrapperResult =
+      await App.SafeWrapper_Module.createMultiSendTransaction(
+        {
+          txs: safeTxArray,
+          customMultiSendContractAddress: contractNetworksPart.multisendAddress,
+        },
+        client,
+        wrapperUri
+      );
 
     if (!wrapperResult.ok) fail(wrapperResult.error);
     const wrapperResultData = wrapperResult.value.data;
@@ -153,15 +158,16 @@ describe(`Transactions creation v${safeVersion}`, () => {
       safeTxGas: "666",
     };
 
-    const wrapperResult = await App.SafeWrapper_Module.createMultiSendTransaction(
-      {
-        txs: safeTxArray,
-        options: options,
-        customMultiSendContractAddress: contractNetworksPart.multisendAddress,
-      },
-      client,
-      wrapperUri
-    );
+    const wrapperResult =
+      await App.SafeWrapper_Module.createMultiSendTransaction(
+        {
+          txs: safeTxArray,
+          options: options,
+          customMultiSendContractAddress: contractNetworksPart.multisendAddress,
+        },
+        client,
+        wrapperUri
+      );
 
     if (!wrapperResult.ok) fail(wrapperResult.error);
     const wrapperResultData = wrapperResult.value.data;
@@ -178,11 +184,15 @@ describe(`Transactions creation v${safeVersion}`, () => {
   });
 
   it("should fail when creating a MultiSend transaction passing a transaction array with length=0", async () => {
-    const multiSendResult = await App.SafeWrapper_Module.createMultiSendTransaction(
-      { txs: [], customMultiSendContractAddress: contractNetworksPart.multisendAddress },
-      client,
-      wrapperUri
-    );
+    const multiSendResult =
+      await App.SafeWrapper_Module.createMultiSendTransaction(
+        {
+          txs: [],
+          customMultiSendContractAddress: contractNetworksPart.multisendAddress,
+        },
+        client,
+        wrapperUri
+      );
 
     expect(multiSendResult.ok).toBe(false);
   });
@@ -198,14 +208,15 @@ describe(`Transactions creation v${safeVersion}`, () => {
 
     const safeTxArray = [safeTransactionData, safeTransactionData];
 
-    const wrapperResult = await App.SafeWrapper_Module.createMultiSendTransaction(
-      {
-        txs: safeTxArray,
-        customMultiSendContractAddress: contractNetworksPart.multisendAddress,
-      },
-      client,
-      wrapperUri
-    );
+    const wrapperResult =
+      await App.SafeWrapper_Module.createMultiSendTransaction(
+        {
+          txs: safeTxArray,
+          customMultiSendContractAddress: contractNetworksPart.multisendAddress,
+        },
+        client,
+        wrapperUri
+      );
 
     if (!wrapperResult.ok) fail(wrapperResult.error);
     const wrapperResultData = wrapperResult.value.data;
@@ -234,15 +245,16 @@ describe(`Transactions creation v${safeVersion}`, () => {
       safeTxGas: "666",
     };
 
-    const wrapperResult = await App.SafeWrapper_Module.createMultiSendTransaction(
-      {
-        txs: safeTxArray,
-        options: options,
-        customMultiSendContractAddress: contractNetworksPart.multisendAddress,
-      },
-      client,
-      wrapperUri
-    );
+    const wrapperResult =
+      await App.SafeWrapper_Module.createMultiSendTransaction(
+        {
+          txs: safeTxArray,
+          options: options,
+          customMultiSendContractAddress: contractNetworksPart.multisendAddress,
+        },
+        client,
+        wrapperUri
+      );
 
     if (!wrapperResult.ok) fail(wrapperResult.error);
     const wrapperResultData = wrapperResult.value.data;
