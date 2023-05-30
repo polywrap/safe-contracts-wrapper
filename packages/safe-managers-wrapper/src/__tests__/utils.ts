@@ -6,7 +6,7 @@ import {
 } from "@polywrap/ethereum-provider-js";
 import { ethers, Signer, Wallet } from "ethers";
 import EthersAdapter from "@safe-global/safe-ethers-lib";
-import { providers } from "@polywrap/test-env-js";
+import { ETH_ENS_IPFS_MODULE_CONSTANTS } from "@polywrap/cli-js";
 
 import {
   abi as factoryAbi_1_2_0,
@@ -45,12 +45,13 @@ import {
   bytecode as ERC20MintableBytecode,
 } from "./ERC20Mock.json";
 import * as App from "./types/wrap";
-import { CoreClientConfig, PolywrapClient, IWrapPackage } from "@polywrap/client-js";
 import {
-  defaultIpfsProviders,
-  ClientConfigBuilder,
-} from "@polywrap/client-config-builder-js";
-import { Env } from "@polywrap/core-js";
+  CoreClientConfig,
+  PolywrapClient,
+  IWrapPackage,
+} from "@polywrap/client-js";
+import { ClientConfigBuilder } from "@polywrap/client-config-builder-js";
+import { runCli } from "@polywrap/cli-js";
 import { configure } from "../../client-config";
 
 export const safeContractsPath = path.resolve(
@@ -59,21 +60,31 @@ export const safeContractsPath = path.resolve(
 
 interface CustomizableConfig {
   signer?: Wallet;
-  safeEnv?: Env;
+  safeAddress?: string;
 }
+const connection = { networkNameOrChainId: "testnet", node: null };
+export const chainId = 1337;
 
 export function getClientConfig(
   customConfig?: CustomizableConfig
 ): CoreClientConfig {
+  const wrapperPath: string = path.join(
+    path.resolve(__dirname),
+    "..",
+    ".."
+  );
+  const wrapperUri = `fs/${wrapperPath}/build`;
   const envs: Record<string, Record<string, unknown>> = {
     "wrap://package/ipfs-resolver": {
-      provider: providers.ipfs,
-      fallbackProviders: defaultIpfsProviders,
+      provider: ETH_ENS_IPFS_MODULE_CONSTANTS.ipfsProvider,
     },
   };
 
-  if (customConfig && customConfig.safeEnv) {
-    envs[customConfig.safeEnv.uri.uri] = customConfig.safeEnv.env;
+  if (customConfig && customConfig.safeAddress) {
+    envs[wrapperUri] = {
+      safeAddress: customConfig.safeAddress,
+      connection,
+    };
   }
 
   const config = configure(new ClientConfigBuilder());
@@ -86,7 +97,7 @@ export function getClientConfig(
         connections: new Connections({
           networks: {
             testnet: new Connection({
-              provider: providers.ethereum,
+              provider: ETH_ENS_IPFS_MODULE_CONSTANTS.ethereumProvider,
               signer: customConfig?.signer,
             }),
           },
@@ -144,7 +155,7 @@ export const setupContractNetworks = async (
   const factoryBytecode =
     version === "1.3.0" ? factoryBytecode_1_3_0 : factoryBytecode_1_2_0;
 
-  const proxyFactoryContractResponse = await App.Ethereum_Module.deployContract(
+  const proxyFactoryContractResponse = await App.Ethers_Module.deployContract(
     {
       abi: JSON.stringify(factoryAbi),
       bytecode: factoryBytecode,
@@ -162,7 +173,7 @@ export const setupContractNetworks = async (
   const safeBytecode =
     version === "1.3.0" ? safeBytecode_1_3_0 : safeBytecode_1_2_0;
 
-  const safeFactoryContractResponse = await App.Ethereum_Module.deployContract(
+  const safeFactoryContractResponse = await App.Ethers_Module.deployContract(
     {
       abi: JSON.stringify(safeAbi),
       bytecode: safeBytecode,
@@ -208,7 +219,7 @@ export const setupContractNetworks = async (
   const multisendBytecode =
     version === "1.3.0" ? multisendBytecode_1_3_0 : multisendBytecode_1_2_0;
 
-  const multisendResponse = await App.Ethereum_Module.deployContract(
+  const multisendResponse = await App.Ethers_Module.deployContract(
     {
       abi: JSON.stringify(multisendAbi),
       bytecode: multisendBytecode,
@@ -221,7 +232,7 @@ export const setupContractNetworks = async (
   if (!multisendResponse.ok) throw multisendResponse.error;
   multisendAddress = multisendResponse.value as string;
 
-  const multisendCallOnlyResponse = await App.Ethereum_Module.deployContract(
+  const multisendCallOnlyResponse = await App.Ethers_Module.deployContract(
     {
       abi: JSON.stringify(multisendCallOnlyAbi),
       bytecode: multisendCallOnlyBytecode,
@@ -246,7 +257,9 @@ export const setupContractNetworks = async (
 };
 
 export const getERC20Mintable = async (signer: Wallet) => {
-  const provider = new ethers.providers.JsonRpcProvider(providers.ethereum);
+  const provider = new ethers.providers.JsonRpcProvider(
+    ETH_ENS_IPFS_MODULE_CONSTANTS.ethereumProvider
+  );
   const wallet = new Wallet(signer.privateKey, provider);
 
   const factory = new ethers.ContractFactory(
@@ -326,3 +339,34 @@ export const setupTests = async (
     },
   };
 };
+
+export async function initInfra(): Promise<void> {
+  const { exitCode, stderr, stdout } = await runCli({
+    args: ["infra", "up", "--verbose", "--modules", "eth-ens-ipfs"],
+  });
+
+  if (exitCode) {
+    throw Error(
+      `initInfra failed to start test environment.\nExit Code: ${exitCode}\nStdErr: ${stderr}\nStdOut: ${stdout}`
+    );
+  }
+
+  await new Promise<void>(function (resolve) {
+    setTimeout(() => resolve(), 5000);
+  });
+
+  return Promise.resolve();
+}
+
+export async function stopInfra(): Promise<void> {
+  const { exitCode, stderr, stdout } = await runCli({
+    args: ["infra", "down", "--verbose", "--modules", "eth-ens-ipfs"],
+  });
+
+  if (exitCode) {
+    throw Error(
+      `initInfra failed to stop test environment.\nExit Code: ${exitCode}\nStdErr: ${stderr}\nStdOut: ${stdout}`
+    );
+  }
+  return Promise.resolve();
+}

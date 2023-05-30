@@ -8,17 +8,16 @@ import {
     TxResponse,
     TxOptions,
     StaticTxResult
-} into Ethereum from "wrap://ens/wraps.eth:ethereum@2.0.0"
+} into Ethers from "wrap://ens/ethers.wraps.eth:0.1.0"
 import { Module } into SafeContracts from "wrap://ens/safe.wraps.eth:contracts@0.1.0"
-import { Module } into EthersUtils from "wrap://ens/ethers.wraps.eth:utils@0.1.0"
-import * into Datetime from "wrap://ens/datetime.polywrap.eth"
-import * into Logger from "wrap://ens/wraps.eth:logger@1.0.0"
+import { Module } into EthersUtils from "wrap://ens/ethers.wraps.eth:utils@0.1.1"
+import * into Datetime from "wrap://plugin/datetime"
 """
 
 type Module {
     deploySafe(
         input: DeploymentInput!
-        txOptions: Ethereum_TxOptions
+        txOptions: Ethers_TxOptions
     ): String!
 
     predictSafeAddress(
@@ -27,7 +26,7 @@ type Module {
 
     safeIsDeployed(
         safeAddress: String!
-        connection: Ethereum_Connection!
+        connection: Ethers_Connection!
     ): Boolean!
 
     encodeDeploySafe(
@@ -43,7 +42,7 @@ type DeploymentInput {
     safeAccountConfig: SafeAccountConfig!
     safeDeploymentConfig: SafeDeploymentConfig
     customContractAddresses: CustomContract
-    connection: Ethereum_Connection
+    connection: Ethers_Connection
 }
 
 enum OperationType {
@@ -111,8 +110,8 @@ type BaseTransactionResult {
 }
 
 type TransactionResult implements BaseTransactionResult {
-    receipt: Ethereum_TxReceipt
-    transactionResponse: Ethereum_TxResponse
+    receipt: Ethers_TxReceipt
+    transactionResponse: Ethers_TxResponse
     #options: TransactionOptions
 }
 

@@ -1,44 +1,44 @@
 import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
-import { initTestEnvironment, stopTestEnvironment } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getClientConfig, setupAccounts, setupContractNetworks } from "../utils";
-import { Uri } from "@polywrap/core-js";
+import {
+  getClientConfig,
+  initInfra,
+  setupAccounts,
+  setupContractNetworks,
+  stopInfra,
+} from "../utils";
 
 jest.setTimeout(1200000);
 
 const safeVersion = process.env.SAFE_VERSION! as "1.2.0" | "1.3.0";
-console.log('safeVersion', safeVersion)
+console.log("safeVersion", safeVersion);
 
 describe(`Off-chain signatures v${safeVersion}`, () => {
   let safeAddress: string;
 
   let client: PolywrapClient;
-  const wrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..");
+  const wrapperPath: string = path.join(
+    path.resolve(__dirname),
+    "..",
+    "..",
+    ".."
+  );
   const wrapperUri = `fs/${wrapperPath}/build`;
 
-  const connection = { networkNameOrChainId: "testnet", chainId: 1337 };
-
   beforeAll(async () => {
-    await initTestEnvironment();
+    await initInfra();
     let config = await getClientConfig();
     client = new PolywrapClient(config);
 
     [safeAddress] = await setupContractNetworks(client, {}, safeVersion);
-    const env = {
-      uri: Uri.from(wrapperUri),
-      env: {
-        safeAddress: safeAddress,
-        connection: connection,
-      },
-    };
-    config = await getClientConfig({ safeEnv: env });
+    config = await getClientConfig({ safeAddress });
 
     client = new PolywrapClient(config);
   });
 
   afterAll(async () => {
-    await stopTestEnvironment();
+    await stopInfra();
   });
 
   describe("signTransactionHash", () => {
@@ -63,14 +63,23 @@ describe(`Off-chain signatures v${safeVersion}`, () => {
 
       expect(tx).toBeTruthy();
 
-      const transactionHashResult = await App.SafeWrapper_Module.getTransactionHash({ tx: tx.data }, client, wrapperUri);
+      const transactionHashResult =
+        await App.SafeWrapper_Module.getTransactionHash(
+          { tx: tx.data },
+          client,
+          wrapperUri
+        );
       if (!transactionHashResult.ok) fail(transactionHashResult.error);
 
       const hash = transactionHashResult.value as string;
 
       expect(hash).toBeTruthy();
 
-      const signatureResult = await App.SafeWrapper_Module.signTransactionHash({ hash: hash }, client, wrapperUri);
+      const signatureResult = await App.SafeWrapper_Module.signTransactionHash(
+        { hash: hash },
+        client,
+        wrapperUri
+      );
       if (!signatureResult.ok) fail(signatureResult.error);
       const signature = signatureResult.value;
 
@@ -102,7 +111,11 @@ describe(`Off-chain signatures v${safeVersion}`, () => {
       expect(tx).toBeTruthy();
       expect(tx.signatures?.size).toEqual(0);
 
-      const signedTransactionResult = await App.SafeWrapper_Module.addSignature({ tx: tx }, client, wrapperUri);
+      const signedTransactionResult = await App.SafeWrapper_Module.addSignature(
+        { tx: tx },
+        client,
+        wrapperUri
+      );
 
       if (!signedTransactionResult.ok) fail(signedTransactionResult.error);
       const signedTransaction = signedTransactionResult.value;
@@ -135,7 +148,11 @@ describe(`Off-chain signatures v${safeVersion}`, () => {
       expect(tx).toBeTruthy();
       expect(tx.signatures?.size).toEqual(0);
 
-      const signedTransactionResult = await App.SafeWrapper_Module.addSignature({ tx: tx }, client, wrapperUri);
+      const signedTransactionResult = await App.SafeWrapper_Module.addSignature(
+        { tx: tx },
+        client,
+        wrapperUri
+      );
 
       if (!signedTransactionResult.ok) fail(signedTransactionResult.error);
       const signedTx = signedTransactionResult.value;
@@ -145,7 +162,12 @@ describe(`Off-chain signatures v${safeVersion}`, () => {
       expect(signedTx.signatures?.size).toEqual(1);
 
       //Try to sign second time
-      const signedTransactionResult2 = await App.SafeWrapper_Module.addSignature({ tx: signedTx }, client, wrapperUri);
+      const signedTransactionResult2 =
+        await App.SafeWrapper_Module.addSignature(
+          { tx: signedTx },
+          client,
+          wrapperUri
+        );
 
       if (!signedTransactionResult2.ok) fail(signedTransactionResult2.error);
       const signedTx2 = signedTransactionResult2.value;
@@ -156,14 +178,7 @@ describe(`Off-chain signatures v${safeVersion}`, () => {
     it("should fail if signature is added by an account that is not an owner", async () => {
       const [, , account3] = setupAccounts();
       //recreating client with new signer
-      const env = {
-        uri: Uri.from(wrapperUri),
-        env: {
-          safeAddress: safeAddress,
-          connection: connection,
-        },
-      }
-      const config = getClientConfig({ signer: account3.signer, safeEnv: env })
+      const config = getClientConfig({ signer: account3.signer, safeAddress });
       client = new PolywrapClient(config);
 
       const [account1] = setupAccounts();
@@ -187,10 +202,16 @@ describe(`Off-chain signatures v${safeVersion}`, () => {
 
       expect(tx).toBeTruthy();
 
-      const addSignatureResult = await App.SafeWrapper_Module.addSignature({ tx: tx }, client, wrapperUri);
+      const addSignatureResult = await App.SafeWrapper_Module.addSignature(
+        { tx: tx },
+        client,
+        wrapperUri
+      );
 
       if (addSignatureResult.ok) fail();
-      expect(addSignatureResult.error!.message).toContain("Transactions can only be signed by Safe owners");
+      expect(addSignatureResult.error!.message).toContain(
+        "Transactions can only be signed by Safe owners"
+      );
     });
   });
 });

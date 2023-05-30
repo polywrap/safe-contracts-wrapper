@@ -1,12 +1,8 @@
 import { PolywrapClient } from "@polywrap/client-js";
-import {
-  initTestEnvironment,
-  stopTestEnvironment,
-} from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
 import path from "path";
 
-import { getClientConfig } from "../utils";
+import { getClientConfig, initInfra, stopInfra } from "../utils";
 
 import {
   abi as factoryAbi_1_2_0,
@@ -52,11 +48,11 @@ describe("SafeFactory", () => {
   let safeContractAddress_v130: string;
 
   beforeAll(async () => {
-    await initTestEnvironment();
+    await initInfra();
     /******* Contracts initialization *********/
 
     const proxyFactoryContractResponse_v120 =
-      await App.Ethereum_Module.deployContract(
+      await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(factoryAbi_1_2_0),
           bytecode: factoryBytecode_1_2_0,
@@ -73,7 +69,7 @@ describe("SafeFactory", () => {
       proxyFactoryContractResponse_v120.value as string;
 
     const safeFactoryContractResponse_v120 =
-      await App.Ethereum_Module.deployContract(
+      await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(safeAbi_1_2_0),
           bytecode: safeBytecode_1_2_0,
@@ -89,7 +85,7 @@ describe("SafeFactory", () => {
     safeContractAddress_v120 = safeFactoryContractResponse_v120.value as string;
 
     const proxyFactoryContractResponse_v130 =
-      await App.Ethereum_Module.deployContract(
+      await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(factoryAbi_1_3_0),
           bytecode: factoryBytecode_1_3_0,
@@ -106,7 +102,7 @@ describe("SafeFactory", () => {
       proxyFactoryContractResponse_v130.value as string;
 
     const safeFactoryContractResponse_v130 =
-      await App.Ethereum_Module.deployContract(
+      await App.Ethers_Module.deployContract(
         {
           abi: JSON.stringify(safeAbi_1_3_0),
           bytecode: safeBytecode_1_3_0,
@@ -123,7 +119,7 @@ describe("SafeFactory", () => {
   });
 
   afterAll(async () => {
-    await stopTestEnvironment();
+    await stopInfra();
   });
 
   describe("deploySafe with custom contract adressess", () => {
@@ -477,7 +473,7 @@ describe("SafeFactory", () => {
     });
 
     it("should predict a new Safe with saltNonce", async () => {
-      const saltNonce = "0x127";
+      const saltNonce = "42";
       const predictSafeResp = await App.Factory_Module.predictSafeAddress(
         {
           input: {

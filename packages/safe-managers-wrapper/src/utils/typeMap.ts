@@ -1,10 +1,10 @@
 import {
-  Ethereum_Log,
-  Ethereum_TxReceipt,
+  Ethers_Log,
+  Ethers_TxReceipt,
   SafeContracts_SafeTransaction,
   SafeContracts_SafeTransactionData,
   SafeContracts_SignSignature,
-  SafeContracts_Ethereum_TxReceipt,
+  SafeContracts_Ethers_TxReceipt,
   SafeTransaction,
   SafeTransactionData,
   SignSignature,
@@ -45,7 +45,7 @@ export function toTransactionSignatures(signatures: Map<string, SignSignature>):
   return newMap;
 }
 
-export function toTxReceipt(txReceipt: SafeContracts_Ethereum_TxReceipt): Ethereum_TxReceipt {
+export function toTxReceipt(txReceipt: SafeContracts_Ethers_TxReceipt): Ethers_TxReceipt {
   return {
     _from: txReceipt._from,
     _type: txReceipt._type,
@@ -56,7 +56,7 @@ export function toTxReceipt(txReceipt: SafeContracts_Ethereum_TxReceipt): Ethere
     cumulativeGasUsed: txReceipt.cumulativeGasUsed,
     effectiveGasPrice: txReceipt.effectiveGasPrice,
     gasUsed: txReceipt.gasUsed,
-    logs: txReceipt.logs.map<Ethereum_Log>((l) => ({
+    logs: txReceipt.logs.map<Ethers_Log>((l) => ({
       address: l.address,
       blockHash: l.blockHash,
       blockNumber: l.blockNumber,

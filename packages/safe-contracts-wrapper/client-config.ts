@@ -5,7 +5,6 @@ import {
   Connections,
 } from "@polywrap/ethereum-provider-js";
 import { IClientConfigBuilder } from "@polywrap/client-config-builder-js";
-import { providers } from "@polywrap/test-env-js";
 import {
   abi as abi_1_2_0,
   bytecode as bytecode_1_2_0,
@@ -16,6 +15,7 @@ import {
 } from "@gnosis.pm/safe-contracts_1.3.0/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json";
 import { WrapManifest } from "@polywrap/wrap-manifest-types-js";
 import { PluginPackage, PluginModule } from "@polywrap/plugin-js";
+import { ETH_ENS_IPFS_MODULE_CONSTANTS } from "@polywrap/cli-js";
 
 type NoConfig = Record<string, never>;
 class AbiPlugin extends PluginModule<NoConfig> {
@@ -35,26 +35,18 @@ class AbiPlugin extends PluginModule<NoConfig> {
 let abiPlugin = PluginPackage.from(new AbiPlugin({}), {} as WrapManifest);
 
 export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
-  return (
-    builder
-      .addDefaults()
-      .addPackages({
-        "wrap://ens/abi.stub.eth": abiPlugin as IWrapPackage,
-        "wrap://ens/wraps.eth:ethereum-provider@2.0.0": ethereumProviderPlugin({
-          connections: new Connections({
-            networks: {
-              testnet: new Connection({
-                provider: providers.ethereum,
-                signer: "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
-              }),
-            },
-            defaultNetwork: "testnet",
+  return builder.addDefaults().addPackages({
+    "wrap://ens/abi.stub.eth": abiPlugin as IWrapPackage,
+    "wrap://ens/wraps.eth:ethereum-provider@2.0.0": ethereumProviderPlugin({
+      connections: new Connections({
+        networks: {
+          testnet: new Connection({
+            provider: ETH_ENS_IPFS_MODULE_CONSTANTS.ethereumProvider,
+            signer: "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
           }),
-        }) as IWrapPackage,
-      })
-      .addInterfaceImplementation(
-        "wrap://ens/wraps.eth:ethereum-provider@2.0.0",
-        "wrap://ens/wraps.eth:ethereum-provider@2.0.0"
-      )
-  );
+        },
+        defaultNetwork: "testnet",
+      }),
+    }) as IWrapPackage,
+  });
 }

@@ -1,9 +1,9 @@
 import {
-  Ethereum_Connection,
-  Ethereum_Module,
+  Ethers_Connection,
+  Ethers_Module,
   SafeAccountConfig,
   SafeDeploymentConfig,
-  SafeContracts_Ethereum_Connection,
+  SafeContracts_Ethers_Connection,
   SafeContracts_Module,
   EthersUtils_Module,
   CustomContract,
@@ -77,16 +77,17 @@ export function encodeSetupCallData(accountConfig: SafeAccountConfig): string {
   }
 
   return EthersUtils_Module.encodeFunction({
-    method: "function setup(address[] _owners,uint256 _threshold,address to,bytes data,address fallbackHandler,address paymentToken,uint256 payment,address paymentReceiver)",
+    method:
+      "function setup(address[] _owners,uint256 _threshold,address to,bytes data,address fallbackHandler,address paymentToken,uint256 payment,address paymentReceiver)",
     args: args,
   }).unwrap();
 }
 
 export function isContractDeployed(
   address: string,
-  connection: Ethereum_Connection | null
+  connection: Ethers_Connection | null
 ): boolean {
-  const code = Ethereum_Module.sendRpc({
+  const code = Ethers_Module.sendRpc({
     method: "eth_getCode",
     connection: connection,
     params: [address, "pending"],
@@ -101,7 +102,7 @@ export function isContractDeployed(
 export function getInitCode(
   safeProxyFactoryAddr: string,
   gnosisSafeAddr: string,
-  connection: SafeContracts_Ethereum_Connection | null
+  connection: SafeContracts_Ethers_Connection | null
 ): Result<string, string> {
   const proxyCreationCode = SafeContracts_Module.proxyCreationCode({
     address: safeProxyFactoryAddr,
@@ -130,61 +131,31 @@ export function generateSalt(
 ): Result<string, string> {
   const saltNonce = EthersUtils_Module.encodeParams({
     types: ["uint256"],
-    values: [BigInt.fromString(nonce).toString()]
-  }); 
+    values: [BigInt.fromString(nonce).toString()],
+  });
   if (saltNonce.isErr) {
     return saltNonce;
   }
-  let initializerHash = EthersUtils_Module.keccak256({ value: initializer }); 
+  let initializerHash = EthersUtils_Module.keccak256({ value: initializer });
   if (initializerHash.isErr) {
     return Result.Err<string, string>(initializerHash.unwrapErr());
   }
 
   let initHash = initializerHash.unwrap();
 
-  let encodePacked = EthersUtils_Module.keccak256BytesEncodePacked({
-    value: initHash + saltNonce.unwrap().slice(2)
+  return EthersUtils_Module.keccak256({
+    value: EthersUtils_Module.solidityPack({
+      values: [initHash + saltNonce.unwrap().slice(2)],
+      types: ["bytes"],
+    }).unwrap(),
   });
-
-  if (encodePacked.isErr) {
-    return Result.Err<string, string>(encodePacked.unwrapErr());
-  }
-
-  return Result.Ok<string, string>(encodePacked.unwrap());
-}
-
-/**
- * EIP-1014
- * keccak256(0xff ++ address ++ salt ++ keccak256(init_code))[12:]
- * @address [address]
- * @salt [bytes32]
- * @initCode [bytes]
- */
-export function calculateProxyAddress(
-  address: string,
-  salt: string,
-  initCode: string
-): Result<string, string> {
-
-  const initCodeHash = EthersUtils_Module.generateCreate2Address({
-    address,
-    initCode,
-    salt,
-  });
-
-  
-  if (initCodeHash.isErr) {
-    return initCodeHash;
-  }
-
-  return initCodeHash
 }
 
 export function prepareSafeDeployPayload(
   safeAccountConfig: SafeAccountConfig,
   safeDeploymentConfig: SafeDeploymentConfig | null,
   customContractAddresses: CustomContract | null,
-  connection: Ethereum_Connection | null
+  connection: Ethers_Connection | null
 ): DeploymentPayload {
   validateSafeAccountConfig(safeAccountConfig);
   if (safeDeploymentConfig != null) {
@@ -214,7 +185,7 @@ export function prepareSafeDeployPayload(
     safeContractVersion = "1.3.0";
   }
 
-  const chainId = Ethereum_Module.getChainId({ connection }).unwrap();
+  const chainId = Ethers_Module.getChainId({ connection }).unwrap();
   let safeContractAddress: string = "";
   let safeFactoryContractAddress: string = "";
 
@@ -271,7 +242,7 @@ export function prepareSafeDeployPayload(
         multiSendCallOnlyAddress: false,
         fallbackHandlerAddress: true,
       },
-    }).unwrap()
+    }).unwrap();
     safeAccountConfig.fallbackHandler = contracts.fallbackHandlerAddress;
   }
 

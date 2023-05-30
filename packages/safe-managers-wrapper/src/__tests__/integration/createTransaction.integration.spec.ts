@@ -1,11 +1,18 @@
 import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
-import { initTestEnvironment, stopTestEnvironment, providers, } from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
-import { getClientConfig, getEthAdapter, setupContractNetworks, setupTests as setupTestsBase } from "../utils";
+import {
+  chainId,
+  getClientConfig,
+  getEthAdapter,
+  initInfra,
+  setupContractNetworks,
+  setupTests as setupTestsBase,
+  stopInfra,
+} from "../utils";
 
-import { Uri } from "@polywrap/core-js";
 import Safe from "@safe-global/safe-core-sdk";
+import { ETH_ENS_IPFS_MODULE_CONSTANTS } from "@polywrap/cli-js";
 
 jest.setTimeout(1200000);
 
@@ -13,34 +20,35 @@ describe("Transactions creation", () => {
   let safeAddress: string;
 
   let client: PolywrapClient;
-  const wrapperPath: string = path.join(path.resolve(__dirname), "..", "..", "..");
+  const wrapperPath: string = path.join(
+    path.resolve(__dirname),
+    "..",
+    "..",
+    ".."
+  );
   const wrapperUri = `fs/${wrapperPath}/build`;
-
-  const connection = { networkNameOrChainId: "testnet", chainId: 1337 };
 
   let setupTests: () => ReturnType<typeof setupTestsBase>;
   beforeAll(async () => {
-    await initTestEnvironment();
+    await initInfra();
 
-    client = new PolywrapClient(getClientConfig())
-    
+    client = new PolywrapClient(getClientConfig());
+
     const setupContractsResult = await setupContractNetworks(client);
     safeAddress = setupContractsResult[0];
-    
-    setupTests = setupTestsBase.bind({}, connection.chainId, setupContractsResult[1], '1.3.0');
-    
-    const env = {
-      uri: Uri.from(wrapperUri),
-      env: {
-        safeAddress: safeAddress,
-        connection: connection,
-      },
-    }
-    client = new PolywrapClient(getClientConfig({ safeEnv: env }));
+
+    setupTests = setupTestsBase.bind(
+      {},
+      chainId,
+      setupContractsResult[1],
+      "1.3.0"
+    );
+
+    client = new PolywrapClient(getClientConfig({ safeAddress }));
   });
 
   afterAll(async () => {
-    await stopTestEnvironment();
+    await stopInfra();
   });
 
   describe("standardizeSafeTransactionData", () => {});
@@ -50,7 +58,10 @@ describe("Transactions creation", () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
 
-      const ethAdapter = await getEthAdapter(providers.ethereum, account1.signer);
+      const ethAdapter = await getEthAdapter(
+        ETH_ENS_IPFS_MODULE_CONSTANTS.ethereumProvider,
+        account1.signer
+      );
       const safeSdk = await Safe.create({
         //@ts-ignore
         ethAdapter,
@@ -113,7 +124,10 @@ describe("Transactions creation", () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
 
-      const ethAdapter = await getEthAdapter(providers.ethereum, account1.signer);
+      const ethAdapter = await getEthAdapter(
+        ETH_ENS_IPFS_MODULE_CONSTANTS.ethereumProvider,
+        account1.signer
+      );
 
       const safeSdk = await Safe.create({
         //@ts-ignore
@@ -161,7 +175,10 @@ describe("Transactions creation", () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
 
-      const ethAdapter = await getEthAdapter(providers.ethereum, account1.signer);
+      const ethAdapter = await getEthAdapter(
+        ETH_ENS_IPFS_MODULE_CONSTANTS.ethereumProvider,
+        account1.signer
+      );
 
       const safeSdk = await Safe.create({
         //@ts-ignore
@@ -181,14 +198,16 @@ describe("Transactions creation", () => {
         safeTransactionData: safeTxArray,
       });
 
-      const wrapperMultisendResult = await App.SafeWrapper_Module.createMultiSendTransaction(
-        {
-          txs: [safeTransactionData, safeTransactionData],
-          customMultiSendContractAddress: contractNetworks[connection.chainId].multiSendAddress,
-        },
-        client,
-        wrapperUri
-      );
+      const wrapperMultisendResult =
+        await App.SafeWrapper_Module.createMultiSendTransaction(
+          {
+            txs: [safeTransactionData, safeTransactionData],
+            customMultiSendContractAddress:
+              contractNetworks[chainId].multiSendAddress,
+          },
+          client,
+          wrapperUri
+        );
 
       if (!wrapperMultisendResult.ok) fail(wrapperMultisendResult.error);
       const wrapperMultisendData = wrapperMultisendResult.value.data;
@@ -197,19 +216,32 @@ describe("Transactions creation", () => {
       expect(wrapperMultisendData.to).toEqual(sdkMultisendData.to);
       expect(wrapperMultisendData.value).toEqual(sdkMultisendData.value);
       expect(wrapperMultisendData.data).toEqual(sdkMultisendData.data);
-      expect(wrapperMultisendData.baseGas).toEqual(sdkMultisendData.baseGas.toString());
-      expect(wrapperMultisendData.gasPrice).toEqual(sdkMultisendData.gasPrice.toString());
+      expect(wrapperMultisendData.baseGas).toEqual(
+        sdkMultisendData.baseGas.toString()
+      );
+      expect(wrapperMultisendData.gasPrice).toEqual(
+        sdkMultisendData.gasPrice.toString()
+      );
       expect(wrapperMultisendData.gasToken).toEqual(sdkMultisendData.gasToken);
-      expect(wrapperMultisendData.refundReceiver).toEqual(sdkMultisendData.refundReceiver);
-      expect(wrapperMultisendData.nonce).toEqual(sdkMultisendData.nonce.toString());
-      expect(wrapperMultisendData.safeTxGas).toEqual(sdkMultisendData.safeTxGas.toString());
+      expect(wrapperMultisendData.refundReceiver).toEqual(
+        sdkMultisendData.refundReceiver
+      );
+      expect(wrapperMultisendData.nonce).toEqual(
+        sdkMultisendData.nonce.toString()
+      );
+      expect(wrapperMultisendData.safeTxGas).toEqual(
+        sdkMultisendData.safeTxGas.toString()
+      );
     });
 
     it("should create SDK-like multisend transaction  with options", async () => {
       const { accounts, contractNetworks } = await setupTests();
       const [account1] = accounts;
 
-      const ethAdapter = await getEthAdapter(providers.ethereum, account1.signer);
+      const ethAdapter = await getEthAdapter(
+        ETH_ENS_IPFS_MODULE_CONSTANTS.ethereumProvider,
+        account1.signer
+      );
 
       const safeSdk = await Safe.create({
         //@ts-ignore
@@ -241,21 +273,23 @@ describe("Transactions creation", () => {
         options: options,
       });
 
-      const wrapperMultisendResult = await App.SafeWrapper_Module.createMultiSendTransaction(
-        {
-          txs: [safeTransactionData, safeTransactionData],
-          options: {
-            ...options,
-            baseGas: String(options.baseGas),
-            gasPrice: String(options.gasPrice),
-            nonce: String(options.nonce),
-            safeTxGas: String(options.safeTxGas),
+      const wrapperMultisendResult =
+        await App.SafeWrapper_Module.createMultiSendTransaction(
+          {
+            txs: [safeTransactionData, safeTransactionData],
+            options: {
+              ...options,
+              baseGas: String(options.baseGas),
+              gasPrice: String(options.gasPrice),
+              nonce: String(options.nonce),
+              safeTxGas: String(options.safeTxGas),
+            },
+            customMultiSendContractAddress:
+              contractNetworks[chainId].multiSendAddress,
           },
-          customMultiSendContractAddress: contractNetworks[connection.chainId].multiSendAddress,
-        },
-        client,
-        wrapperUri
-      );
+          client,
+          wrapperUri
+        );
 
       if (!wrapperMultisendResult.ok) fail(wrapperMultisendResult.error);
       const wrapperMultisendData = wrapperMultisendResult.value.data;
@@ -264,12 +298,22 @@ describe("Transactions creation", () => {
       expect(wrapperMultisendData.to).toEqual(sdkMultisendData.to);
       expect(wrapperMultisendData.value).toEqual(sdkMultisendData.value);
       expect(wrapperMultisendData.data).toEqual(sdkMultisendData.data);
-      expect(wrapperMultisendData.baseGas).toEqual(sdkMultisendData.baseGas.toString());
-      expect(wrapperMultisendData.gasPrice).toEqual(sdkMultisendData.gasPrice.toString());
+      expect(wrapperMultisendData.baseGas).toEqual(
+        sdkMultisendData.baseGas.toString()
+      );
+      expect(wrapperMultisendData.gasPrice).toEqual(
+        sdkMultisendData.gasPrice.toString()
+      );
       expect(wrapperMultisendData.gasToken).toEqual(sdkMultisendData.gasToken);
-      expect(wrapperMultisendData.refundReceiver).toEqual(sdkMultisendData.refundReceiver);
-      expect(wrapperMultisendData.nonce).toEqual(sdkMultisendData.nonce.toString());
-      expect(wrapperMultisendData.safeTxGas).toEqual(sdkMultisendData.safeTxGas.toString());
+      expect(wrapperMultisendData.refundReceiver).toEqual(
+        sdkMultisendData.refundReceiver
+      );
+      expect(wrapperMultisendData.nonce).toEqual(
+        sdkMultisendData.nonce.toString()
+      );
+      expect(wrapperMultisendData.safeTxGas).toEqual(
+        sdkMultisendData.safeTxGas.toString()
+      );
     });
   });
 });

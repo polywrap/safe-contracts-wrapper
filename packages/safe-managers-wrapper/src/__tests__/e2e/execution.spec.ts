@@ -1,21 +1,18 @@
 import path from "path";
 import { PolywrapClient } from "@polywrap/client-js";
-import {
-  initTestEnvironment,
-  stopTestEnvironment,
-  providers,
-} from "@polywrap/test-env-js";
 import * as App from "../types/wrap";
 import {
   getClientConfig,
   getERC20Mintable,
   getEthAdapter,
+  initInfra,
   setupAccounts,
   setupContractNetworks,
+  stopInfra,
 } from "../utils";
 import { BigNumber, Wallet } from "ethers";
 import { SafeWrapper_SafeTransactionData } from "../types/wrap";
-import { Uri } from "@polywrap/core-js";
+import { ETH_ENS_IPFS_MODULE_CONSTANTS } from "@polywrap/cli-js";
 
 jest.setTimeout(1200000);
 
@@ -38,25 +35,18 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
   const connection = { networkNameOrChainId: "testnet" };
 
   beforeAll(async () => {
-    await initTestEnvironment();
+    await initInfra();
     let config = await getClientConfig();
     client = new PolywrapClient(config);
 
     [safeAddress] = await setupContractNetworks(client, {}, safeVersion);
-    const env = {
-      uri: Uri.from(wrapperUri),
-      env: {
-        safeAddress: safeAddress,
-        connection: connection,
-      },
-    };
-    config = await getClientConfig({ safeEnv: env });
+    config = await getClientConfig({ safeAddress });
 
     client = new PolywrapClient(config);
   });
 
   afterAll(async () => {
-    await stopTestEnvironment();
+    await stopInfra();
   });
 
   const createTransaction = async (
@@ -87,12 +77,12 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
     safe = safeAddress,
     amount = "1000000000000000000" // 1 ETH
   ) =>
-    App.Ethereum_Module.sendTransactionAndWait(
+    App.Ethers_Module.sendTransactionAndWait(
       {
         tx: {
           to: safe,
           value: amount,
-          data: "0x"
+          data: "0x",
         },
         connection: connection,
       },
@@ -104,17 +94,9 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
     signer: Wallet,
     safeAddr = safeAddress
   ) => {
-    const safeEnv = {
-      uri: Uri.from(wrapperUri),
-      env: {
-        safeAddress: safeAddr,
-        connection: connection,
-      },
-    };
-    const config = await getClientConfig({ safeEnv, signer });
+    const config = await getClientConfig({ safeAddress: safeAddr, signer });
 
     return new PolywrapClient(config);
-    
   };
 
   describe("executeTransaction", () => {
@@ -255,7 +237,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
     it("should execute a transaction with threshold 1", async () => {
       await fundSafeBalance();
 
-      const balanceBefore = await App.Ethereum_Module.getBalance(
+      const balanceBefore = await App.Ethers_Module.getBalance(
         { address: safeAddress, blockTag: null, connection: connection },
         client,
         ethereumUri
@@ -275,14 +257,14 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
 
       const signedTx = signedTxRes.value;
       const executionResult = await App.SafeWrapper_Module.executeTransaction(
-        { tx: signedTx, options: { gasLimit: "400000"} },
+        { tx: signedTx, options: { gasLimit: "400000" } },
         client,
         wrapperUri
       );
 
       if (!executionResult.ok) fail(executionResult.error);
 
-      const balanceAfter = await App.Ethereum_Module.getBalance(
+      const balanceAfter = await App.Ethers_Module.getBalance(
         { address: safeAddress, blockTag: null, connection: connection },
         client,
         ethereumUri
@@ -321,7 +303,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
 
       await fundSafeBalance(newSafeAddress);
 
-      const balanceBefore = await App.Ethereum_Module.getBalance(
+      const balanceBefore = await App.Ethers_Module.getBalance(
         { address: newSafeAddress, blockTag: null, connection: connection },
         client,
         ethereumUri
@@ -362,7 +344,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       );
       expect(executionResult.ok).toBeTruthy();
 
-      const balanceAfter = await App.Ethereum_Module.getBalance(
+      const balanceAfter = await App.Ethers_Module.getBalance(
         { address: newSafeAddress, blockTag: null, connection: connection },
         client,
         ethereumUri
@@ -400,7 +382,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
 
       await fundSafeBalance(newSafeAddress);
 
-      const balanceBefore = await App.Ethereum_Module.getBalance(
+      const balanceBefore = await App.Ethers_Module.getBalance(
         { address: newSafeAddress, blockTag: null, connection: connection },
         client,
         ethereumUri
@@ -440,7 +422,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       );
       expect(executionResult.ok).toBeTruthy();
 
-      const balanceAfter = await App.Ethereum_Module.getBalance(
+      const balanceAfter = await App.Ethers_Module.getBalance(
         { address: newSafeAddress, blockTag: null, connection: connection },
         client,
         ethereumUri
@@ -468,7 +450,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       if (!executionResult.ok) fail(executionResult.error);
 
       const ethAdapter = await getEthAdapter(
-        providers.ethereum,
+        ETH_ENS_IPFS_MODULE_CONSTANTS.ethereumProvider,
         account1.signer
       );
 
@@ -495,7 +477,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       if (!executionResult.ok) fail(executionResult.error);
 
       const ethAdapter = await getEthAdapter(
-        providers.ethereum,
+        ETH_ENS_IPFS_MODULE_CONSTANTS.ethereumProvider,
         account1.signer
       );
       const txConfirmed = await ethAdapter.getTransaction(
@@ -542,7 +524,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
 
       await fundSafeBalance(newSafeAddress, "20000000000000000000");
 
-      const balanceBefore = await App.Ethereum_Module.getBalance(
+      const balanceBefore = await App.Ethers_Module.getBalance(
         { address: newSafeAddress, blockTag: null, connection: connection },
         client,
         ethereumUri
@@ -598,7 +580,7 @@ describe(`Off-chain signatures  v${safeVersion}`, () => {
       );
       if (!executionResult.ok) fail(executionResult.error);
 
-      const balanceAfter = await App.Ethereum_Module.getBalance(
+      const balanceAfter = await App.Ethers_Module.getBalance(
         { address: newSafeAddress, blockTag: null, connection: connection },
         client,
         ethereumUri
