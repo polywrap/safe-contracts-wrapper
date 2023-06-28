@@ -1,10 +1,6 @@
-# Polywrap Gnosis Safe Factory Wrap
+# Polywrap Gnosis Safe Manager Wrap
 
-## Table of contents
-* [Installation](#installation)
-* [Getting Started](#getting-started)
-* [Safe Manager Wrap Reference](#safe-managers-wrap)
-## <a name="installation">Installation</a>
+## Installation
 
 Install the package with yarn or npm:
 
@@ -13,7 +9,7 @@ yarn add polywrap
 npm install polywrap
 ```
 
-## <a name="getting-started">Getting Started</a>
+## Getting Started
 
 The following steps show how to set up the Polywrap Client, deploy a new Safe, create a Safe transaction, generate the required signatures from owners and execute the transaction.
 
@@ -152,7 +148,7 @@ const executeTxResponse = await client.invoke({
 });
 ```
 
-## <a name="safe-managers-wrap">Safe Manager Wrap Reference</a>
+## Safe Manager Wrap Reference
 
 
 ### getAddress

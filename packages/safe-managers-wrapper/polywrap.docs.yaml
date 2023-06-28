@@ -1,5 +1,5 @@
 format: 0.1.0
-description: Safe Manager wrap
+description: Interact with your deployed Safe contracts.
 website: https://polywrap.io
 repository: https://github.com/polywrap/safe-contracts-wrapper
 readme: ./docs/readme.md

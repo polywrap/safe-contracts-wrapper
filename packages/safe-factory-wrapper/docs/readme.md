@@ -1,10 +1,6 @@
 # Polywrap Gnosis Safe Factory Wrap
 
-## Table of contents
-* [Installation](#installation)
-* [Getting Started](#getting-started)
-* [Safe Factory Wrap Reference](#safe-factory-wrap)
-## <a name="installation">Installation</a>
+## Installation
 
 Install the package with yarn or npm:
 
@@ -13,7 +9,7 @@ yarn add polywrap
 npm install polywrap
 ```
 
-## <a name="getting-started">Getting Started</a>
+## Getting Started
 
 The following steps show how to set up the Polywrap Client, deploy a new Safe, create a Safe transaction, generate the required signatures from owners and execute the transaction.
 
@@ -154,7 +150,7 @@ const executeTxResponse = await client.invoke({
 
 
 
-## <a name="safe-factory-wrap">Safe Factory Wrap Reference</a>
+## Safe Factory Wrap Reference
 
 ### deploySafe
 
