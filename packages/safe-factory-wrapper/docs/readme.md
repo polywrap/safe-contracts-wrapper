@@ -1,41 +1,27 @@
 # Polywrap Gnosis Safe Factory Wrap
 
-## Installation
+The Gnosis Safe Factory wrap allows you to deploy Safes from any environment.
 
-Install the package with yarn or npm:
+## Requirements
 
-```bash
-yarn add polywrap
-npm install polywrap
-```
+To run the Gnosis Safe Factory wrap you'll need a Polywrap client in your application. See here for installation information: https://docs.polywrap.io/clients
 
-## Getting Started
+### Configuration
 
-The following steps show how to set up the Polywrap Client, deploy a new Safe, create a Safe transaction, generate the required signatures from owners and execute the transaction.
+Gnosis Safe Factory depends upon the [ethereum wrap](https://github.com/polywrap/ethers), which in-turn requires an [ethereum-provider plugin](https://github.com/polywrap/ethereum-wallet). Plugins are added directly to the client using its config.
 
-### Note
-Currently, the wraps dont allow the collection of owner signatures off-chain. To do this and be able to see and confirm the pending transactions shown in the [Safe Web App](https://gnosis-safe.io/app/), it is recommended that you follow this other [guide](https://github.com/safe-global/safe-core-sdk/blob/main/guides/integrating-the-safe-core-sdk.md#5-propose-the-transaction-to-the-service) that covers the use of the Safe Core SDK, combined with the Safe Service Client.
+[Here's an example](https://github.com/polywrap/ethers/blob/36e6f3331264732e73f3e236004416e82930ed64/provider/implementations/js/tests/index.spec.ts#L15-L30) of setting up a JavaScript / TypeScript client with the ethereum-provider plugin.
 
-### 1. Instantiate a Polywrap Client
+You can learn more about Polywrap clients & configs in the docs [here](https://docs.polywrap.io/tutorials/use-wraps/configure-client).
 
-First of all, we need to create a `Polywrap Client`, which contains all the required utilities for the SDKs to interact with the blockchain. It acts as a wrap for [web3.js](https://web3js.readthedocs.io/) or [ethers.js](https://docs.ethers.io/v5/) Ethereum libraries.
+## Run!
 
-Use an import or require statement, depending on which your environment supports.
+With your client successfully configured, you can now run any function on the Gnosis Safe Factory wrap with ease.
+See the example below, or take a look at the [Gnosis Safe Factory wrap's tests](https://github.com/polywrap/safe-contracts-wrapper/blob/main/packages/safe-factory-wrapper/src/__tests__/e2e/integration.spec.ts) for more examples.
 
-```js
-import { PolywrapClient } from "@polywrap/client-js";
-```
+## Example - Deploy a new Safe
 
-Then, you will be able to use the PolywrapClient like so:
-```js
-// Simply instantiate the PolywrapClient.
-const client = new PolywrapClient();
-```
-[Polywrap client docs](https://github.com/polywrap/javascript-client/tree/origin-dev/packages/client)
-
-### 2. Deploy a new Safe
-
-To deploy a new Safe account invoke `deploySafe` method of `safe-factory-wrapper` with the right params to configure the new Safe. This includes defining the list of owners and the threshold of the Safe. A Safe account with three owners and threshold equal three will be used as the starting point for this example but any Safe configuration is valid.
+To deploy a new Safe account invoke `deploySafe` method with the right params to configure the new Safe. This includes defining the list of owners and the threshold of the Safe. A Safe account with three owners and threshold equal three will be used as the starting point for this example but any Safe configuration is valid.
 
 ```js
 const result = await client.invoke({
@@ -43,8 +29,8 @@ const result = await client.invoke({
   method: "deploySafe",
   args: {
     safeAccountConfig: {
-      owners: [<owner1>, <owner2>, <owner3> ],
-      threshold: 1,
+      owners: ["<owner1>", "<owner2>", "<owner3>" ],
+      threshold: 3,
     }
   }
 });
@@ -52,154 +38,6 @@ const result = await client.invoke({
 
 The `deploySafe` method executes a transaction from the your current ethereum account, deploys a new Safe and returns a Safe Address. Make sure to save this address as you will need it to interact with `safe-managers-wrapper`
 
-### 3. Create a Safe transaction
+## Support
 
-To create a transaction you can invoke `createTransaction` method of `safe-managers-wrapper`. Make sure you provided environment param `safeAddress` to your call.
-
-```js
-
-const safeTransactionData = {
-  to: '0x<address>',
-  value: '<eth_value_in_wei>',
-  data: '0x<data>'
-}
-
-const safeTransaction = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.1.0',
-  method: "createTransaction",
-  args: {
-      tx: safeTransactionData,
-    },
-    env: {
-      safeAddress: <SAFE_ADDRESS>
-    }
-  }
-});
-```
-
-Check the `createTransaction` method in the [Wrap Reference](#wrap-api) for additional details on creating MultiSend transactions.
-
-Before executing this transaction, it must be signed by the owners and this can be done off-chain or on-chain. In this example `owner1` will sign it off-chain, `owner2` will sign it on-chain and `owner3` will execute it (the executor also signs the transaction transparently).
-
-
-### 3.a. Off-chain signatures
-
-The `owner1` account signs the transaction off-chain.
-
-```js
-const signedSafeTransaction = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.1.0',
-  method: "addSignature",
-  args: {
-      tx: safeTransactionData,
-    },
-  env: {
-    safeAddress: <SAFE_ADDRESS>
-  }
-});
-```
-
-Because the signature is off-chain, there is no interaction with the contract and the signature becomes available at `signedSafeTransaction.signatures`.
-
-### 3.b. On-chain signatures
-
-To sign transaction on-chain `owner2` should instantiate new PolywrapClient connected to ethereum ([Ethereum-plugin-config](#ethereum-plugin-config)). After `owner2` account is connected to the ethereum-plugin as a signer the transaction hash will be approved on-chain.
-
-```js
-// Get transaction hash
-const txHash = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.1.0',
-  method: "getTransactionHash",
-  args: {
-      tx: signedSafeTransaction.data,
-    },
-  env: {
-    safeAddress: <SAFE_ADDRESS>
-  }
-});
-
-// Approve
-await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.1.0',
-  method: "approveTransactionHash",
-  args: {
-      hash: txHash,
-    },
-  env: {
-    safeAddress: <SAFE_ADDRESS>
-  }
-});
-```
-
-### 4. Transaction execution
-
-Lastly, `owner3` account is connected to the client as a signer and executor of the Safe transaction to execute it.
-
-```js
-const executeTxResponse = await client.invoke({
-  uri: 'ens/safe.wraps.eth@manager:0.1.0',
-  method: "executeTransaction",
-  args: {
-      tx: signedTransaction,
-    },
-  env: {
-    safeAddress: <SAFE_ADDRESS>
-  }
-});
-```
-
-
-
-## Safe Factory Wrap Reference
-
-### deploySafe
-
-Deploys a new Safe and returns an instance of the Safe Core SDK connected to the deployed Safe. The address of the Master Copy, Safe contract version and the contract (`GnosisSafe.sol` or `GnosisSafeL2.sol`) of the deployed Safe will depend on the initialization of the `safeFactory` instance.
-
-```js
-const safeAccountConfig = {
-  owners,
-  threshold,
-  to, // Optional
-  data, // Optional
-  fallbackHandler, // Optional
-  paymentToken, // Optional
-  payment, // Optional
-  paymentReceiver // Optional
-}
-
-const safeSdk = await safeFactory.deploySafe({ safeAccountConfig })
-```
-
-This method can optionally receive the `safeDeploymentConfig` parameter to define the `saltNonce`.
-
-```js
-const safeAccountConfig = {
-  owners,
-  threshold,
-  to, // Optional
-  data, // Optional
-  fallbackHandler, // Optional
-  paymentToken, // Optional
-  payment, // Optional
-  paymentReceiver // Optional
-}
-
-const safeDeploymentConfig = {
-  saltNonce,
-  isL1Safe, // Optional
-  version, // Optional
-}
-
-const safeDeploymentResponse = await client.invoke({
-  uri: 'ens/safe.wraps.eth@factory:0.1.0',
-  method: 'deploySafe',
-  args: { 
-    safeAccountConfig, 
-    safeDeploymentConfig
-    },
-  env: {
-    safeAddress: <SAFE_ADDRESS>
-  }
-})
-```
+For any questions or problems related to the Gnosis Safe Factory wrap or Polywrap at large, please visit our [Discord](https://discord.polywrap.io).
