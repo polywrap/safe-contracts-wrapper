@@ -1,5 +1,5 @@
 format: 0.1.0
-description: Interact with your deployed Safe contracts.
+description: Interact with safes
 website: https://polywrap.io
 repository: https://github.com/polywrap/safe-contracts-wrapper
 readme: ./docs/readme.md
