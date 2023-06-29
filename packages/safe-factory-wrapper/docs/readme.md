@@ -4,7 +4,7 @@ The Gnosis Safe Factory wrap allows you to deploy Safes from any environment.
 
 ## Requirements
 
-To run the Gnosis Safe Factory wrap you'll need a Polywrap client in your application. See here for installation information: https://docs.polywrap.io/clients
+To run the Gnosis Safe Factory wrap you'll need a Polywrap client in your application. See here for installation information: [https://docs.polywrap.io/clients](https://docs.polywrap.io/clients)
 
 ### Configuration
 

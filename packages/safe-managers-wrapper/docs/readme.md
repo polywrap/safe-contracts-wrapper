@@ -4,7 +4,7 @@ The Gnosis Safe Manager wrap allows you to interact with Safes from any environm
 
 ## Requirements
 
-To run the Gnosis Safe Manager wrap you'll need a Polywrap client in your application. See here for installation information: https://docs.polywrap.io/clients
+To run the Gnosis Safe Manager wrap you'll need a Polywrap client in your application. See here for installation information: [https://docs.polywrap.io/clients](https://docs.polywrap.io/clients)
 
 ### Configuration
 
