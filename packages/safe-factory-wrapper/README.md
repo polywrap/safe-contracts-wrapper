@@ -13,7 +13,7 @@ yarn
 yarn build
 ```
 
-## Tests
+## Test
 
 Run tests:
 
@@ -21,4 +21,6 @@ Run tests:
 yarn test
 ```
 
-<!-- ### TODO: Add examples -->
+## Integrate
+
+For usage examples and integration details, please see the [integration docs](./INTEGRATION.md).

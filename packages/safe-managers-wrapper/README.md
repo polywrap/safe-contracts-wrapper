@@ -11,7 +11,7 @@ yarn
 yarn build
 ```
 
-## Tests
+## Test
 
 Run tests:
 
