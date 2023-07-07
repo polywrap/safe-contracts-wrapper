@@ -1,0 +1,5 @@
+format: 0.1.0
+description: Deploy new Safes
+website: https://polywrap.io
+repository: https://github.com/polywrap/safe-contracts-wrapper
+readme: ./INTEGRATION.md

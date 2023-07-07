@@ -1,9 +1,10 @@
-format: 0.3.0
+format: 0.4.0
 project:
-  name: safe-managers-as
+  name: safe-manager
   type: wasm/assemblyscript
 source:
   module: ./src/index.ts
   schema: ./src/schema.graphql
 extensions:
   build: ./polywrap.build.yaml
+  docs: ./polywrap.docs.yaml
