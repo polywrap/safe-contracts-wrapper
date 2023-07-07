@@ -18,3 +18,7 @@ Run tests:
 ```shell
 yarn test
 ```
+
+## Integrate
+
+For usage examples and integration details, please see the [integration docs](./INTEGRATION.md).
