@@ -50,7 +50,7 @@ import {
   PolywrapClient,
   IWrapPackage,
 } from "@polywrap/client-js";
-import { ClientConfigBuilder } from "@polywrap/client-config-builder-js";
+import { PolywrapClientConfigBuilder } from "@polywrap/client-config-builder-js";
 import { runCli } from "@polywrap/cli-js";
 import { configure } from "../../client-config";
 
@@ -87,11 +87,11 @@ export function getClientConfig(
     };
   }
 
-  const config = configure(new ClientConfigBuilder());
+  const config = configure(new PolywrapClientConfigBuilder());
   config.addEnvs(envs);
 
   if (customConfig && customConfig.signer) {
-    config.addPackage(
+    config.setPackage(
       "wrap://ens/wraps.eth:ethereum-provider@2.0.0",
       ethereumProviderPlugin({
         connections: new Connections({

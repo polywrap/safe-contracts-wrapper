@@ -1,5 +1,5 @@
 import path from "path";
-import { ClientConfigBuilder, CoreClientConfig } from "@polywrap/client-js";
+import { PolywrapClientConfigBuilder, CoreClientConfig } from "@polywrap/client-js";
 import { runCli } from "@polywrap/cli-js";
 import { configure } from "../../client-config";
 
@@ -8,7 +8,7 @@ export const safeContractsPath = path.resolve(
 );
 
 export function getClientConfig(): CoreClientConfig {
-  return configure(new ClientConfigBuilder()).build();
+  return configure(new PolywrapClientConfigBuilder()).build();
 }
 
 export async function initInfra(): Promise<void> {

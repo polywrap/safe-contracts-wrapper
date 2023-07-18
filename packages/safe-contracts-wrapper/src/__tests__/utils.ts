@@ -1,10 +1,10 @@
-import { ClientConfigBuilder } from "@polywrap/client-config-builder-js";
+import { PolywrapClientConfigBuilder } from "@polywrap/client-config-builder-js";
 import { CoreClientConfig } from "@polywrap/core-js";
 import { runCli } from "@polywrap/cli-js";
 import { configure } from "../../client-config";
 
 export function getClientConfig(): CoreClientConfig {
-  return configure(new ClientConfigBuilder()).build();
+  return configure(new PolywrapClientConfigBuilder()).build();
 }
 
 export async function initInfra(): Promise<void> {

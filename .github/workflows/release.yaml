@@ -2,7 +2,7 @@ name: Safe Wrappers CI
 
 on:
   pull_request:
-  types: [closed]
+    types: [closed]
 
 jobs:
   deploy-wrappers:
