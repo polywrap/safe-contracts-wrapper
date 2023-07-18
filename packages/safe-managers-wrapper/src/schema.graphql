@@ -14,7 +14,7 @@ import {
     SafeTransactionData,
     SafeTransactionOptionalProps,
     TransactionOptions
-} from "../../safe-common-types/schema.graphql"
+} from "wrap://safe/common"
 """
 
 type Env {
