@@ -4,14 +4,14 @@ import {
   Connection,
   Connections,
 } from "@polywrap/ethereum-provider-js";
-import { IClientConfigBuilder } from "@polywrap/client-config-builder-js";
+import { ClientConfigBuilder } from "@polywrap/client-config-builder-js";
 import { dateTimePlugin } from "@polywrap/datetime-plugin-js";
 import { ETH_ENS_IPFS_MODULE_CONSTANTS } from "polywrap";
 
-export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
+export function configure(builder: ClientConfigBuilder): ClientConfigBuilder {
   return builder
     .addDefaults()
-    .addPackages({
+    .setPackages({
       "wrap://ens/wraps.eth:ethereum-provider@2.0.0": ethereumProviderPlugin({
         connections: new Connections({
           networks: {
@@ -21,10 +21,10 @@ export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
           },
           defaultNetwork: "testnet",
         }),
-      }),
+      }) as IWrapPackage,
       "wrap://plugin/datetime": dateTimePlugin({}) as IWrapPackage,
     })
-    .addRedirect(
+    .setRedirect(
       "wrap://ens/safe.wraps.eth:contracts@0.1.0",
       "fs/../safe-contracts-wrapper/build"
     )

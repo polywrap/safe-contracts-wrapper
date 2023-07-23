@@ -11,7 +11,7 @@ import {
     SafeTransactionData,
     TransactionOptions,
     SafeTransactionOptionalProps
-} from "../../safe-common-types/schema.graphql"
+} from "wrap://safe/common"
 """
 
 type Module {

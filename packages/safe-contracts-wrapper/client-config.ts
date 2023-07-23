@@ -4,7 +4,7 @@ import {
   Connection,
   Connections,
 } from "@polywrap/ethereum-provider-js";
-import { IClientConfigBuilder } from "@polywrap/client-config-builder-js";
+import { ClientConfigBuilder } from "@polywrap/client-config-builder-js";
 import {
   abi as abi_1_2_0,
   bytecode as bytecode_1_2_0,
@@ -34,8 +34,8 @@ class AbiPlugin extends PluginModule<NoConfig> {
 }
 let abiPlugin = PluginPackage.from(new AbiPlugin({}), {} as WrapManifest);
 
-export function configure(builder: IClientConfigBuilder): IClientConfigBuilder {
-  return builder.addDefaults().addPackages({
+export function configure(builder: ClientConfigBuilder): ClientConfigBuilder {
+  return builder.addDefaults().setPackages({
     "wrap://ens/abi.stub.eth": abiPlugin as IWrapPackage,
     "wrap://ens/wraps.eth:ethereum-provider@2.0.0": ethereumProviderPlugin({
       connections: new Connections({

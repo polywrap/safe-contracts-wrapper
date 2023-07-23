@@ -1,0 +1,43 @@
+name: Safe Wrappers CI
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  deploy-wrappers:
+    if: |
+      github.event.pull_request.merged &&
+      endsWith(github.event.pull_request.title, '/release')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Read .nvmrc
+        run: echo ::set-output name=NVMRC::$(cat .nvmrc)
+        id: nvm
+
+      - name: Setup Node.js
+        uses: actions/setup-node@master
+        with:
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build
+        run: yarn build
+
+      - name: Tests
+        run: yarn deploy
+        env:
+          POLYWRAP_WRAPSCAN_AUTH_HEADER_PROD: ${{secrets.POLYWRAP_WRAPSCAN_AUTH_HEADER_PROD}}
+
+      - name: PR New URIs
+        uses: peter-evans/create-pull-request@v3
+        with:
+          branch: safe-wrapper-update-uris-pr-${{github.event.number}}
+          commit-message: "chore(release): update uris"
+          title: "chore(release): update uris"
+          body: "Triggered by: https://github.com/${{github.repository}}/pull/${{github.event.number}}"
