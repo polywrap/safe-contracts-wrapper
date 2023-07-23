@@ -1,1 +1,1 @@
-wrap://ipfs/Qmf9mRhNvKN1wfN52VdiZkjQiRw1WWEBYnwkuwzFg1ZjQn
+wrap://http/https://wraps.wrapscan.io/r/polywrap/safe-manager@0.1.0

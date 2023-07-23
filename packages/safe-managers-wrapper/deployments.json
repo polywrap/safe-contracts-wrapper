@@ -6,7 +6,13 @@
         "name": "ipfs_deploy",
         "id": "ipfs_deploy.ipfs_deploy",
         "input": "wrap://fs/./build",
-        "result": "wrap://ipfs/Qmf9mRhNvKN1wfN52VdiZkjQiRw1WWEBYnwkuwzFg1ZjQn"
+        "result": "wrap://ipfs/QmQCcWxu2beEPgqY1PLR9FgfEZuhsLgm8ygUBmrjV6fqcV"
+      },
+      {
+        "name": "http_deploy",
+        "id": "ipfs_deploy.http_deploy",
+        "input": "wrap://ipfs/QmQCcWxu2beEPgqY1PLR9FgfEZuhsLgm8ygUBmrjV6fqcV",
+        "result": "wrap://http/https://wraps.wrapscan.io/r/polywrap/safe-manager@0.1.0"
       }
     ]
   }
