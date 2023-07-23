@@ -1,1 +1,1 @@
-wrap://ipfs/QmR7yiQv5jULzZ8ysHbCtjMowLiuiv2hX6Z4DiyfdQd5Pp
+wrap://http/https://wraps.wrapscan.io/r/polywrap/safe-factory@0.1.0
